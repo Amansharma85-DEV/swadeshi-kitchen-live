@@ -1,0 +1,681 @@
+﻿import { AnimatePresence, motion } from 'framer-motion';
+import {
+  CheckCircle2,
+  ChevronRight,
+  ClipboardList,
+  CreditCard,
+  LockKeyhole,
+  MapPin,
+  Menu,
+  Minus,
+  Moon,
+  Phone,
+  Plus,
+  QrCode,
+  Search,
+  ShoppingBag,
+  Sparkles,
+  Star,
+  Sun,
+  Truck,
+  UserRound,
+  WalletCards,
+  X
+} from 'lucide-react';
+import { FormEvent, useMemo, useState } from 'react';
+import { readLocalOrders, storeOrder, type StoredOrder } from './lib/firebase';
+
+type MenuItem = {
+  id: number;
+  name: string;
+  category: string;
+  description: string;
+  price: number;
+  image: string;
+  tag: string;
+};
+
+type CartLine = MenuItem & {
+  quantity: number;
+};
+
+type Customer = {
+  name: string;
+  phone: string;
+  address: string;
+  note: string;
+};
+
+const phoneNumber = '+919310575998';
+const displayPhoneNumber = '+91 93105 75998';
+const upiId = '9310575998@ybl';
+const brand = 'Swadeshi Kitchen';
+
+const formatCurrency = (amount: number) => `Rs ${amount.toLocaleString('en-IN')}`;
+
+const menu: MenuItem[] = [
+  {
+    id: 1,
+    name: 'Truffle Butter Paneer Bowl',
+    category: 'Signature Bowls',
+    description: 'Creamy paneer, saffron rice, charred peppers, cashew crunch and herb chutney.',
+    price: 289,
+    image: 'https://images.unsplash.com/photo-1631452180519-c014fe946bc7?auto=format&fit=crop&w=900&q=80',
+    tag: 'Bestseller'
+  },
+  {
+    id: 2,
+    name: 'Smoked Tandoori Chicken Meal',
+    category: 'Chef Meals',
+    description: 'Slow-smoked chicken, mint pilaf, pickled onions, house raita and roasted masala gravy.',
+    price: 349,
+    image: 'https://images.unsplash.com/photo-1596797038530-2c107229654b?auto=format&fit=crop&w=900&q=80',
+    tag: 'Chef pick'
+  },
+  {
+    id: 3,
+    name: 'Swadeshi Kitchen Combo',
+    category: 'Combos',
+    description: 'One loaded bowl, crispy starter, dessert cup and a chilled seasonal drink.',
+    price: 499,
+    image: 'https://images.unsplash.com/photo-1543353071-873f17a7a088?auto=format&fit=crop&w=900&q=80',
+    tag: 'Value'
+  },
+  {
+    id: 4,
+    name: 'Peri Peri Lotus Stem Bites',
+    category: 'Small Plates',
+    description: 'Crispy lotus stem tossed in peri peri dust with garlic aioli and lime.',
+    price: 219,
+    image: 'https://images.unsplash.com/photo-1625944525533-473f1a3d54e7?auto=format&fit=crop&w=900&q=80',
+    tag: 'Crispy'
+  },
+  {
+    id: 5,
+    name: 'Royal Chocolate Mousse Cup',
+    category: 'Desserts',
+    description: 'Dark chocolate mousse, brownie soil, salted caramel and roasted almond flakes.',
+    price: 179,
+    image: 'https://images.unsplash.com/photo-1488477181946-6428a0291777?auto=format&fit=crop&w=900&q=80',
+    tag: 'Sweet'
+  },
+  {
+    id: 6,
+    name: 'Fresh Kokum Cooler',
+    category: 'Beverages',
+    description: 'A bright coastal cooler with kokum, lime, black salt and crushed ice.',
+    price: 119,
+    image: 'https://images.unsplash.com/photo-1544145945-f90425340c7e?auto=format&fit=crop&w=900&q=80',
+    tag: 'Chilled'
+  }
+];
+
+const categories = ['All', ...Array.from(new Set(menu.map((item) => item.category)))];
+const paymentMethods = ['PhonePe', 'Google Pay', 'UPI QR', 'Cash on Delivery'];
+const deliveryMethods = ['Self delivery', 'Local delivery boys', 'Porter / Dunzo'];
+const coupons = {
+  SWADESHI10: { label: '10% off food bill', type: 'percent', value: 10 },
+  FREEDEL: { label: 'Free delivery', type: 'delivery', value: 39 }
+} as const;
+const orderStages = ['Order placed', 'Cooking', 'Packed', 'Out for delivery', 'Delivered'];
+
+function App() {
+  const [selectedCategory, setSelectedCategory] = useState('All');
+  const [cart, setCart] = useState<CartLine[]>([]);
+  const [isCartOpen, setIsCartOpen] = useState(false);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isDarkMode, setIsDarkMode] = useState(false);
+  const [selectedPayment, setSelectedPayment] = useState('PhonePe');
+  const [selectedDelivery, setSelectedDelivery] = useState('Self delivery');
+  const [couponCode, setCouponCode] = useState('');
+  const [appliedCoupon, setAppliedCoupon] = useState('');
+  const [couponMessage, setCouponMessage] = useState('');
+  const [otpSent, setOtpSent] = useState(false);
+  const [otpCode, setOtpCode] = useState('');
+  const [isOtpVerified, setIsOtpVerified] = useState(false);
+  const [activeOrder, setActiveOrder] = useState<StoredOrder | null>(null);
+  const [orderStep, setOrderStep] = useState(0);
+  const [orders, setOrders] = useState<StoredOrder[]>(() => readLocalOrders());
+  const [customer, setCustomer] = useState<Customer>({
+    name: '',
+    phone: phoneNumber,
+    address: '',
+    note: ''
+  });
+
+  const filteredMenu = selectedCategory === 'All'
+    ? menu
+    : menu.filter((item) => item.category === selectedCategory);
+
+  const totals = useMemo(() => {
+    const subtotal = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
+    const baseDelivery = subtotal > 499 || subtotal === 0 ? 0 : 39;
+    const coupon = coupons[appliedCoupon as keyof typeof coupons];
+    const discount = coupon?.type === 'percent' ? Math.round((subtotal * coupon.value) / 100) : 0;
+    const delivery = coupon?.type === 'delivery' ? 0 : baseDelivery;
+    const taxes = Math.round((subtotal - discount) * 0.05);
+    return {
+      count: cart.reduce((sum, item) => sum + item.quantity, 0),
+      subtotal,
+      discount,
+      delivery,
+      taxes,
+      grandTotal: Math.max(0, subtotal - discount + delivery + taxes)
+    };
+  }, [cart, appliedCoupon]);
+
+  const upiUrl = `upi://pay?pa=${upiId}&pn=${encodeURIComponent(brand)}&am=${totals.grandTotal}&cu=INR&tn=${encodeURIComponent('Swadeshi Kitchen order')}`;
+  const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(upiUrl)}`;
+
+  const addToCart = (item: MenuItem) => {
+    setCart((current) => {
+      const existing = current.find((line) => line.id === item.id);
+      if (existing) {
+        return current.map((line) => line.id === item.id ? { ...line, quantity: line.quantity + 1 } : line);
+      }
+      return [...current, { ...item, quantity: 1 }];
+    });
+    setIsCartOpen(true);
+  };
+
+  const updateQuantity = (id: number, nextQuantity: number) => {
+    setCart((current) => {
+      if (nextQuantity <= 0) {
+        return current.filter((line) => line.id !== id);
+      }
+      return current.map((line) => line.id === id ? { ...line, quantity: nextQuantity } : line);
+    });
+  };
+
+  const applyCoupon = () => {
+    const normalized = couponCode.trim().toUpperCase();
+    if (!normalized) {
+      setCouponMessage('Enter SWADESHI10 or FREEDEL.');
+      return;
+    }
+    if (!coupons[normalized as keyof typeof coupons]) {
+      setAppliedCoupon('');
+      setCouponMessage('Coupon not valid.');
+      return;
+    }
+    setAppliedCoupon(normalized);
+    setCouponMessage(`${normalized} applied.`);
+  };
+
+  const sendOtp = () => {
+    if (customer.phone.replace(/\D/g, '').length < 10) {
+      setCouponMessage('Enter a valid mobile number before OTP.');
+      return;
+    }
+    setOtpSent(true);
+    setOtpCode('');
+    setCouponMessage('Demo OTP sent. Use 1234 to verify.');
+  };
+
+  const verifyOtp = () => {
+    if (otpCode === '1234') {
+      setIsOtpVerified(true);
+      setCouponMessage('Mobile number verified.');
+      return;
+    }
+    setCouponMessage('Wrong OTP. Demo OTP is 1234.');
+  };
+
+  const createWhatsAppMessage = (order: StoredOrder) => {
+    const lines = order.items.map((item) => `${item.quantity} x ${item.name} - ${formatCurrency(item.price * item.quantity)}`);
+    return [
+      `New order from ${brand}`,
+      `Order ID: ${order.id}`,
+      `Customer: ${order.customer.name}`,
+      `Phone: ${order.customer.phone}`,
+      `Address: ${order.customer.address}`,
+      `Payment: ${order.paymentMethod}`,
+      `Total: ${formatCurrency(order.totals.grandTotal)}`,
+      `Items:`,
+      ...lines
+    ].join('\n');
+  };
+
+  const submitOrder = async (event: FormEvent) => {
+    event.preventDefault();
+    if (!cart.length || !customer.name || !customer.address || !customer.phone || !isOtpVerified) {
+      setCouponMessage('Add items, fill customer details, and verify OTP.');
+      return;
+    }
+
+    const order: StoredOrder = {
+      id: `SK-${Date.now().toString().slice(-6)}`,
+      customer,
+      items: cart.map((item) => ({ name: item.name, quantity: item.quantity, price: item.price })),
+      totals,
+      paymentMethod: selectedPayment,
+      deliveryMethod: selectedDelivery,
+      couponCode: appliedCoupon || 'None',
+      status: orderStages[0],
+      createdAt: new Date().toISOString()
+    };
+
+    const stored = await storeOrder(order);
+    const savedOrder = { ...order, id: stored.id || order.id };
+    setActiveOrder(savedOrder);
+    setOrders([savedOrder, ...orders]);
+    setOrderStep(0);
+    setCouponMessage(`Order saved to ${stored.mode === 'firebase' ? 'Firebase' : 'local storage'}.`);
+
+    const whatsappUrl = `https://wa.me/${phoneNumber.replace('+', '')}?text=${encodeURIComponent(createWhatsAppMessage(savedOrder))}`;
+    window.open(whatsappUrl, '_blank', 'noopener,noreferrer');
+  };
+
+  const navItems = ['Menu', 'Tracking', 'Admin', 'Contact'];
+
+  return (
+    <div className={isDarkMode ? 'dark' : ''}>
+      <div className="min-h-screen bg-[#fffaf3] text-slate-900 transition-colors duration-300 dark:bg-slate-950 dark:text-white">
+        <header className="sticky top-0 z-40 border-b border-orange-100 bg-[#fffaf3]/90 backdrop-blur dark:border-slate-800 dark:bg-slate-950/90">
+          <div className="section-shell flex h-20 items-center justify-between">
+            <a href="#" className="flex items-center gap-3 font-black" aria-label="Swadeshi Kitchen home">
+              <img src="/logo.svg" alt="Swadeshi Kitchen logo" className="h-14 w-14 rounded-full object-contain shadow-sm" />
+              <span className="text-lg leading-tight">
+                Swadeshi
+                <span className="block text-sm font-semibold text-orange-700 dark:text-orange-300">Kitchen</span>
+              </span>
+            </a>
+
+            <nav className="hidden items-center gap-8 text-sm font-bold text-slate-700 dark:text-slate-200 md:flex">
+              {navItems.map((item) => (
+                <a key={item} href={`#${item.toLowerCase()}`} className="hover:text-orange-700">
+                  {item}
+                </a>
+              ))}
+            </nav>
+
+            <div className="flex items-center gap-2">
+              <button type="button" onClick={() => setIsDarkMode(!isDarkMode)} className="grid h-11 w-11 place-items-center rounded-full border border-orange-200 bg-white text-slate-900 shadow-sm dark:border-slate-700 dark:bg-slate-900 dark:text-white" aria-label="Toggle dark mode">
+                {isDarkMode ? <Sun size={19} /> : <Moon size={19} />}
+              </button>
+              <button type="button" onClick={() => setIsCartOpen(true)} className="relative grid h-11 w-11 place-items-center rounded-full border border-orange-200 bg-white text-orange-700 shadow-sm dark:border-slate-700 dark:bg-slate-900">
+                <ShoppingBag size={21} />
+                {totals.count > 0 && (
+                  <span className="absolute -right-1 -top-1 grid h-5 min-w-5 place-items-center rounded-full bg-slate-950 px-1 text-xs font-black text-white dark:bg-orange-500">
+                    {totals.count}
+                  </span>
+                )}
+              </button>
+              <button type="button" className="grid h-11 w-11 place-items-center rounded-full border border-orange-200 bg-white md:hidden dark:border-slate-700 dark:bg-slate-900" onClick={() => setIsMenuOpen((value) => !value)} aria-label="Toggle menu">
+                {isMenuOpen ? <X size={21} /> : <Menu size={21} />}
+              </button>
+            </div>
+          </div>
+          {isMenuOpen && (
+            <div className="section-shell flex flex-col gap-3 pb-5 text-sm font-bold md:hidden">
+              {navItems.map((item) => (
+                <a key={item} href={`#${item.toLowerCase()}`} onClick={() => setIsMenuOpen(false)}>
+                  {item}
+                </a>
+              ))}
+            </div>
+          )}
+        </header>
+
+        <main>
+          <section className="section-shell grid min-h-[calc(100vh-80px)] items-center gap-10 py-10 lg:grid-cols-[1fr_0.9fr]">
+            <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.55 }} className="max-w-2xl">
+              <p className="mb-4 inline-flex items-center gap-2 rounded-full bg-white px-4 py-2 text-sm font-black text-orange-700 shadow-sm dark:bg-slate-900 dark:text-orange-300">
+                <Sparkles size={16} />
+                Homemade, healthy, heartfelt
+              </p>
+              <h1 className="text-5xl font-black leading-[1.02] text-slate-950 dark:text-white sm:text-6xl">
+                Swadeshi Kitchen
+              </h1>
+              <p className="mt-6 text-lg leading-8 text-slate-600 dark:text-slate-300">
+                Premium mobile ordering with OTP login, UPI checkout, live tracking, coupons and WhatsApp confirmation.
+              </p>
+              <div className="mt-8 flex flex-wrap gap-3">
+                <a href="#menu" className="btn-primary inline-flex items-center gap-2">
+                  <ShoppingBag size={18} />
+                  Order now
+                </a>
+                <a href={`tel:${phoneNumber}`} className="inline-flex items-center gap-2 rounded-full border border-orange-200 bg-white px-5 py-3 font-black text-slate-900 dark:border-slate-700 dark:bg-slate-900 dark:text-white">
+                  <Phone size={18} />
+                  {displayPhoneNumber}
+                </a>
+              </div>
+              <div className="mt-8 grid max-w-xl grid-cols-3 gap-4 text-center">
+                {[
+                  ['4.9', 'Rating'],
+                  ['18k+', 'Orders'],
+                  ['35m', 'Average']
+                ].map(([value, label]) => (
+                  <motion.div whileHover={{ y: -4 }} key={label} className="rounded-lg bg-white p-4 shadow-sm dark:bg-slate-900">
+                    <div className="text-2xl font-black">{value}</div>
+                    <div className="text-xs font-bold uppercase tracking-wide text-slate-500">{label}</div>
+                  </motion.div>
+                ))}
+              </div>
+            </motion.div>
+
+            <motion.div initial={{ opacity: 0, scale: 0.96 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.55, delay: 0.1 }} className="relative min-h-[520px] overflow-hidden rounded-[2rem] bg-slate-950 shadow-soft">
+              <img src="https://images.unsplash.com/photo-1555244162-803834f70033?auto=format&fit=crop&w=1200&q=85" alt="Swadeshi Kitchen meals" className="absolute inset-0 h-full w-full object-cover opacity-85" />
+              <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/25 to-transparent" />
+              <div className="absolute bottom-0 p-7 text-white">
+                <p className="mb-3 flex items-center gap-2 text-sm font-bold">
+                  <Star className="fill-orange-400 text-orange-400" size={18} />
+                  Today's special
+                </p>
+                <h2 className="text-3xl font-black">Smoked tandoori dinner box</h2>
+                <p className="mt-2 max-w-md text-white/80">
+                  Scan, pay and confirm your order on WhatsApp in one smooth checkout.
+                </p>
+              </div>
+            </motion.div>
+          </section>
+
+          <section id="menu" className="bg-white py-16 dark:bg-slate-900">
+            <div className="section-shell">
+              <div className="flex flex-col justify-between gap-5 md:flex-row md:items-end">
+                <div>
+                  <p className="text-sm font-black uppercase tracking-wide text-orange-700 dark:text-orange-300">Fresh menu</p>
+                  <h2 className="mt-2 text-4xl font-black">Made for delivery, plated like dine-in.</h2>
+                </div>
+                <div className="flex gap-2 overflow-x-auto pb-2">
+                  {categories.map((category) => (
+                    <button key={category} type="button" onClick={() => setSelectedCategory(category)} className={`whitespace-nowrap rounded-full px-4 py-2 text-sm font-black ${selectedCategory === category ? 'bg-slate-950 text-white dark:bg-orange-500' : 'bg-orange-50 text-slate-700 dark:bg-slate-800 dark:text-slate-200'}`}>
+                      {category}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                {filteredMenu.map((item, index) => (
+                  <motion.article initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: index * 0.04 }} key={item.id} className="overflow-hidden rounded-lg border border-orange-100 bg-[#fffaf3] shadow-sm dark:border-slate-800 dark:bg-slate-950">
+                    <div className="relative aspect-[4/3] overflow-hidden">
+                      <img src={item.image} alt={item.name} className="h-full w-full object-cover transition duration-300 hover:scale-105" />
+                      <span className="absolute left-4 top-4 rounded-full bg-white px-3 py-1 text-xs font-black text-orange-700">
+                        {item.tag}
+                      </span>
+                    </div>
+                    <div className="p-5">
+                      <div className="flex items-start justify-between gap-3">
+                        <h3 className="text-xl font-black">{item.name}</h3>
+                        <span className="font-black text-orange-700 dark:text-orange-300">{formatCurrency(item.price)}</span>
+                      </div>
+                      <p className="mt-2 min-h-[72px] text-sm leading-6 text-slate-600 dark:text-slate-300">{item.description}</p>
+                      <button type="button" onClick={() => addToCart(item)} className="btn-primary mt-5 w-full">
+                        Add to cart
+                      </button>
+                    </div>
+                  </motion.article>
+                ))}
+              </div>
+            </div>
+          </section>
+
+          <section id="tracking" className="section-shell py-16">
+            <div className="grid gap-6 lg:grid-cols-[0.9fr_1.1fr]">
+              <div>
+                <p className="text-sm font-black uppercase tracking-wide text-orange-700 dark:text-orange-300">Live tracking</p>
+                <h2 className="mt-2 text-4xl font-black">Follow every order stage.</h2>
+                <p className="mt-3 text-slate-600 dark:text-slate-300">After checkout, the latest order appears here. The admin panel can advance the visible order stage.</p>
+              </div>
+              <div className="rounded-lg bg-white p-5 shadow-sm dark:bg-slate-900">
+                <p className="font-black">{activeOrder ? `Order ${activeOrder.id}` : 'No active order yet'}</p>
+                <div className="mt-5 space-y-4">
+                  {orderStages.map((stage, index) => (
+                    <div key={stage} className="flex items-center gap-3">
+                      <span className={`grid h-9 w-9 place-items-center rounded-full ${index <= orderStep ? 'bg-orange-600 text-white' : 'bg-orange-50 text-slate-500 dark:bg-slate-800'}`}>
+                        {index <= orderStep ? <CheckCircle2 size={18} /> : index + 1}
+                      </span>
+                      <div className="flex-1">
+                        <p className="font-black">{stage}</p>
+                        <div className="mt-2 h-2 rounded-full bg-orange-50 dark:bg-slate-800">
+                          <div className="h-2 rounded-full bg-orange-600 transition-all" style={{ width: index <= orderStep ? '100%' : '0%' }} />
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <section id="admin" className="bg-white py-16 dark:bg-slate-900">
+            <div className="section-shell">
+              <div className="flex flex-col justify-between gap-4 md:flex-row md:items-end">
+                <div>
+                  <p className="text-sm font-black uppercase tracking-wide text-orange-700 dark:text-orange-300">Admin dashboard</p>
+                  <h2 className="mt-2 text-4xl font-black">Orders, revenue and status control.</h2>
+                </div>
+                <button type="button" onClick={() => setOrderStep((step) => Math.min(step + 1, orderStages.length - 1))} className="btn-primary inline-flex items-center gap-2">
+                  Advance order
+                  <ChevronRight size={18} />
+                </button>
+              </div>
+
+              <div className="mt-8 grid gap-4 md:grid-cols-3">
+                {[
+                  ['Orders', orders.length],
+                  ['Revenue', formatCurrency(orders.reduce((sum, order) => sum + order.totals.grandTotal, 0))],
+                  ['Active stage', orderStages[orderStep]]
+                ].map(([label, value]) => (
+                  <div key={label} className="rounded-lg bg-[#fffaf3] p-5 shadow-sm dark:bg-slate-950">
+                    <p className="text-sm font-bold text-slate-500">{label}</p>
+                    <p className="mt-2 text-2xl font-black">{value}</p>
+                  </div>
+                ))}
+              </div>
+
+              <div className="mt-6 overflow-hidden rounded-lg border border-orange-100 dark:border-slate-800">
+                <div className="grid grid-cols-[1fr_0.8fr_1fr_1fr] bg-orange-50 p-3 text-sm font-black text-slate-700 dark:bg-slate-950 dark:text-slate-200">
+                  <span>Customer</span>
+                  <span>Total</span>
+                  <span>Payment</span>
+                  <span>Delivery</span>
+                </div>
+                {(orders.length ? orders : [{ id: 'Demo', customer: { name: 'Demo Customer', phone: displayPhoneNumber, address: 'Delhi', note: '' }, items: [], totals: { subtotal: 499, discount: 50, delivery: 0, taxes: 22, grandTotal: 471 }, paymentMethod: 'PhonePe', deliveryMethod: 'Self delivery', couponCode: 'SWADESHI10', status: 'Order placed', createdAt: new Date().toISOString() }]).slice(0, 5).map((order) => (
+                  <div key={order.id} className="grid grid-cols-[1fr_0.8fr_1fr_1fr] border-t border-orange-100 p-3 text-sm dark:border-slate-800">
+                    <span className="font-bold">{order.customer.name}</span>
+                    <span>{formatCurrency(order.totals.grandTotal)}</span>
+                    <span>{order.paymentMethod}</span>
+                    <span>{order.deliveryMethod || 'Self delivery'}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </section>
+
+          <section id="contact" className="section-shell grid gap-8 py-16 lg:grid-cols-[0.8fr_1.2fr]">
+            <div>
+              <p className="text-sm font-black uppercase tracking-wide text-orange-700 dark:text-orange-300">Contact</p>
+              <h2 className="mt-2 text-4xl font-black">Order direct from Swadeshi Kitchen.</h2>
+            </div>
+            <div className="grid gap-4 sm:grid-cols-2">
+              <a href={`tel:${phoneNumber}`} className="rounded-lg bg-white p-5 font-black shadow-sm dark:bg-slate-900">
+                <Phone className="mb-3 text-orange-700" />
+                {displayPhoneNumber}
+              </a>
+              <div className="rounded-lg bg-white p-5 font-black shadow-sm dark:bg-slate-900">
+                <MapPin className="mb-3 text-orange-700" />
+                Delivery across your city
+              </div>
+            </div>
+          </section>
+        </main>
+
+        <footer className="border-t border-orange-100 bg-white py-8 dark:border-slate-800 dark:bg-slate-950">
+          <div className="section-shell flex flex-col justify-between gap-3 text-sm font-semibold text-slate-500 md:flex-row">
+            <p>Swadeshi Kitchen</p>
+            <p>Freshly cooked. Carefully packed. Fast delivered.</p>
+          </div>
+        </footer>
+
+        <AnimatePresence>
+          {isCartOpen && (
+            <motion.aside className="fixed inset-0 z-50" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+              <button type="button" className="absolute inset-0 bg-slate-950/50" onClick={() => setIsCartOpen(false)} aria-label="Close cart" />
+              <motion.div initial={{ x: '100%' }} animate={{ x: 0 }} exit={{ x: '100%' }} transition={{ type: 'spring', damping: 30, stiffness: 260 }} className="absolute right-0 top-0 flex h-full w-full max-w-xl flex-col bg-white shadow-soft dark:bg-slate-950">
+                <div className="flex items-center justify-between border-b border-orange-100 p-5 dark:border-slate-800">
+                  <div>
+                    <p className="text-sm font-bold text-orange-700 dark:text-orange-300">Modern checkout</p>
+                    <h2 className="text-2xl font-black">Cart and payment</h2>
+                  </div>
+                  <button type="button" onClick={() => setIsCartOpen(false)} className="grid h-10 w-10 place-items-center rounded-full bg-orange-50 dark:bg-slate-800">
+                    <X size={20} />
+                  </button>
+                </div>
+
+                <form onSubmit={submitOrder} className="flex-1 overflow-y-auto p-5">
+                  <div className="space-y-4">
+                    {cart.length === 0 ? (
+                      <div className="grid rounded-lg border border-dashed border-orange-200 p-8 text-center dark:border-slate-700">
+                        <ShoppingBag className="mx-auto text-orange-600" size={42} />
+                        <p className="mt-4 font-black">Your cart is empty.</p>
+                        <p className="mt-2 text-sm text-slate-500">Add a chef-made meal to start checkout.</p>
+                      </div>
+                    ) : (
+                      cart.map((line) => (
+                        <div key={line.id} className="flex gap-4 rounded-lg border border-orange-100 p-3 dark:border-slate-800">
+                          <img src={line.image} alt={line.name} className="h-20 w-20 rounded-md object-cover" />
+                          <div className="min-w-0 flex-1">
+                            <h3 className="font-black leading-tight">{line.name}</h3>
+                            <p className="mt-1 text-sm font-bold text-orange-700 dark:text-orange-300">
+                              {formatCurrency(line.price)} x {line.quantity} = {formatCurrency(line.price * line.quantity)}
+                            </p>
+                            <div className="mt-3 flex items-center gap-2">
+                              <button type="button" onClick={() => updateQuantity(line.id, line.quantity - 1)} className="grid h-8 w-8 place-items-center rounded-full bg-orange-50 dark:bg-slate-800">
+                                <Minus size={15} />
+                              </button>
+                              <span className="w-7 text-center font-black">{line.quantity}</span>
+                              <button type="button" onClick={() => updateQuantity(line.id, line.quantity + 1)} className="grid h-8 w-8 place-items-center rounded-full bg-orange-50 dark:bg-slate-800">
+                                <Plus size={15} />
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      ))
+                    )}
+
+                    <div className="rounded-lg bg-orange-50 p-4 dark:bg-slate-900">
+                      <p className="mb-3 flex items-center gap-2 font-black">
+                        <UserRound size={18} />
+                        Customer details
+                      </p>
+                      <div className="grid gap-3">
+                        <input value={customer.name} onChange={(event) => setCustomer({ ...customer, name: event.target.value })} placeholder="Full name" className="rounded-lg border border-orange-100 bg-white px-4 py-3 outline-none focus:border-orange-500 dark:border-slate-700 dark:bg-slate-950" />
+                        <input value={customer.phone} onChange={(event) => setCustomer({ ...customer, phone: event.target.value })} placeholder="Mobile number" className="rounded-lg border border-orange-100 bg-white px-4 py-3 outline-none focus:border-orange-500 dark:border-slate-700 dark:bg-slate-950" />
+                        <textarea value={customer.address} onChange={(event) => setCustomer({ ...customer, address: event.target.value })} placeholder="Delivery address" rows={3} className="rounded-lg border border-orange-100 bg-white px-4 py-3 outline-none focus:border-orange-500 dark:border-slate-700 dark:bg-slate-950" />
+                        <input value={customer.note} onChange={(event) => setCustomer({ ...customer, note: event.target.value })} placeholder="Cooking note or landmark" className="rounded-lg border border-orange-100 bg-white px-4 py-3 outline-none focus:border-orange-500 dark:border-slate-700 dark:bg-slate-950" />
+                      </div>
+                    </div>
+
+                    <div className="rounded-lg border border-orange-100 p-4 dark:border-slate-800">
+                      <p className="mb-3 flex items-center gap-2 font-black">
+                        <LockKeyhole size={18} />
+                        OTP login
+                      </p>
+                      <div className="flex gap-2">
+                        <button type="button" onClick={sendOtp} className="rounded-lg bg-slate-950 px-4 py-3 text-sm font-black text-white dark:bg-orange-600">
+                          Send OTP
+                        </button>
+                        <input value={otpCode} onChange={(event) => setOtpCode(event.target.value)} placeholder="1234" className="min-w-0 flex-1 rounded-lg border border-orange-100 px-4 py-3 outline-none focus:border-orange-500 dark:border-slate-700 dark:bg-slate-950" />
+                        <button type="button" onClick={verifyOtp} disabled={!otpSent} className="rounded-lg bg-orange-600 px-4 py-3 text-sm font-black text-white disabled:opacity-40">
+                          Verify
+                        </button>
+                      </div>
+                      <p className="mt-2 text-xs font-semibold text-slate-500">{isOtpVerified ? 'Verified successfully.' : 'Demo OTP is 1234.'}</p>
+                    </div>
+
+                    <div className="rounded-lg border border-orange-100 p-4 dark:border-slate-800">
+                      <p className="mb-3 flex items-center gap-2 font-black">
+                        <Search size={18} />
+                        Coupon
+                      </p>
+                      <div className="flex gap-2">
+                        <input value={couponCode} onChange={(event) => setCouponCode(event.target.value)} placeholder="SWADESHI10 or FREEDEL" className="min-w-0 flex-1 rounded-lg border border-orange-100 px-4 py-3 uppercase outline-none focus:border-orange-500 dark:border-slate-700 dark:bg-slate-950" />
+                        <button type="button" onClick={applyCoupon} className="rounded-lg bg-slate-950 px-4 py-3 text-sm font-black text-white dark:bg-orange-600">
+                          Apply
+                        </button>
+                      </div>
+                      {couponMessage && <p className="mt-2 text-xs font-semibold text-orange-700 dark:text-orange-300">{couponMessage}</p>}
+                    </div>
+
+
+                    <div className="rounded-lg border border-orange-100 p-4 dark:border-slate-800">
+                      <p className="mb-3 flex items-center gap-2 font-black">
+                        <Truck size={18} />
+                        Delivery system
+                      </p>
+                      <div className="grid gap-2 sm:grid-cols-3">
+                        {deliveryMethods.map((method) => (
+                          <button
+                            key={method}
+                            type="button"
+                            onClick={() => setSelectedDelivery(method)}
+                            className={`rounded-lg border px-3 py-3 text-sm font-black ${
+                              selectedDelivery === method
+                                ? 'border-orange-600 bg-orange-50 text-orange-700 dark:bg-orange-600 dark:text-white'
+                                : 'border-orange-100 bg-white text-slate-700 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-200'
+                            }`}
+                          >
+                            {method}
+                          </button>
+                        ))}
+                      </div>
+                      <p className="mt-3 text-xs font-semibold text-slate-500">
+                        Selected delivery partner: {selectedDelivery}
+                      </p>
+                    </div>
+                    <div className="rounded-lg border border-orange-100 p-4 dark:border-slate-800">
+                      <p className="mb-3 flex items-center gap-2 font-black">
+                        <WalletCards size={18} />
+                        PhonePe / Google Pay
+                      </p>
+                      <div className="grid grid-cols-2 gap-2">
+                        {paymentMethods.map((method) => (
+                          <button key={method} type="button" onClick={() => setSelectedPayment(method)} className={`rounded-lg border px-3 py-3 text-sm font-black ${selectedPayment === method ? 'border-orange-600 bg-orange-50 text-orange-700 dark:bg-orange-600 dark:text-white' : 'border-orange-100 bg-white text-slate-700 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-200'}`}>
+                            {method}
+                          </button>
+                        ))}
+                      </div>
+                      <div className="mt-4 grid gap-4 rounded-lg bg-[#fffaf3] p-4 dark:bg-slate-900 sm:grid-cols-[auto_1fr]">
+                        <img src={qrUrl} alt="UPI QR code for Swadeshi Kitchen payment" className="h-36 w-36 rounded-lg bg-white p-2" />
+                        <div>
+                          <p className="flex items-center gap-2 font-black">
+                            <QrCode size={18} />
+                            Scan and pay
+                          </p>
+                          <p className="mt-2 text-sm text-slate-600 dark:text-slate-300">UPI ID: {upiId}</p>
+                          <p className="mt-1 text-sm text-slate-600 dark:text-slate-300">Amount: {formatCurrency(totals.grandTotal)}</p>
+                          <a href={upiUrl} className="mt-3 inline-flex items-center gap-2 rounded-full bg-slate-950 px-4 py-2 text-sm font-black text-white dark:bg-orange-600">
+                            Open UPI app
+                            <ChevronRight size={16} />
+                          </a>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="rounded-lg border border-orange-100 p-4 text-sm font-semibold dark:border-slate-800">
+                      <div className="flex justify-between"><span>Subtotal</span><span>{formatCurrency(totals.subtotal)}</span></div>
+                      <div className="mt-2 flex justify-between"><span>Discount</span><span>- {formatCurrency(totals.discount)}</span></div>
+                      <div className="mt-2 flex justify-between"><span>Delivery</span><span>{totals.delivery === 0 ? 'Free' : formatCurrency(totals.delivery)}</span></div>
+                      <div className="mt-2 flex justify-between"><span>Taxes</span><span>{formatCurrency(totals.taxes)}</span></div>
+                      <div className="mt-3 flex justify-between border-t border-orange-100 pt-3 text-lg font-black dark:border-slate-800"><span>Total</span><span>{formatCurrency(totals.grandTotal)}</span></div>
+                    </div>
+                  </div>
+
+                  <button type="submit" className="btn-primary mt-5 flex w-full items-center justify-center gap-2" disabled={cart.length === 0}>
+                    <Truck size={18} />
+                    Place order and confirm on WhatsApp
+                  </button>
+                </form>
+              </motion.div>
+            </motion.aside>
+          )}
+        </AnimatePresence>
+      </div>
+    </div>
+  );
+}
+
+export default App;
+
