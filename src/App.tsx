@@ -3,7 +3,6 @@ import {
   CheckCircle2,
   ChevronRight,
   ClipboardList,
-  ExternalLink,
   LockKeyhole,
   Mail,
   MapPin,
@@ -56,6 +55,14 @@ const upiId = '9310575998@ybl';
 const brand = 'Swadeshi Kitchen';
 
 const formatCurrency = (amount: number) => `Rs ${amount.toLocaleString('en-IN')}`;
+
+function ZomatoLogo() {
+  return (
+    <span className="grid h-12 w-12 place-items-center rounded-md bg-white text-[11px] font-black lowercase text-[#e23744] shadow-sm">
+      zomato
+    </span>
+  );
+}
 
 const menu: MenuItem[] = [
   {
@@ -549,9 +556,12 @@ function App() {
                 <MapPin className="mb-3 text-orange-700" />
                 {businessAddress}
               </div>
-              <a href={zomatoUrl} target="_blank" rel="noreferrer" className="rounded-lg bg-red-600 p-5 font-black text-white shadow-sm sm:col-span-2">
-                <ExternalLink className="mb-3" />
-                Order Swadeshi Kitchen on Zomato
+              <a href={zomatoUrl} target="_blank" rel="noreferrer" className="flex items-center gap-4 rounded-lg bg-[#e23744] p-5 font-black text-white shadow-sm transition hover:bg-[#c91f2e] sm:col-span-2" aria-label="Order Swadeshi Kitchen on Zomato">
+                <ZomatoLogo />
+                <span>
+                  <span className="block text-lg leading-tight">Order on Zomato</span>
+                  <span className="block text-sm font-semibold text-white/85">Swadeshi Kitchen</span>
+                </span>
               </a>
             </div>
           </section>
