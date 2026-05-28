@@ -48,6 +48,9 @@ type Customer = {
 
 const phoneNumber = '+919310575998';
 const displayPhoneNumber = '+91 93105 75998';
+const businessEmail = 'swadeshikitchen0@gmail.com';
+const businessAddress = '53-A Arjun Park, Najafgarh, New Delhi 110043';
+const zomatoUrl = 'https://zomato.onelink.me/xqzv/gv2aw1bn';
 const upiId = '9310575998@ybl';
 const brand = 'Swadeshi Kitchen';
 
@@ -266,7 +269,14 @@ function App() {
     window.open(whatsappUrl, '_blank', 'noopener,noreferrer');
   };
 
-  const navItems = ['Menu', 'Tracking', 'Admin', 'Contact'];
+  const bulkOrderMessage = `Bulk order enquiry for ${brand}%0AName:%0AEvent date:%0AGuests:%0AAddress:%0ARequirements:`;
+  const navItems = [
+    { label: 'Menu', id: 'menu' },
+    { label: 'Bulk Orders', id: 'bulk-orders' },
+    { label: 'Tracking', id: 'tracking' },
+    { label: 'Admin', id: 'admin' },
+    { label: 'Contact', id: 'contact' }
+  ];
 
   return (
     <div className={isDarkMode ? 'dark' : ''}>
@@ -283,8 +293,8 @@ function App() {
 
             <nav className="hidden items-center gap-8 text-sm font-bold text-slate-700 dark:text-slate-200 md:flex">
               {navItems.map((item) => (
-                <a key={item} href={`#${item.toLowerCase()}`} className="hover:text-orange-700">
-                  {item}
+                <a key={item.id} href={`#${item.id}`} className="hover:text-orange-700">
+                  {item.label}
                 </a>
               ))}
             </nav>
@@ -309,8 +319,8 @@ function App() {
           {isMenuOpen && (
             <div className="section-shell flex flex-col gap-3 pb-5 text-sm font-bold md:hidden">
               {navItems.map((item) => (
-                <a key={item} href={`#${item.toLowerCase()}`} onClick={() => setIsMenuOpen(false)}>
-                  {item}
+                <a key={item.id} href={`#${item.id}`} onClick={() => setIsMenuOpen(false)}>
+                  {item.label}
                 </a>
               ))}
             </div>
@@ -484,6 +494,42 @@ function App() {
             </div>
           </section>
 
+
+          <section id="bulk-orders" className="section-shell py-16">
+            <div className="grid gap-8 lg:grid-cols-[0.85fr_1.15fr]">
+              <div>
+                <p className="text-sm font-black uppercase tracking-wide text-orange-700 dark:text-orange-300">Bulk orders</p>
+                <h2 className="mt-2 text-4xl font-black">Separate catering and party order desk.</h2>
+                <p className="mt-3 text-slate-600 dark:text-slate-300">
+                  For office lunches, family functions, birthday parties, society events and custom meal boxes.
+                </p>
+                <div className="mt-6 flex flex-wrap gap-3">
+                  <a href={`https://wa.me/${phoneNumber.replace('+', '')}?text=${bulkOrderMessage}`} target="_blank" rel="noreferrer" className="btn-primary inline-flex items-center gap-2">
+                    <ClipboardList size={18} />
+                    Enquire on WhatsApp
+                  </a>
+                  <a href={`mailto:${businessEmail}?subject=Bulk order enquiry - Swadeshi Kitchen`} className="inline-flex items-center gap-2 rounded-full border border-orange-200 bg-white px-5 py-3 font-black text-slate-900 dark:border-slate-700 dark:bg-slate-900 dark:text-white">
+                    <Mail size={18} />
+                    Email bulk order
+                  </a>
+                </div>
+              </div>
+
+              <div className="grid gap-4 md:grid-cols-2">
+                {[
+                  ['Corporate Meals', 'Packed lunch boxes, regular office meals and team orders.'],
+                  ['Family Functions', 'Custom menu planning for small and medium gatherings.'],
+                  ['Party Combos', 'Snacks, drinks, bowls and desserts in bulk quantities.'],
+                  ['Custom Menu', 'Tell us your budget, date, guests and preferred dishes.']
+                ].map(([title, copy]) => (
+                  <motion.div whileHover={{ y: -4 }} key={title} className="rounded-lg bg-white p-5 shadow-sm dark:bg-slate-900">
+                    <p className="font-black text-orange-700 dark:text-orange-300">{title}</p>
+                    <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-300">{copy}</p>
+                  </motion.div>
+                ))}
+              </div>
+            </div>
+          </section>
           <section id="contact" className="section-shell grid gap-8 py-16 lg:grid-cols-[0.8fr_1.2fr]">
             <div>
               <p className="text-sm font-black uppercase tracking-wide text-orange-700 dark:text-orange-300">Contact</p>
@@ -494,10 +540,18 @@ function App() {
                 <Phone className="mb-3 text-orange-700" />
                 {displayPhoneNumber}
               </a>
-              <div className="rounded-lg bg-white p-5 font-black shadow-sm dark:bg-slate-900">
+              <a href={`mailto:${businessEmail}`} className="rounded-lg bg-white p-5 font-black shadow-sm dark:bg-slate-900">
+                <Mail className="mb-3 text-orange-700" />
+                {businessEmail}
+              </a>
+              <div className="rounded-lg bg-white p-5 font-black shadow-sm dark:bg-slate-900 sm:col-span-2">
                 <MapPin className="mb-3 text-orange-700" />
-                Delivery across your city
+                {businessAddress}
               </div>
+              <a href={zomatoUrl} target="_blank" rel="noreferrer" className="rounded-lg bg-red-600 p-5 font-black text-white shadow-sm sm:col-span-2">
+                <ExternalLink className="mb-3" />
+                Order Swadeshi Kitchen on Zomato
+              </a>
             </div>
           </section>
         </main>
@@ -505,7 +559,7 @@ function App() {
         <footer className="border-t border-orange-100 bg-white py-8 dark:border-slate-800 dark:bg-slate-950">
           <div className="section-shell flex flex-col justify-between gap-3 text-sm font-semibold text-slate-500 md:flex-row">
             <p>Swadeshi Kitchen</p>
-            <p>Freshly cooked. Carefully packed. Fast delivered.</p>
+            <p>{businessEmail} | {businessAddress}</p>
           </div>
         </footer>
 
@@ -678,5 +732,8 @@ function App() {
 }
 
 export default App;
+
+
+
 
 
