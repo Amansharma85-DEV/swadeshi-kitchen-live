@@ -1,0 +1,31 @@
+﻿<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="512" height="512" rx="256" fill="#fffaf3"/>
+  <path d="M94 268c0-89.5 72.5-162 162-162 78.1 0 143.3 55.3 158.6 128.9" stroke="#3c1a08" stroke-width="9" stroke-linecap="round"/>
+  <path d="M421 268c0 91.1-73.9 165-165 165-78.6 0-144.4-55-161-128.6" stroke="#5b650f" stroke-width="6" stroke-linecap="round"/>
+  <path d="M156 201c29.8 5.5 52.1 26.8 60.8 58.3" stroke="#5b650f" stroke-width="6" stroke-linecap="round"/>
+  <ellipse cx="150" cy="193" rx="9" ry="24" transform="rotate(-43 150 193)" fill="#58620f"/>
+  <ellipse cx="177" cy="207" rx="9" ry="25" transform="rotate(15 177 207)" fill="#6f7a18"/>
+  <ellipse cx="134" cy="225" rx="9" ry="25" transform="rotate(-78 134 225)" fill="#48540b"/>
+  <ellipse cx="188" cy="237" rx="9" ry="25" transform="rotate(52 188 237)" fill="#75801c"/>
+  <ellipse cx="159" cy="259" rx="9" ry="27" transform="rotate(-74 159 259)" fill="#59640f"/>
+  <path d="M207 221c7-29 91-29 98 0l8 48c6 35-15 64-57 64s-63-29-57-64l8-48Z" fill="#b84412"/>
+  <path d="M200 225c0-12 112-12 112 0 0 13-112 13-112 0Z" fill="#cf4b14" stroke="#3c1a08" stroke-width="5"/>
+  <path d="M216 206c0-11 80-11 80 0 0 11-80 11-80 0Z" fill="#bd4512" stroke="#3c1a08" stroke-width="4"/>
+  <ellipse cx="256" cy="190" rx="17" ry="8" fill="#a3370e" stroke="#3c1a08" stroke-width="4"/>
+  <path d="M205 265c9 17 93 17 102 0" stroke="#fffaf3" stroke-width="7" stroke-linecap="round"/>
+  <path d="M202 258c7 16 14 16 21 0s14-16 21 0 14 16 21 0 14-16 21 0 14 16 21 0" stroke="#fffaf3" stroke-width="5" stroke-linecap="round"/>
+  <path d="M246 169c13-18-20-23-4-48" stroke="#d98a40" stroke-width="9" stroke-linecap="round"/>
+  <path d="M273 168c24-28-30-31-2-63" stroke="#d98a40" stroke-width="9" stroke-linecap="round"/>
+  <path d="M324 254c4-25 62-24 65 0l4 39c4 25-11 43-35 43s-39-18-35-43l1-39Z" fill="#2c2924"/>
+  <path d="M322 255c0-12 69-12 69 0s-69 12-69 0Z" fill="#3a3630" stroke="#16130f" stroke-width="4"/>
+  <rect x="361" y="197" width="18" height="80" rx="9" transform="rotate(36 361 197)" fill="#4a463e" stroke="#16130f" stroke-width="4"/>
+  <path d="M352 316c27 6 40 17 42 35" stroke="#d01818" stroke-width="12" stroke-linecap="round"/>
+  <path d="M408 318c9-17 27-22 41-15-6 17-22 27-41 15Z" fill="#f5dfc2" stroke="#d7b68c" stroke-width="3"/>
+  <circle cx="409" cy="348" r="4" fill="#3c1a08"/>
+  <circle cx="429" cy="350" r="4" fill="#3c1a08"/>
+  <circle cx="442" cy="344" r="4" fill="#3c1a08"/>
+  <text x="256" y="385" text-anchor="middle" font-family="Georgia, serif" font-size="54" font-weight="700" fill="#3c1a08">Swadeshi</text>
+  <text x="256" y="426" text-anchor="middle" font-family="Arial, sans-serif" font-size="30" font-weight="800" letter-spacing="3" fill="#5b650f">KITCHEN</text>
+  <path d="M180 449h55M277 449h55" stroke="#5b650f" stroke-width="4" stroke-linecap="round"/>
+  <path d="M252 445c-8 4-13 11-15 20 9-1 16-5 20-14 4 9 11 13 20 14-2-9-7-16-15-20l-5-12-5 12Z" fill="#b84412"/>
+</svg>
