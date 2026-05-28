@@ -57,8 +57,12 @@ function getFirebaseApp() {
 }
 
 function saveLocalOrder(order: StoredOrder) {
-  const existing = JSON.parse(localStorage.getItem('swadeshi-orders') || '[]') as StoredOrder[];
-  localStorage.setItem('swadeshi-orders', JSON.stringify([order, ...existing]));
+  try {
+    const existing = readLocalOrders();
+    localStorage.setItem('swadeshi-orders', JSON.stringify([order, ...existing]));
+  } catch {
+    // Some browsers block localStorage in strict privacy modes. Orders still continue through WhatsApp.
+  }
 }
 
 export async function storeOrder(order: StoredOrder) {
@@ -78,6 +82,11 @@ export async function storeOrder(order: StoredOrder) {
 }
 
 export function readLocalOrders() {
-  return JSON.parse(localStorage.getItem('swadeshi-orders') || '[]') as StoredOrder[];
+  try {
+    const orders = JSON.parse(localStorage.getItem('swadeshi-orders') || '[]');
+    return Array.isArray(orders) ? orders as StoredOrder[] : [];
+  } catch {
+    return [];
+  }
 }
 
