@@ -3,6 +3,7 @@ import {
   CheckCircle2,
   ChevronRight,
   ClipboardList,
+  Instagram,
   LockKeyhole,
   Mail,
   MapPin,
@@ -51,6 +52,7 @@ const displayPhoneNumber = '+91 93105 75998';
 const businessEmail = 'swadeshikitchen0@gmail.com';
 const businessAddress = '53-A Arjun Park, Najafgarh, New Delhi 110043';
 const zomatoUrl = 'https://zomato.onelink.me/xqzv/gv2aw1bn';
+const instagramUrl = 'https://www.instagram.com/swade_shikitchen?igsh=MTI2MDk2ejc3OHF1aw==';
 const upiId = '9310575998@ybl';
 const brand = 'Swadeshi Kitchen';
 
@@ -67,58 +69,113 @@ function ZomatoLogo() {
 const menu: MenuItem[] = [
   {
     id: 1,
-    name: 'Truffle Butter Paneer Bowl',
-    category: 'Signature Bowls',
-    description: 'Creamy paneer, saffron rice, charred peppers, cashew crunch and herb chutney.',
-    price: 289,
+    name: 'Veg Thali',
+    category: 'Daily Thali',
+    description: 'Rice, dal or curry of the day, seasonal sabzi, boondi raita, salad and 3 tawa roti.',
+    price: 149,
     image: 'https://images.unsplash.com/photo-1631452180519-c014fe946bc7?auto=format&fit=crop&w=900&q=80',
-    tag: 'Bestseller'
+    tag: 'Daily'
   },
   {
     id: 2,
-    name: 'Smoked Tandoori Chicken Meal',
-    category: 'Chef Meals',
-    description: 'Slow-smoked chicken, mint pilaf, pickled onions, house raita and roasted masala gravy.',
-    price: 349,
-    image: 'https://images.unsplash.com/photo-1596797038530-2c107229654b?auto=format&fit=crop&w=900&q=80',
-    tag: 'Chef pick'
+    name: 'Gobhi Paratha',
+    category: 'Parathas',
+    description: 'Served with curd and pickle. Choose 1 piece or order more for a fuller meal.',
+    price: 79,
+    image: 'https://images.unsplash.com/photo-1601050690597-df0568f70950?auto=format&fit=crop&w=900&q=80',
+    tag: 'Homestyle'
   },
   {
     id: 3,
-    name: 'Swadeshi Kitchen Combo',
-    category: 'Combos',
-    description: 'One loaded bowl, crispy starter, dessert cup and a chilled seasonal drink.',
-    price: 499,
-    image: 'https://images.unsplash.com/photo-1543353071-873f17a7a088?auto=format&fit=crop&w=900&q=80',
-    tag: 'Value'
+    name: 'Paneer Paratha',
+    category: 'Parathas',
+    description: 'Stuffed paneer paratha served hot with curd and pickle.',
+    price: 119,
+    image: 'https://images.unsplash.com/photo-1626132647523-66f5bf380027?auto=format&fit=crop&w=900&q=80',
+    tag: 'Popular'
   },
   {
     id: 4,
-    name: 'Peri Peri Lotus Stem Bites',
-    category: 'Small Plates',
-    description: 'Crispy lotus stem tossed in peri peri dust with garlic aioli and lime.',
-    price: 219,
-    image: 'https://images.unsplash.com/photo-1625944525533-473f1a3d54e7?auto=format&fit=crop&w=900&q=80',
-    tag: 'Crispy'
+    name: 'Mooli Paratha',
+    category: 'Parathas',
+    description: 'Fresh mooli stuffing, home masala, curd and pickle.',
+    price: 99,
+    image: 'https://images.unsplash.com/photo-1589301760014-d929f3979dbc?auto=format&fit=crop&w=900&q=80',
+    tag: 'Fresh'
   },
   {
     id: 5,
-    name: 'Royal Chocolate Mousse Cup',
-    category: 'Desserts',
-    description: 'Dark chocolate mousse, brownie soil, salted caramel and roasted almond flakes.',
-    price: 179,
-    image: 'https://images.unsplash.com/photo-1488477181946-6428a0291777?auto=format&fit=crop&w=900&q=80',
-    tag: 'Sweet'
+    name: 'Aloo Paratha',
+    category: 'Parathas',
+    description: 'Classic aloo paratha served with curd and pickle.',
+    price: 79,
+    image: 'https://images.unsplash.com/photo-1589647363585-f4a7d3877b10?auto=format&fit=crop&w=900&q=80',
+    tag: 'Classic'
   },
   {
     id: 6,
-    name: 'Fresh Kokum Cooler',
-    category: 'Beverages',
-    description: 'A bright coastal cooler with kokum, lime, black salt and crushed ice.',
+    name: 'Aloo Pyaz Paratha',
+    category: 'Parathas',
+    description: 'Aloo and onion stuffing, served with curd and pickle.',
+    price: 89,
+    image: 'https://images.unsplash.com/photo-1606491956689-2ea866880c84?auto=format&fit=crop&w=900&q=80',
+    tag: 'Value'
+  },
+  {
+    id: 7,
+    name: 'Ajwain Paratha',
+    category: 'Parathas',
+    description: '2 pieces served with aloo jeera, curd and pickle.',
+    price: 139,
+    image: 'https://images.unsplash.com/photo-1626776876729-bab4369a5a5a?auto=format&fit=crop&w=900&q=80',
+    tag: 'Meal'
+  },
+  {
+    id: 8,
+    name: 'Luxurious Paratha',
+    category: 'Parathas',
+    description: 'Stuffed with aloo, mooli, gobhi, paneer and moong, served with pickle, curd and butter.',
+    price: 139,
+    image: 'https://images.unsplash.com/photo-1567188040759-fb8a883dc6d8?auto=format&fit=crop&w=900&q=80',
+    tag: 'Loaded'
+  },
+  {
+    id: 9,
+    name: 'Aloo Poori',
+    category: 'Poori',
+    description: '5 pooris served with curd and pickle.',
     price: 119,
-    image: 'https://images.unsplash.com/photo-1544145945-f90425340c7e?auto=format&fit=crop&w=900&q=80',
-    tag: 'Chilled'
+    image: 'https://images.unsplash.com/photo-1630383249896-424e482df921?auto=format&fit=crop&w=900&q=80',
+    tag: 'Comfort'
   }
+];
+
+const dailyThalis = [
+  ['Monday & Thursday', 'Rice, Yellow Dal, Aloo Jeera, Boondi Raita, Salad, 3 Tawa Roti'],
+  ['Tuesday', 'Rice, Channa Masala, Mix Veg, Boondi Raita, Salad, 3 Roti'],
+  ['Wednesday & Friday', 'Rice, Black Dal Tadka, Aloo Bhaji, Boondi Raita, Salad, 3 Roti'],
+  ['Saturday', 'Rice, Rajma, Mix Veg, Boondi Raita, Salad, 3 Roti'],
+  ['Sunday', 'Rice, Kadhi Pakora, Aloo Mutter, 3 Roti']
+];
+
+const parathaMenu = [
+  ['Gobhi Paratha', '1 piece Rs 79', '2 pieces Rs 139'],
+  ['Paneer Paratha', '1 piece Rs 119', '2 pieces Rs 189'],
+  ['Mooli Paratha', '1 piece Rs 99', '2 pieces Rs 169'],
+  ['Aloo Paratha', '1 piece Rs 79', '2 pieces Rs 139'],
+  ['Aloo Pyaz Paratha', '1 piece Rs 89', '2 pieces Rs 159'],
+  ['Ajwain Paratha', '2 pieces Rs 139', 'Aloo jeera, curd, pickle'],
+  ['Luxurious Paratha', '1 piece Rs 139', '2 pieces Rs 199'],
+  ['Aloo Poori', '5 pooris Rs 119', 'Curd and pickle']
+];
+
+const extraItems = [
+  ['Dal', 'Half Rs 60', 'Full Rs 110'],
+  ['Sabzi', 'Half Rs 60', 'Full Rs 110'],
+  ['Rice', 'Half Rs 50', 'Full Rs 100'],
+  ['Plain Tawa Roti', '1 pc Rs 12', '10 pcs Rs 100'],
+  ['Ghee Tawa Roti', '1 pc Rs 15', '10 pcs Rs 130'],
+  ['Butter Tawa Roti', '1 pc Rs 15', '10 pcs Rs 150']
 ];
 
 const categories = ['All', ...Array.from(new Set(menu.map((item) => item.category)))];
@@ -279,10 +336,10 @@ function App() {
 
   const bulkOrderMessage = `Bulk order enquiry for ${brand}%0AName:%0AEvent date:%0AGuests:%0AAddress:%0ARequirements:`;
   const navItems = [
+    { label: 'Daily Menu', id: 'daily-menu' },
     { label: 'Menu', id: 'menu' },
     { label: 'Bulk Orders', id: 'bulk-orders' },
     { label: 'Tracking', id: 'tracking' },
-    { label: 'Admin', id: 'admin' },
     { label: 'Contact', id: 'contact' }
   ];
 
@@ -346,23 +403,27 @@ function App() {
                 Swadeshi Kitchen
               </h1>
               <p className="mt-6 text-lg leading-8 text-slate-600 dark:text-slate-300">
-                Premium mobile ordering with OTP login, UPI checkout, live tracking, coupons and WhatsApp confirmation.
+                Homemade daily thalis and stuffed parathas for Dwarka, Delhi. Freshly made, pocket friendly, and ready for lunch, dinner, bulk orders and self pick-up.
               </p>
               <div className="mt-8 flex flex-wrap gap-3">
-                <a href="#menu" className="btn-primary inline-flex items-center gap-2">
+                <a href="#daily-menu" className="btn-primary inline-flex items-center gap-2">
                   <ShoppingBag size={18} />
-                  Order now
+                  View menu
                 </a>
                 <a href={`tel:${phoneNumber}`} className="inline-flex items-center gap-2 rounded-full border border-orange-200 bg-white px-5 py-3 font-black text-slate-900 dark:border-slate-700 dark:bg-slate-900 dark:text-white">
                   <Phone size={18} />
                   {displayPhoneNumber}
                 </a>
+                <a href={instagramUrl} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 rounded-full border border-pink-200 bg-white px-5 py-3 font-black text-pink-700 dark:border-slate-700 dark:bg-slate-900 dark:text-pink-300">
+                  <Instagram size={18} />
+                  Instagram
+                </a>
               </div>
               <div className="mt-8 grid max-w-xl grid-cols-3 gap-4 text-center">
                 {[
-                  ['4.9', 'Rating'],
-                  ['18k+', 'Orders'],
-                  ['35m', 'Average']
+                  ['Rs 149', 'Veg Thali'],
+                  ['12 PM', 'Opening'],
+                  ['20%', 'Self pickup']
                 ].map(([value, label]) => (
                   <motion.div whileHover={{ y: -4 }} key={label} className="rounded-lg bg-white p-4 shadow-sm dark:bg-slate-900">
                     <div className="text-2xl font-black">{value}</div>
@@ -380,12 +441,102 @@ function App() {
                   <Star className="fill-orange-400 text-orange-400" size={18} />
                   Today's special
                 </p>
-                <h2 className="text-3xl font-black">Smoked tandoori dinner box</h2>
+                <h2 className="text-3xl font-black">Veg thali and stuffed parathas</h2>
                 <p className="mt-2 max-w-md text-white/80">
-                  Scan, pay and confirm your order on WhatsApp in one smooth checkout.
+                  Order direct, on Zomato, or message us for daily deals and bulk meal boxes.
                 </p>
               </div>
             </motion.div>
+          </section>
+
+          <section id="daily-menu" className="bg-[#193d1d] py-16 text-white">
+            <div className="section-shell">
+              <div className="grid gap-8 lg:grid-cols-[0.9fr_1.1fr]">
+                <div>
+                  <p className="text-sm font-black uppercase tracking-wide text-amber-200">Menu page</p>
+                  <h2 className="mt-2 text-4xl font-black">Homemade taste. Pocket friendly. Fresh daily.</h2>
+                  <p className="mt-4 max-w-xl text-white/80">
+                    Veg thali changes through the week, so regular customers get familiar food without the same plate every day.
+                  </p>
+                  <div className="mt-6 grid gap-3 sm:grid-cols-3">
+                    <div className="rounded-lg bg-white/10 p-4">
+                      <p className="text-sm font-bold text-amber-100">Veg Thali</p>
+                      <p className="mt-1 text-3xl font-black">Rs 149</p>
+                    </div>
+                    <div className="rounded-lg bg-white/10 p-4">
+                      <p className="text-sm font-bold text-amber-100">Timings</p>
+                      <p className="mt-1 text-2xl font-black">12 PM - 12 AM</p>
+                    </div>
+                    <div className="rounded-lg bg-white/10 p-4">
+                      <p className="text-sm font-bold text-amber-100">Self pick-up</p>
+                      <p className="mt-1 text-3xl font-black">20% off</p>
+                    </div>
+                  </div>
+                  <div className="mt-6 flex flex-wrap gap-3">
+                    <a href={zomatoUrl} target="_blank" rel="noreferrer" className="inline-flex items-center gap-3 rounded-full bg-[#e23744] px-5 py-3 font-black text-white">
+                      <ZomatoLogo />
+                      Order on Zomato
+                    </a>
+                    <a href={instagramUrl} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 rounded-full bg-white px-5 py-3 font-black text-[#193d1d]">
+                      <Instagram size={18} />
+                      Follow menu updates
+                    </a>
+                  </div>
+                </div>
+
+                <div className="rounded-lg bg-[#fff8e8] p-5 text-slate-950 shadow-soft">
+                  <div className="flex items-center justify-between gap-4 border-b border-amber-200 pb-4">
+                    <div>
+                      <p className="text-sm font-black uppercase tracking-wide text-orange-700">Day menu</p>
+                      <h3 className="text-2xl font-black">Veg thali options</h3>
+                    </div>
+                    <span className="rounded-full bg-[#193d1d] px-4 py-2 text-xl font-black text-white">Rs 149</span>
+                  </div>
+                  <div className="mt-4 divide-y divide-amber-200">
+                    {dailyThalis.map(([day, details]) => (
+                      <div key={day} className="grid gap-2 py-4 md:grid-cols-[160px_1fr] md:items-start">
+                        <p className="font-black text-[#193d1d]">{day}</p>
+                        <p className="text-sm font-semibold leading-6 text-slate-700">{details}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              <div className="mt-8 grid gap-6 lg:grid-cols-[1.15fr_0.85fr]">
+                <div className="rounded-lg bg-white p-5 text-slate-950 shadow-soft">
+                  <p className="text-sm font-black uppercase tracking-wide text-purple-700">Paratha menu</p>
+                  <div className="mt-4 grid gap-3 sm:grid-cols-2">
+                    {parathaMenu.map(([name, one, two]) => (
+                      <div key={name} className="rounded-lg border border-purple-100 bg-[#fffaf3] p-4">
+                        <p className="font-black text-purple-800">{name}</p>
+                        <div className="mt-3 flex flex-wrap gap-2 text-sm font-bold text-slate-700">
+                          <span className="rounded-full bg-white px-3 py-1">{one}</span>
+                          <span className="rounded-full bg-white px-3 py-1">{two}</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="rounded-lg bg-white p-5 text-slate-950 shadow-soft">
+                  <p className="text-sm font-black uppercase tracking-wide text-orange-700">Extra items</p>
+                  <div className="mt-4 divide-y divide-orange-100">
+                    {extraItems.map(([item, half, full]) => (
+                      <div key={item} className="grid grid-cols-[1fr_auto_auto] gap-3 py-3 text-sm">
+                        <p className="font-black">{item}</p>
+                        <p className="font-bold text-slate-600">{half}</p>
+                        <p className="font-bold text-slate-600">{full}</p>
+                      </div>
+                    ))}
+                  </div>
+                  <div className="mt-5 rounded-lg bg-[#193d1d] p-4 text-white">
+                    <p className="text-2xl font-black">Bulk orders and daily deals</p>
+                    <p className="mt-2 text-sm font-semibold text-white/80">Call one day before for bulk orders and special discounts on daily orders.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
           </section>
 
           <section id="menu" className="bg-white py-16 dark:bg-slate-900">
@@ -457,52 +608,6 @@ function App() {
             </div>
           </section>
 
-          <section id="admin" className="bg-white py-16 dark:bg-slate-900">
-            <div className="section-shell">
-              <div className="flex flex-col justify-between gap-4 md:flex-row md:items-end">
-                <div>
-                  <p className="text-sm font-black uppercase tracking-wide text-orange-700 dark:text-orange-300">Admin dashboard</p>
-                  <h2 className="mt-2 text-4xl font-black">Orders, revenue and status control.</h2>
-                </div>
-                <button type="button" onClick={() => setOrderStep((step) => Math.min(step + 1, orderStages.length - 1))} className="btn-primary inline-flex items-center gap-2">
-                  Advance order
-                  <ChevronRight size={18} />
-                </button>
-              </div>
-
-              <div className="mt-8 grid gap-4 md:grid-cols-3">
-                {[
-                  ['Orders', orders.length],
-                  ['Revenue', formatCurrency(orders.reduce((sum, order) => sum + order.totals.grandTotal, 0))],
-                  ['Active stage', orderStages[orderStep]]
-                ].map(([label, value]) => (
-                  <div key={label} className="rounded-lg bg-[#fffaf3] p-5 shadow-sm dark:bg-slate-950">
-                    <p className="text-sm font-bold text-slate-500">{label}</p>
-                    <p className="mt-2 text-2xl font-black">{value}</p>
-                  </div>
-                ))}
-              </div>
-
-              <div className="mt-6 overflow-hidden rounded-lg border border-orange-100 dark:border-slate-800">
-                <div className="grid grid-cols-[1fr_0.8fr_1fr_1fr] bg-orange-50 p-3 text-sm font-black text-slate-700 dark:bg-slate-950 dark:text-slate-200">
-                  <span>Customer</span>
-                  <span>Total</span>
-                  <span>Payment</span>
-                  <span>Delivery</span>
-                </div>
-                {(orders.length ? orders : [{ id: 'Demo', customer: { name: 'Demo Customer', phone: displayPhoneNumber, address: 'Delhi', note: '' }, items: [], totals: { subtotal: 499, discount: 50, delivery: 0, taxes: 22, grandTotal: 471 }, paymentMethod: 'PhonePe', deliveryMethod: 'Self delivery', couponCode: 'SWADESHI10', status: 'Order placed', createdAt: new Date().toISOString() }]).slice(0, 5).map((order) => (
-                  <div key={order.id} className="grid grid-cols-[1fr_0.8fr_1fr_1fr] border-t border-orange-100 p-3 text-sm dark:border-slate-800">
-                    <span className="font-bold">{order.customer.name}</span>
-                    <span>{formatCurrency(order.totals.grandTotal)}</span>
-                    <span>{order.paymentMethod}</span>
-                    <span>{order.deliveryMethod || 'Self delivery'}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </section>
-
-
           <section id="bulk-orders" className="section-shell py-16">
             <div className="grid gap-8 lg:grid-cols-[0.85fr_1.15fr]">
               <div>
@@ -561,6 +666,15 @@ function App() {
                 <span>
                   <span className="block text-lg leading-tight">Order on Zomato</span>
                   <span className="block text-sm font-semibold text-white/85">Swadeshi Kitchen</span>
+                </span>
+              </a>
+              <a href={instagramUrl} target="_blank" rel="noreferrer" className="flex items-center gap-4 rounded-lg bg-gradient-to-r from-pink-600 to-orange-500 p-5 font-black text-white shadow-sm sm:col-span-2" aria-label="Follow Swadeshi Kitchen on Instagram">
+                <span className="grid h-12 w-12 place-items-center rounded-md bg-white/15">
+                  <Instagram size={28} />
+                </span>
+                <span>
+                  <span className="block text-lg leading-tight">Follow on Instagram</span>
+                  <span className="block text-sm font-semibold text-white/85">@swade_shikitchen</span>
                 </span>
               </a>
             </div>
