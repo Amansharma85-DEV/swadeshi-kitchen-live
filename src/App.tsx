@@ -4,7 +4,6 @@ import {
   ChevronRight,
   ClipboardList,
   Instagram,
-  LockKeyhole,
   Mail,
   MapPin,
   Menu,
@@ -199,9 +198,6 @@ function App() {
   const [couponCode, setCouponCode] = useState('');
   const [appliedCoupon, setAppliedCoupon] = useState('');
   const [couponMessage, setCouponMessage] = useState('');
-  const [otpSent, setOtpSent] = useState(false);
-  const [otpCode, setOtpCode] = useState('');
-  const [isOtpVerified, setIsOtpVerified] = useState(false);
   const [activeOrder, setActiveOrder] = useState<StoredOrder | null>(null);
   const [orderStep, setOrderStep] = useState(0);
   const [orders, setOrders] = useState<StoredOrder[]>(() => readLocalOrders());
@@ -271,50 +267,28 @@ function App() {
     setCouponMessage(`${normalized} applied.`);
   };
 
-  const sendOtp = () => {
-    if (customer.phone.replace(/\D/g, '').length < 10) {
-      setCouponMessage('Enter a valid mobile number before OTP.');
-      return;
-    }
-    setOtpSent(true);
-    setOtpCode('');
-    setCouponMessage('Demo OTP sent. Use 1234 to verify.');
-  };
-
-  const verifyOtp = () => {
-    if (otpCode === '1234') {
-      setIsOtpVerified(true);
-      setCouponMessage('Mobile number verified.');
-      return;
-    }
-    setCouponMessage('Wrong OTP. Demo OTP is 1234.');
-  };
-
   const createWhatsAppMessage = (order: StoredOrder) => {
     const lines = order.items.map((item) => `${item.quantity} x ${item.name} - ${formatCurrency(item.price * item.quantity)}`);
     return [
-      '🍽️ New Order Received',
+      '🍽️ *New Order Received*',
+      '━━━━━━━━━━━━━━━━',
       '',
-      '👤 Customer Name:',
+      '👤 *Customer Name*',
       order.customer.name,
       '',
-      '📞 Phone:',
+      '📞 *Phone*',
       order.customer.phone,
       '',
-      '📍 Delivery Address:',
+      '📍 *Delivery Address*',
       order.customer.address,
       '',
-      '🛒 Order Items:',
+      '🛒 *Order Items*',
       ...lines,
       '',
-      '💰 Total:',
-      formatCurrency(order.totals.grandTotal),
-      '',
-      '💳 Payment Method:',
-      order.paymentMethod,
-      '',
-      '📝 Notes:',
-      order.customer.note || 'None',
+      '━━━━━━━━━━━━━━━━',
+      `💰 *Total: ${formatCurrency(order.totals.grandTotal)}*`,
+      `💳 *Payment Method: ${order.paymentMethod}*`,
+      `📝 *Notes: ${order.customer.note || 'None'}*`,
       '',
       'Thank you for your order! ❤️'
     ].join('\n');
@@ -322,8 +296,8 @@ function App() {
 
   const submitOrder = async (event: FormEvent) => {
     event.preventDefault();
-    if (!cart.length || !customer.name || !customer.address || !customer.phone || !isOtpVerified) {
-      setCouponMessage('Add items, fill customer details, and verify OTP.');
+    if (!cart.length || !customer.name || !customer.address || !customer.phone) {
+      setCouponMessage('Add items and fill customer details before placing an order.');
       return;
     }
 
@@ -762,23 +736,6 @@ function App() {
                         <textarea value={customer.address} onChange={(event) => setCustomer({ ...customer, address: event.target.value })} placeholder="Delivery address" rows={3} className="rounded-lg border border-orange-100 bg-white px-4 py-3 outline-none focus:border-orange-500 dark:border-slate-700 dark:bg-slate-950" />
                         <input value={customer.note} onChange={(event) => setCustomer({ ...customer, note: event.target.value })} placeholder="Cooking note or landmark" className="rounded-lg border border-orange-100 bg-white px-4 py-3 outline-none focus:border-orange-500 dark:border-slate-700 dark:bg-slate-950" />
                       </div>
-                    </div>
-
-                    <div className="rounded-lg border border-orange-100 p-4 dark:border-slate-800">
-                      <p className="mb-3 flex items-center gap-2 font-black">
-                        <LockKeyhole size={18} />
-                        OTP login
-                      </p>
-                      <div className="flex gap-2">
-                        <button type="button" onClick={sendOtp} className="rounded-lg bg-slate-950 px-4 py-3 text-sm font-black text-white dark:bg-orange-600">
-                          Send OTP
-                        </button>
-                        <input value={otpCode} onChange={(event) => setOtpCode(event.target.value)} placeholder="1234" className="min-w-0 flex-1 rounded-lg border border-orange-100 px-4 py-3 outline-none focus:border-orange-500 dark:border-slate-700 dark:bg-slate-950" />
-                        <button type="button" onClick={verifyOtp} disabled={!otpSent} className="rounded-lg bg-orange-600 px-4 py-3 text-sm font-black text-white disabled:opacity-40">
-                          Verify
-                        </button>
-                      </div>
-                      <p className="mt-2 text-xs font-semibold text-slate-500">{isOtpVerified ? 'Verified successfully.' : 'Demo OTP is 1234.'}</p>
                     </div>
 
                     <div className="rounded-lg border border-orange-100 p-4 dark:border-slate-800">
