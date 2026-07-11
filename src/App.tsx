@@ -410,7 +410,7 @@ function App() {
 
         <main>
           <section className="section-shell grid min-h-[calc(100vh-80px)] items-center gap-10 py-10 lg:grid-cols-[1fr_0.9fr]">
-            <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.55 }} className="max-w-2xl">
+            <motion.div initial={false} animate={{ opacity: 1, y: 0 }} className="max-w-2xl">
               <p className="mb-4 inline-flex items-center gap-2 rounded-full bg-white px-4 py-2 text-sm font-black text-orange-700 shadow-sm dark:bg-slate-900 dark:text-orange-300">
                 <Sparkles size={16} />
                 Homemade, healthy, heartfelt
@@ -449,7 +449,7 @@ function App() {
               </div>
             </motion.div>
 
-            <motion.div initial={{ opacity: 0, scale: 0.96 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.55, delay: 0.1 }} className="relative min-h-[520px] overflow-hidden rounded-[2rem] bg-slate-950 shadow-soft">
+            <motion.div initial={false} animate={{ opacity: 1, scale: 1 }} className="relative min-h-[520px] overflow-hidden rounded-[2rem] bg-slate-950 shadow-soft">
               <img src="https://images.unsplash.com/photo-1555244162-803834f70033?auto=format&fit=crop&w=1200&q=85" alt="Swadeshi Kitchen meals" className="absolute inset-0 h-full w-full object-cover opacity-85" />
               <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/25 to-transparent" />
               <div className="absolute bottom-0 p-7 text-white">
