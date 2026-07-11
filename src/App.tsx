@@ -347,7 +347,8 @@ function App() {
     setCouponMessage(`Order saved to ${stored.mode === 'firebase' ? 'Firebase' : 'local storage'}.`);
 
     const whatsappUrl = `https://wa.me/${whatsAppOrderNumber}?text=${encodeURIComponent(createWhatsAppMessage(savedOrder))}`;
-    window.open(whatsappUrl, '_blank', 'noopener,noreferrer');
+    // Same-tab navigation is reliable on mobile browsers, which can block pop-up windows.
+    window.location.assign(whatsappUrl);
   };
 
   const bulkOrderMessage = `Bulk order enquiry for ${brand}%0AName:%0AEvent date:%0AGuests:%0AAddress:%0ARequirements:`;
