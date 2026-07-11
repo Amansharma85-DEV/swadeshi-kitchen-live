@@ -46,14 +46,14 @@ type Customer = {
   note: string;
 };
 
-const phoneNumber = '+919310575998';
+const phoneNumber = '+919599749976';
 const whatsAppOrderNumber = '919599749976';
-const displayPhoneNumber = '+91 93105 75998';
+const displayPhoneNumber = '+91 95997 49976';
 const businessEmail = 'swadeshikitchen0@gmail.com';
 const businessAddress = '53-A Arjun Park, Najafgarh, New Delhi 110043';
 const zomatoUrl = 'https://zomato.onelink.me/xqzv/gv2aw1bn';
 const instagramUrl = 'https://www.instagram.com/swade_shikitchen?igsh=MTI2MDk2ejc3OHF1aw==';
-const upiId = '9310575998@ybl';
+const upiId = '9958033982@ptsbi';
 const brand = 'Swadeshi Kitchen';
 
 const formatCurrency = (amount: number) => `Rs ${amount.toLocaleString('en-IN')}`;
