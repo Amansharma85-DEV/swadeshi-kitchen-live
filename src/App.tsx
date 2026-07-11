@@ -340,7 +340,7 @@ function App() {
         <header className="sticky top-0 z-40 border-b border-orange-100 bg-[#fffaf3]/90 backdrop-blur dark:border-slate-800 dark:bg-slate-950/90">
           <div className="section-shell flex h-20 items-center justify-between">
             <a href="#" className="flex items-center gap-3 font-black" aria-label="Swadeshi Kitchen home">
-              <img src="./logo.svg" alt="Swadeshi Kitchen logo" className="h-14 w-14 rounded-full object-contain shadow-sm" />
+              <img src={`${import.meta.env.BASE_URL}logo.png`} alt="Swadeshi Kitchen logo" className="h-14 w-14 rounded-full object-contain shadow-sm" />
               <span className="text-lg leading-tight">
                 Swadeshi
                 <span className="block text-sm font-semibold text-orange-700 dark:text-orange-300">Kitchen</span>
