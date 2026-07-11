@@ -48,6 +48,7 @@ type Customer = {
 };
 
 const phoneNumber = '+919310575998';
+const whatsAppOrderNumber = '919599749976';
 const displayPhoneNumber = '+91 93105 75998';
 const businessEmail = 'swadeshikitchen0@gmail.com';
 const businessAddress = '53-A Arjun Park, Najafgarh, New Delhi 110043';
@@ -292,15 +293,30 @@ function App() {
   const createWhatsAppMessage = (order: StoredOrder) => {
     const lines = order.items.map((item) => `${item.quantity} x ${item.name} - ${formatCurrency(item.price * item.quantity)}`);
     return [
-      `New order from ${brand}`,
-      `Order ID: ${order.id}`,
-      `Customer: ${order.customer.name}`,
-      `Phone: ${order.customer.phone}`,
-      `Address: ${order.customer.address}`,
-      `Payment: ${order.paymentMethod}`,
-      `Total: ${formatCurrency(order.totals.grandTotal)}`,
-      `Items:`,
-      ...lines
+      '🍽️ New Order Received',
+      '',
+      '👤 Customer Name:',
+      order.customer.name,
+      '',
+      '📞 Phone:',
+      order.customer.phone,
+      '',
+      '📍 Delivery Address:',
+      order.customer.address,
+      '',
+      '🛒 Order Items:',
+      ...lines,
+      '',
+      '💰 Total:',
+      formatCurrency(order.totals.grandTotal),
+      '',
+      '💳 Payment Method:',
+      order.paymentMethod,
+      '',
+      '📝 Notes:',
+      order.customer.note || 'None',
+      '',
+      'Thank you for your order! ❤️'
     ].join('\n');
   };
 
@@ -330,7 +346,7 @@ function App() {
     setOrderStep(0);
     setCouponMessage(`Order saved to ${stored.mode === 'firebase' ? 'Firebase' : 'local storage'}.`);
 
-    const whatsappUrl = `https://wa.me/${phoneNumber.replace('+', '')}?text=${encodeURIComponent(createWhatsAppMessage(savedOrder))}`;
+    const whatsappUrl = `https://wa.me/${whatsAppOrderNumber}?text=${encodeURIComponent(createWhatsAppMessage(savedOrder))}`;
     window.open(whatsappUrl, '_blank', 'noopener,noreferrer');
   };
 
