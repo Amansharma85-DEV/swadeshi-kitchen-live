@@ -1,4 +1,4 @@
-﻿import { initializeApp, type FirebaseApp } from 'firebase/app';
+import { initializeApp, type FirebaseApp } from 'firebase/app';
 import { addDoc, collection, getFirestore, serverTimestamp } from 'firebase/firestore';
 
 export type StoredOrder = {
@@ -90,3 +90,14 @@ export function readLocalOrders() {
   }
 }
 
+export function updateOrderStatus(orderId: string, status: string) {
+  try {
+    const orders = readLocalOrders();
+    const updatedOrders = orders.map(o => 
+      o.id === orderId ? { ...o, status } : o
+    );
+    localStorage.setItem('swadeshi-orders', JSON.stringify(updatedOrders));
+  } catch (e) {
+    console.error(e);
+  }
+}
