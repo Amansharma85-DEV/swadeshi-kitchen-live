@@ -143,6 +143,7 @@ function App() {
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(false);
+  const [isMenuCardOpen, setIsMenuCardOpen] = useState(false);
   const [selectedPayment, setSelectedPayment] = useState('PhonePe');
   const [selectedDelivery, setSelectedDelivery] = useState('Self delivery');
   const [couponCode, setCouponCode] = useState('');
@@ -445,11 +446,19 @@ function App() {
                   <ShoppingBag size={18} />
                   View menu
                 </a>
-                <a href={`tel:${phoneNumber}`} className="inline-flex items-center gap-2 rounded-full border border-orange-200 bg-white px-5 py-3 font-black text-slate-900 dark:border-slate-700 dark:bg-slate-900 dark:text-white">
+                <button
+                  type="button"
+                  onClick={() => setIsMenuCardOpen(true)}
+                  className="inline-flex items-center gap-2 rounded-full border border-orange-200 bg-white px-5 py-3 font-black text-orange-700 hover:bg-orange-50 dark:border-slate-700 dark:bg-slate-900 dark:text-orange-300 dark:hover:bg-slate-800 transition-all hover:scale-105 active:scale-95 shadow-sm"
+                >
+                  <QrCode size={18} />
+                  Menu Card
+                </button>
+                <a href={`tel:${phoneNumber}`} className="inline-flex items-center gap-2 rounded-full border border-orange-200 bg-white px-5 py-3 font-black text-slate-900 dark:border-slate-700 dark:bg-slate-900 dark:text-white transition-all hover:scale-105 active:scale-95 shadow-sm">
                   <Phone size={18} />
                   {displayPhoneNumber}
                 </a>
-                <a href={instagramUrl} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 rounded-full border border-pink-200 bg-white px-5 py-3 font-black text-pink-700 dark:border-slate-700 dark:bg-slate-900 dark:text-pink-300">
+                <a href={instagramUrl} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 rounded-full border border-pink-200 bg-white px-5 py-3 font-black text-pink-700 dark:border-slate-700 dark:bg-slate-900 dark:text-pink-300 transition-all hover:scale-105 active:scale-95 shadow-sm">
                   <Instagram size={18} />
                   Instagram
                 </a>
@@ -945,6 +954,45 @@ function App() {
             <MessageCircle size={22} />
           </a>
         </div>
+
+        {/* Menu Card Modal */}
+        <AnimatePresence>
+          {isMenuCardOpen && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 0.6 }}
+                exit={{ opacity: 0 }}
+                onClick={() => setIsMenuCardOpen(false)}
+                className="fixed inset-0 bg-slate-950"
+              />
+              <motion.div
+                initial={{ scale: 0.9, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 0.9, opacity: 0 }}
+                className="relative z-10 max-h-[85vh] w-full max-w-xl overflow-y-auto rounded-2xl bg-white p-4 shadow-xl dark:bg-slate-900"
+              >
+                <div className="mb-4 flex items-center justify-between border-b border-slate-100 pb-3 dark:border-slate-800">
+                  <h3 className="text-xl font-black text-slate-900 dark:text-white">Official Menu Card</h3>
+                  <button
+                    type="button"
+                    onClick={() => setIsMenuCardOpen(false)}
+                    className="grid h-8 w-8 place-items-center rounded-full bg-slate-100 text-slate-500 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-400 dark:hover:bg-slate-700 transition-colors"
+                  >
+                    <X size={18} />
+                  </button>
+                </div>
+                <div className="overflow-hidden rounded-lg border border-slate-100 dark:border-slate-800">
+                  <img
+                    src={`${import.meta.env.BASE_URL}menu_card.jpg`}
+                    alt="Swadeshi Kitchen Menu Flyer"
+                    className="w-full h-auto"
+                  />
+                </div>
+              </motion.div>
+            </div>
+          )}
+        </AnimatePresence>
       </div>
     </div>
   );
