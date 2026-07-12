@@ -11,258 +11,34 @@ export type MenuItem = {
 };
 
 export const defaultMenu: MenuItem[] = [
-  {
-    id: 1,
-    name: 'Paneer Parantha - 2 pcs',
-    category: 'Our Special Paranthas',
-    description: 'Made with whole wheat atta.',
-    price: 189,
-    image: `${import.meta.env.BASE_URL}stuffed_paratha.png`,
-    tag: 'Special'
-  },
-  {
-    id: 2,
-    name: 'Aloo Parantha - 2 pcs',
-    category: 'Our Special Paranthas',
-    description: 'Made with whole wheat atta.',
-    price: 139,
-    image: `${import.meta.env.BASE_URL}stuffed_paratha.png`,
-    tag: 'Classic'
-  },
-  {
-    id: 3,
-    name: 'Aloo Pyaaz Parantha - 2 pcs',
-    category: 'Our Special Paranthas',
-    description: 'Made with whole wheat atta.',
-    price: 159,
-    image: `${import.meta.env.BASE_URL}stuffed_paratha.png`,
-    tag: 'Popular'
-  },
-  {
-    id: 4,
-    name: 'Ajwain Parantha',
-    category: 'Our Special Paranthas',
-    description: 'Served with Aloo Zeera. Made with whole wheat atta.',
-    price: 139,
-    image: `${import.meta.env.BASE_URL}stuffed_paratha.png`,
-    tag: 'Unique'
-  },
-  {
-    id: 5,
-    name: 'Luxurious Parantha - 2 pcs',
-    category: 'Our Special Paranthas',
-    description: 'Made with whole wheat atta.',
-    price: 199,
-    image: `${import.meta.env.BASE_URL}stuffed_paratha.png`,
-    tag: 'Loaded'
-  },
-  {
-    id: 6,
-    name: 'Aloo Puri - 5 Puris',
-    category: 'Our Special Paranthas',
-    description: '5 Puris served hot.',
-    price: 119,
-    image: `${import.meta.env.BASE_URL}aloo_poori.png`,
-    tag: 'Comfort'
-  },
-  {
-    id: 7,
-    name: 'Pink Sauce Pasta 400gm',
-    category: 'Snacks',
-    description: 'Delicious creamy pink sauce pasta.',
-    price: 349,
-    image: 'https://images.unsplash.com/photo-1621996346565-e13b85f03e0f?auto=format&fit=crop&w=900&q=80',
-    tag: 'New'
-  },
-  {
-    id: 8,
-    name: 'White Sauce Pasta 400gm',
-    category: 'Snacks',
-    description: 'Creamy and cheesy white sauce pasta.',
-    price: 299,
-    image: 'https://images.unsplash.com/photo-1645112411341-6c4fd023714a?auto=format&fit=crop&w=900&q=80',
-    tag: 'Popular'
-  },
-  {
-    id: 9,
-    name: 'Chili Garlic Maggi - Full',
-    category: 'Snacks',
-    description: 'Spicy chili garlic flavored Maggi noodles.',
-    price: 149,
-    image: 'https://images.unsplash.com/photo-1612929633738-8fe44f7ec841?auto=format&fit=crop&w=900&q=80',
-    tag: 'Spicy'
-  },
-  {
-    id: 10,
-    name: 'Corn & Cheese Maggi - Full',
-    category: 'Snacks',
-    description: 'Maggi noodles loaded with sweet corn and cheese.',
-    price: 249,
-    image: 'https://images.unsplash.com/photo-1612929633738-8fe44f7ec841?auto=format&fit=crop&w=900&q=80',
-    tag: 'Cheesy'
-  },
-  {
-    id: 11,
-    name: 'Crispy Potato Fries',
-    category: 'Snacks',
-    description: 'Classic salted crispy french fries.',
-    price: 109,
-    image: 'https://images.unsplash.com/photo-1576107232684-1279f3908594?auto=format&fit=crop&w=900&q=80',
-    tag: 'Sides'
-  },
-  {
-    id: 12,
-    name: 'Peri Peri Fries',
-    category: 'Snacks',
-    description: 'Crispy fries tossed in spicy peri peri seasoning.',
-    price: 139,
-    image: 'https://images.unsplash.com/photo-1576107232684-1279f3908594?auto=format&fit=crop&w=900&q=80',
-    tag: 'Spicy'
-  },
-  {
-    id: 13,
-    name: 'Grilled Sandwich - 4 Pieces',
-    category: 'Snacks',
-    description: 'Classic grilled vegetable sandwich.',
-    price: 169,
-    image: `${import.meta.env.BASE_URL}img1.jpg`,
-    tag: 'Classic'
-  },
-  {
-    id: 14,
-    name: 'Aloo Sandwich - 4 Pieces',
-    category: 'Snacks',
-    description: 'Grilled sandwich stuffed with spiced potato filling.',
-    price: 139,
-    image: `${import.meta.env.BASE_URL}img1.jpg`,
-    tag: 'Comfort'
-  },
-  {
-    id: 15,
-    name: 'Paneer Sandwich - 4 Pieces',
-    category: 'Snacks',
-    description: 'Crispy grilled sandwich stuffed with spiced paneer filling.',
-    price: 179,
-    image: `${import.meta.env.BASE_URL}img1.jpg`,
-    tag: 'Popular'
-  },
-  {
-    id: 16,
-    name: 'Paneer Cheese Sandwich - 4 Pieces',
-    category: 'Snacks',
-    description: 'Grilled paneer sandwich loaded with extra cheese.',
-    price: 249,
-    image: `${import.meta.env.BASE_URL}img1.jpg`,
-    tag: 'Cheesy'
-  },
-  {
-    id: 17,
-    name: 'VEG THALI',
-    category: 'Thali & Rice Combos',
-    description: 'Dal, Sabzi, Roti, Rice, Raita, Salad, Pickle.',
-    price: 199,
-    image: `${import.meta.env.BASE_URL}veg_thali.png`,
-    tag: 'Daily'
-  },
-  {
-    id: 18,
-    name: 'SPECIAL VEG THALI',
-    category: 'Thali & Rice Combos',
-    description: 'Dal, Mutter Paneer, Roti, Boondi Raita, Salad, Pickle.',
-    price: 249,
-    image: `${import.meta.env.BASE_URL}veg_thali.png`,
-    tag: 'Special'
-  },
-  {
-    id: 19,
-    name: 'RAJMA CHAWAL',
-    category: 'Thali & Rice Combos',
-    description: 'Classic homestyle Rajma served with steamed rice.',
-    price: 169,
-    image: 'https://images.unsplash.com/photo-1546833999-b9f581a1996d?auto=format&fit=crop&w=900&q=80',
-    tag: 'Classic'
-  },
-  {
-    id: 20,
-    name: 'CHOLE CHAWAL',
-    category: 'Thali & Rice Combos',
-    description: 'Spicy chole served with steamed rice.',
-    price: 169,
-    image: 'https://images.unsplash.com/photo-1585937421612-70a008356fbe?auto=format&fit=crop&w=900&q=80',
-    tag: 'Popular'
-  },
-  {
-    id: 21,
-    name: 'YELLOW DAL TADKA CHAWAL',
-    category: 'Thali & Rice Combos',
-    description: 'Yellow dal tadka served with steamed rice.',
-    price: 169,
-    image: 'https://images.unsplash.com/photo-1546833999-b9f581a1996d?auto=format&fit=crop&w=900&q=80',
-    tag: 'Comfort'
-  },
-  {
-    id: 22,
-    name: 'BLACK DAL CHAWAL',
-    category: 'Thali & Rice Combos',
-    description: 'Creamy black dal served with steamed rice.',
-    price: 169,
-    image: `${import.meta.env.BASE_URL}img2.jpg`,
-    tag: 'Rich'
-  },
-  {
-    id: 23,
-    name: 'MUTTER PANEER 300gm',
-    category: 'Thali & Rice Combos',
-    description: 'Homestyle mutter paneer curry.',
-    price: 189,
-    image: 'https://images.unsplash.com/photo-1626132647523-66f5bf380027?auto=format&fit=crop&w=900&q=80',
-    tag: 'Curry'
-  },
-  {
-    id: 24,
-    name: 'BLACK DAL FRY 300gm',
-    category: 'Thali & Rice Combos',
-    description: 'Delicious creamy black dal fry.',
-    price: 149,
-    image: `${import.meta.env.BASE_URL}img2.jpg`,
-    tag: 'Curry'
-  },
-  {
-    id: 25,
-    name: 'YELLOW DAL TADKA 300gm',
-    category: 'Thali & Rice Combos',
-    description: 'Classic yellow dal tadka.',
-    price: 149,
-    image: 'https://images.unsplash.com/photo-1546833999-b9f581a1996d?auto=format&fit=crop&w=900&q=80',
-    tag: 'Curry'
-  },
-  {
-    id: 26,
-    name: 'Steamed Basmati Rice',
-    category: 'Extras',
-    description: 'Premium quality steamed basmati rice, perfect with any curry.',
-    price: 79,
-    image: `${import.meta.env.BASE_URL}img3.jpg`,
-    tag: 'Fresh'
-  },
-  {
-    id: 27,
-    name: 'Punjabi Kadhi Pakora',
-    category: 'Extras',
-    description: 'Tangy yogurt curry with deep-fried onion pakoras and a spicy tadka.',
-    price: 129,
-    image: `${import.meta.env.BASE_URL}img4.jpg`,
-    tag: 'Classic'
-  },
-  {
-    id: 28,
-    name: 'Homestyle Aloo Sabzi',
-    category: 'Extras',
-    description: 'Spiced potato curry cooked with tomatoes, curry leaves and homestyle masala.',
-    price: 99,
-    image: `${import.meta.env.BASE_URL}img5.jpg`,
-    tag: 'Homestyle'
-  }
+  { id: 1, name: 'Paneer Parantha - 2 pcs', category: 'Our Special Paranthas', description: 'Made with whole wheat atta.', price: 189, image: 'https://amansharma85-dev.github.io/swadeshi-kitchen-live/stuffed_paratha.png', tag: 'Special' },
+  { id: 2, name: 'Aloo Parantha - 2 pcs', category: 'Our Special Paranthas', description: 'Made with whole wheat atta.', price: 139, image: 'https://amansharma85-dev.github.io/swadeshi-kitchen-live/stuffed_paratha.png', tag: 'Classic' },
+  { id: 3, name: 'Aloo Pyaaz Parantha - 2 pcs', category: 'Our Special Paranthas', description: 'Made with whole wheat atta.', price: 159, image: 'https://amansharma85-dev.github.io/swadeshi-kitchen-live/stuffed_paratha.png', tag: 'Popular' },
+  { id: 4, name: 'Ajwain Parantha', category: 'Our Special Paranthas', description: 'Served with Aloo Zeera. Made with whole wheat atta.', price: 139, image: 'https://amansharma85-dev.github.io/swadeshi-kitchen-live/stuffed_paratha.png', tag: 'Unique' },
+  { id: 5, name: 'Luxurious Parantha - 2 pcs', category: 'Our Special Paranthas', description: 'Made with whole wheat atta.', price: 199, image: 'https://amansharma85-dev.github.io/swadeshi-kitchen-live/stuffed_paratha.png', tag: 'Loaded' },
+  { id: 6, name: 'Aloo Puri - 5 Puris', category: 'Our Special Paranthas', description: '5 Puris served hot.', price: 119, image: 'https://amansharma85-dev.github.io/swadeshi-kitchen-live/aloo_poori.png', tag: 'Comfort' },
+  { id: 7, name: 'Pink Sauce Pasta 400gm', category: 'Snacks', description: 'Delicious creamy pink sauce pasta.', price: 349, image: 'https://images.unsplash.com/photo-1621996346565-e13b85f03e0f?auto=format&fit=crop&w=900&q=80', tag: 'New' },
+  { id: 8, name: 'White Sauce Pasta 400gm', category: 'Snacks', description: 'Creamy and cheesy white sauce pasta.', price: 299, image: 'https://images.unsplash.com/photo-1645112411341-6c4fd023714a?auto=format&fit=crop&w=900&q=80', tag: 'Popular' },
+  { id: 9, name: 'Chili Garlic Maggi - Full', category: 'Snacks', description: 'Spicy chili garlic flavored Maggi noodles.', price: 149, image: 'https://images.unsplash.com/photo-1612929633738-8fe44f7ec841?auto=format&fit=crop&w=900&q=80', tag: 'Spicy' },
+  { id: 10, name: 'Corn and Cheese Maggi - Full', category: 'Snacks', description: 'Maggi noodles loaded with sweet corn and cheese.', price: 249, image: 'https://images.unsplash.com/photo-1612929633738-8fe44f7ec841?auto=format&fit=crop&w=900&q=80', tag: 'Cheesy' },
+  { id: 11, name: 'Crispy Potato Fries', category: 'Snacks', description: 'Classic salted crispy french fries.', price: 109, image: 'https://images.unsplash.com/photo-1576107232684-1279f3908594?auto=format&fit=crop&w=900&q=80', tag: 'Sides' },
+  { id: 12, name: 'Peri Peri Fries', category: 'Snacks', description: 'Crispy fries tossed in spicy peri peri seasoning.', price: 139, image: 'https://images.unsplash.com/photo-1576107232684-1279f3908594?auto=format&fit=crop&w=900&q=80', tag: 'Spicy' },
+  { id: 13, name: 'Grilled Sandwich - 4 Pieces', category: 'Snacks', description: 'Classic grilled vegetable sandwich.', price: 169, image: 'https://amansharma85-dev.github.io/swadeshi-kitchen-live/img1.jpg', tag: 'Classic' },
+  { id: 14, name: 'Aloo Sandwich - 4 Pieces', category: 'Snacks', description: 'Grilled sandwich stuffed with spiced potato filling.', price: 139, image: 'https://amansharma85-dev.github.io/swadeshi-kitchen-live/img1.jpg', tag: 'Comfort' },
+  { id: 15, name: 'Paneer Sandwich - 4 Pieces', category: 'Snacks', description: 'Crispy grilled sandwich stuffed with spiced paneer filling.', price: 179, image: 'https://amansharma85-dev.github.io/swadeshi-kitchen-live/img1.jpg', tag: 'Popular' },
+  { id: 16, name: 'Paneer Cheese Sandwich - 4 Pieces', category: 'Snacks', description: 'Grilled paneer sandwich loaded with extra cheese.', price: 249, image: 'https://amansharma85-dev.github.io/swadeshi-kitchen-live/img1.jpg', tag: 'Cheesy' },
+  { id: 17, name: 'VEG THALI', category: 'Thali and Rice Combos', description: 'Dal, Sabzi, Roti, Rice, Raita, Salad, Pickle.', price: 199, image: 'https://amansharma85-dev.github.io/swadeshi-kitchen-live/veg_thali.png', tag: 'Daily' },
+  { id: 18, name: 'SPECIAL VEG THALI', category: 'Thali and Rice Combos', description: 'Dal, Mutter Paneer, Roti, Boondi Raita, Salad, Pickle.', price: 249, image: 'https://amansharma85-dev.github.io/swadeshi-kitchen-live/veg_thali.png', tag: 'Special' },
+  { id: 19, name: 'RAJMA CHAWAL', category: 'Thali and Rice Combos', description: 'Classic homestyle Rajma served with steamed rice.', price: 169, image: 'https://images.unsplash.com/photo-1546833999-b9f581a1996d?auto=format&fit=crop&w=900&q=80', tag: 'Classic' },
+  { id: 20, name: 'CHOLE CHAWAL', category: 'Thali and Rice Combos', description: 'Spicy chole served with steamed rice.', price: 169, image: 'https://images.unsplash.com/photo-1585937421612-70a008356fbe?auto=format&fit=crop&w=900&q=80', tag: 'Popular' },
+  { id: 21, name: 'YELLOW DAL TADKA CHAWAL', category: 'Thali and Rice Combos', description: 'Yellow dal tadka served with steamed rice.', price: 169, image: 'https://images.unsplash.com/photo-1546833999-b9f581a1996d?auto=format&fit=crop&w=900&q=80', tag: 'Comfort' },
+  { id: 22, name: 'BLACK DAL CHAWAL', category: 'Thali and Rice Combos', description: 'Creamy black dal served with steamed rice.', price: 169, image: 'https://amansharma85-dev.github.io/swadeshi-kitchen-live/img2.jpg', tag: 'Rich' },
+  { id: 23, name: 'MUTTER PANEER 300gm', category: 'Thali and Rice Combos', description: 'Homestyle mutter paneer curry.', price: 189, image: 'https://images.unsplash.com/photo-1626132647523-66f5bf380027?auto=format&fit=crop&w=900&q=80', tag: 'Curry' },
+  { id: 24, name: 'BLACK DAL FRY 300gm', category: 'Thali and Rice Combos', description: 'Delicious creamy black dal fry.', price: 149, image: 'https://amansharma85-dev.github.io/swadeshi-kitchen-live/img2.jpg', tag: 'Curry' },
+  { id: 25, name: 'YELLOW DAL TADKA 300gm', category: 'Thali and Rice Combos', description: 'Classic yellow dal tadka.', price: 149, image: 'https://images.unsplash.com/photo-1546833999-b9f581a1996d?auto=format&fit=crop&w=900&q=80', tag: 'Curry' },
+  { id: 26, name: 'Steamed Basmati Rice', category: 'Extras', description: 'Premium quality steamed basmati rice.', price: 79, image: 'https://amansharma85-dev.github.io/swadeshi-kitchen-live/img3.jpg', tag: 'Fresh' },
+  { id: 27, name: 'Punjabi Kadhi Pakora', category: 'Extras', description: 'Tangy yogurt curry with deep-fried onion pakoras.', price: 129, image: 'https://amansharma85-dev.github.io/swadeshi-kitchen-live/img4.jpg', tag: 'Classic' },
+  { id: 28, name: 'Homestyle Aloo Sabzi', category: 'Extras', description: 'Spiced potato curry cooked with tomatoes and homestyle masala.', price: 99, image: 'https://amansharma85-dev.github.io/swadeshi-kitchen-live/img5.jpg', tag: 'Homestyle' }
 ];
 
 export function getMenu(): MenuItem[] {
