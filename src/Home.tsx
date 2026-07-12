@@ -26,6 +26,7 @@ import {
 import { FormEvent, useMemo, useState, useEffect } from 'react';
 import { getMenu, getPricing, getOffers, getGallery, getSettings, getTestimonials, type MenuItem as StoreMenuItem, type PricingSection, type Offer, type GalleryImage, type GlobalSettings, type Testimonial } from './lib/store';
 import { readLocalOrders, storeOrder, type StoredOrder } from './lib/firebase';
+import { defaultMenu } from './lib/store';
 
 type MenuItem = {
   id: number;
@@ -91,7 +92,11 @@ const mapStatusToStep = (status: string): number => {
 
 function App() {
 
-  const [menuStore, setMenuStore] = useState<StoreMenuItem[]>([]);
+  // Always start with defaultMenu so the grid is never blank
+  const [menuStore, setMenuStore] = useState<StoreMenuItem[]>(() => {
+    const stored = getMenu();
+    return stored.length > 0 ? stored : defaultMenu;
+  });
   const [pricing, setPricing] = useState<PricingSection[]>([]);
   const [offers, setOffers] = useState<Offer[]>([]);
   const [gallery, setGallery] = useState<GalleryImage[]>([]);
@@ -99,7 +104,8 @@ function App() {
   const [testimonials, setTestimonials] = useState<Testimonial[]>([]);
 
   useEffect(() => {
-    setMenuStore(getMenu());
+    const stored = getMenu();
+    setMenuStore(stored.length > 0 ? stored : defaultMenu);
     setPricing(getPricing());
     setOffers(getOffers());
     setGallery(getGallery());
@@ -636,6 +642,12 @@ function App() {
               </div>
 
               <div className="mt-8 grid gap-6 grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                {filteredMenu.length === 0 && (
+                  <div className="col-span-full py-16 text-center">
+                    <p className="text-2xl font-black text-slate-400">No dishes found</p>
+                    <p className="mt-2 text-slate-400">Try a different search or category</p>
+                  </div>
+                )}
                 {filteredMenu.map((item, index) => (
                   <motion.article initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: index * 0.04 }} key={item.id} className="flex flex-col overflow-hidden rounded-lg border border-orange-100 bg-[#fffaf3] shadow-sm dark:border-slate-800 dark:bg-slate-950">
                     <div className="relative aspect-[4/3] overflow-hidden">
