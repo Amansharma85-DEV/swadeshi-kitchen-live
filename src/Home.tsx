@@ -441,7 +441,7 @@ function App() {
                 Homemade daily thalis and stuffed parathas for Dwarka, Delhi. Freshly made, pocket friendly, and ready for lunch, dinner, bulk orders and self pick-up.
               </p>
               <div className="mt-8 flex flex-wrap gap-3">
-                <a href="#daily-menu" className="btn-primary inline-flex items-center gap-2">
+                <a href="#menu" className="btn-primary inline-flex items-center gap-2">
                   <ShoppingBag size={18} />
                   View menu
                 </a>
