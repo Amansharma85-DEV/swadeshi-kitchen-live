@@ -267,6 +267,12 @@ export const defaultMenu: MenuItem[] = [
 
 export function getMenu(): MenuItem[] {
   try {
+    const flag = localStorage.getItem('swadeshi-menu-restored-v2');
+    if (!flag) {
+      saveMenu(defaultMenu);
+      localStorage.setItem('swadeshi-menu-restored-v2', 'true');
+      return defaultMenu;
+    }
     const stored = localStorage.getItem('swadeshi-menu');
     if (stored) {
       const parsed = JSON.parse(stored);
