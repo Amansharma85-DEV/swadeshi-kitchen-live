@@ -334,6 +334,13 @@ function App() {
     window.location.assign(whatsappUrl);
   };
 
+  const scrollToSection = (id: string) => {
+    const el = document.getElementById(id);
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
   const bulkOrderMessage = `Bulk order enquiry for ${brand}%0AName:%0AEvent date:%0AGuests:%0AAddress:%0ARequirements:`;
   const navItems = [
     { label: 'Daily Menu', id: 'daily-menu' },
@@ -362,6 +369,10 @@ function App() {
                 <a 
                   key={item.id} 
                   href={`#${item.id}`} 
+                  onClick={(e) => {
+                    e.preventDefault();
+                    scrollToSection(item.id);
+                  }}
                   className={`transition-colors duration-200 ${activeSection === item.id ? 'text-orange-600 dark:text-orange-400 font-extrabold' : 'text-slate-700 hover:text-orange-700 dark:text-slate-200'}`}
                 >
                   {item.label}
@@ -381,7 +392,14 @@ function App() {
                   </span>
                 )}
               </button>
-              <a href="#menu" className="hidden md:inline-flex items-center gap-2 bg-orange-600 hover:bg-orange-700 text-white px-5 py-2.5 rounded-full text-sm font-black transition-all hover:scale-105 active:scale-95 shadow-sm">
+              <a 
+                href="#menu" 
+                onClick={(e) => {
+                  e.preventDefault();
+                  scrollToSection('menu');
+                }}
+                className="hidden md:inline-flex items-center gap-2 bg-orange-600 hover:bg-orange-700 text-white px-5 py-2.5 rounded-full text-sm font-black transition-all hover:scale-105 active:scale-95 shadow-sm"
+              >
                 Order Now
               </a>
               <button type="button" className="grid h-11 w-11 place-items-center rounded-full border border-orange-200 bg-white md:hidden dark:border-slate-700 dark:bg-slate-900" onClick={() => setIsMenuOpen((value) => !value)} aria-label="Toggle menu">
@@ -419,7 +437,11 @@ function App() {
                     <a
                       key={item.id}
                       href={`#${item.id}`}
-                      onClick={() => setIsMenuOpen(false)}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        setIsMenuOpen(false);
+                        scrollToSection(item.id);
+                      }}
                       className={`flex items-center gap-3 transition-colors ${
                         activeSection === item.id ? 'text-orange-600 dark:text-orange-400 font-black' : 'text-slate-700 dark:text-slate-200 hover:text-orange-600'
                       }`}
@@ -436,7 +458,7 @@ function App() {
 
         <main>
           <motion.section initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.8 }} className="section-shell grid min-h-[calc(100vh-80px)] items-center gap-10 py-10 lg:grid-cols-[1fr_0.9fr]">
-            <motion.div initial={false} animate={{ opacity: 1, y: 0 }} className="max-w-2xl">
+            <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }} className="max-w-2xl">
               <p className="mb-4 inline-flex items-center gap-2 rounded-full bg-white px-4 py-2 text-sm font-black text-orange-700 shadow-sm dark:bg-slate-900 dark:text-orange-300">
                 <Sparkles size={16} />
                 Homemade, healthy, heartfelt
@@ -451,6 +473,10 @@ function App() {
                 {/* View Menu */}
                 <a
                   href="#menu"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    scrollToSection('menu');
+                  }}
                   className="inline-flex items-center gap-2 rounded-full bg-orange-600 px-6 py-3 font-black text-white shadow-lg hover:bg-orange-700 transition-all hover:scale-105 active:scale-95"
                 >
                   <ShoppingBag size={18} />
@@ -501,7 +527,7 @@ function App() {
               </div>
             </motion.div>
 
-            <motion.div initial={false} animate={{ opacity: 1, scale: 1 }} className="relative min-h-[520px] overflow-hidden rounded-[2rem] bg-slate-950 shadow-soft">
+            <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.6 }} className="relative min-h-[520px] overflow-hidden rounded-[2rem] bg-slate-950 shadow-soft">
               <img src={settings?.hero?.backgroundImage || "https://images.unsplash.com/photo-1555244162-803834f70033?auto=format&fit=crop&w=1200&q=85"} alt={settings?.brand?.name} className="absolute inset-0 h-full w-full object-cover opacity-85" />
               <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/25 to-transparent" />
               <div className="absolute bottom-0 p-7 text-white">
@@ -969,6 +995,10 @@ function App() {
         <div className="fixed bottom-4 left-4 right-4 z-40 flex justify-between gap-3 md:hidden">
           <a
             href="#menu"
+            onClick={(e) => {
+              e.preventDefault();
+              scrollToSection('menu');
+            }}
             className="flex-1 shadow-lg bg-orange-600 hover:bg-orange-700 text-white py-3.5 px-6 rounded-full font-black text-center flex items-center justify-center gap-2 transition-all active:scale-95"
           >
             <ShoppingBag size={18} />
