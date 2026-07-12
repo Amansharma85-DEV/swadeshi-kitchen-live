@@ -3,30 +3,42 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Swadeshi Kitchen - Developer Guide & Template Customization</title>
+    <title>Swadeshi Kitchen - System Architecture & Customization Manual</title>
     <style>
         body {
-            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-            line-height: 1.6;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.7;
             color: #334155;
             max-width: 900px;
             margin: 40px auto;
-            padding: 20px;
+            padding: 30px;
             background-color: #fff;
+        }
+        .header-container {
+            text-align: center;
+            border-bottom: 3px solid #ea580c;
+            padding-bottom: 20px;
+            margin-bottom: 40px;
+        }
+        .logo-subtitle {
+            font-size: 1.2em;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-top: 5px;
         }
         h1 {
             color: #ea580c;
-            font-size: 2.5em;
-            border-bottom: 3px solid #ea580c;
-            padding-bottom: 12px;
-            margin-bottom: 30px;
+            font-size: 2.6em;
+            margin: 0;
         }
         h2 {
             color: #0f172a;
             font-size: 1.8em;
             margin-top: 40px;
-            border-left: 5px solid #ea580c;
+            border-left: 6px solid #ea580c;
             padding-left: 15px;
+            padding-bottom: 3px;
         }
         h3 {
             color: #1e293b;
@@ -35,46 +47,56 @@
         }
         p {
             margin-bottom: 18px;
+            text-align: justify;
+        }
+        ul, ol {
+            margin-bottom: 20px;
+            padding-left: 25px;
+        }
+        li {
+            margin-bottom: 8px;
         }
         code {
             background-color: #f1f5f9;
             color: #0f172a;
-            padding: 2px 6px;
+            padding: 3px 6px;
             border-radius: 4px;
-            font-family: 'Courier New', Courier, monospace;
+            font-family: 'Consolas', 'Courier New', monospace;
             font-size: 0.95em;
         }
         pre {
             background: #1e293b;
             color: #f8fafc;
-            padding: 18px;
+            padding: 20px;
             border-radius: 8px;
             overflow-x: auto;
-            font-family: 'Courier New', Courier, monospace;
+            font-family: 'Consolas', 'Courier New', monospace;
             font-size: 0.9em;
-            line-height: 1.5;
+            line-height: 1.6;
             margin: 20px 0;
+            border: 1px solid #e2e8f0;
         }
         .file-path {
             background-color: #fff7ed;
             color: #c2410c;
-            padding: 4px 8px;
+            padding: 4px 10px;
             border-radius: 6px;
             border: 1px solid #ffedd5;
             font-weight: bold;
             font-size: 0.9em;
             display: inline-block;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
         }
         table {
             width: 100%;
             border-collapse: collapse;
             margin: 25px 0;
             font-size: 0.95em;
+            box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1);
         }
         th, td {
             border: 1px solid #e2e8f0;
-            padding: 12px 15px;
+            padding: 14px 18px;
             text-align: left;
         }
         th {
@@ -85,18 +107,18 @@
         tr:nth-child(even) td {
             background-color: #f8fafc;
         }
-        .box {
+        .info-box {
             background: #fff7ed;
             border-left: 5px solid #ea580c;
             padding: 20px;
-            margin: 25px 0;
+            margin: 30px 0;
             border-radius: 0 8px 8px 0;
         }
-        .box-title {
+        .info-title {
             font-weight: bold;
             color: #c2410c;
             margin-bottom: 8px;
-            font-size: 1.1em;
+            font-size: 1.15em;
         }
         .btn-print {
             background-color: #ea580c;
@@ -115,6 +137,9 @@
             background-color: #c2410c;
             transform: translateY(-1px);
         }
+        .page-break {
+            page-break-before: always;
+        }
         @media print {
             .btn-print {
                 display: none;
@@ -123,6 +148,7 @@
                 margin: 0;
                 padding: 0;
                 color: #000;
+                font-size: 11pt;
             }
             pre {
                 white-space: pre-wrap;
@@ -140,143 +166,165 @@
         <button class="btn-print" onclick="window.print()">🖨️ Save as PDF / Print</button>
     </div>
 
-    <h1>Swadeshi Kitchen - Customization Guide</h1>
-    <p>This guide explains how to copy, customize, and deploy this cloud kitchen web application template for other brands or projects.</p>
+    <div class="header-container">
+        <h1>Swadeshi Kitchen</h1>
+        <div class="logo-subtitle">System Architecture & Customization Manual</div>
+    </div>
 
-    <h2>1. Project Structure Map</h2>
+    <h2>1. Executive Project Summary</h2>
+    <p>This application is a modern, high-performance web platform designed specifically for cloud kitchens. It provides customers with an interactive menu, responsive cart checkout, and real-time order tracking. Concurrently, it equips the business owner with a robust administrative dashboard to configure and oversee daily operations.</p>
+    <p>The system is architected as a React Single Page Application (SPA) utilizing Vite, TypeScript, Tailwind CSS, and Framer Motion. By utilizing a hybrid storage engine, the system remains 100% functional out-of-the-box locally (via client browser state) and can be upgraded instantly to support cloud-wide database synchronization using Google Firebase.</p>
+
+    <h2>2. System Architecture & Dashboard Connection</h2>
+    <p>The core interaction of the platform is the bridge between the <strong>Admin Dashboard</strong> (operations) and the <strong>Customer Website</strong> (consumers). Below is an explanation of how they connect and communicate:</p>
+
+    <h3>A. The Shared Storage Engine</h3>
+    <p>Both panels run inside the same React context but render different views depending on the routing path. They query a single data access layer defined in <code>src/lib/store.ts</code> and <code>src/lib/firebase.ts</code>. This layer abstracts reading and writing from local storage or cloud databases.</p>
+
+    <h3>B. Dynamic Timing, Menu, and Testimonials Sync</h3>
+    <ul>
+        <li>When the administrator adds a new dish, edits a price, disables a discount code, or modifies the opening hours (e.g. changing opening time to <code>8:00 AM</code>) in the Admin Panel, the dashboard saves this state to the database.</li>
+        <li>The Customer Page loads this data inside a React <code>useEffect</code> hook on mount. As a result, any menu updates, prices, or timing changes appear instantly to the customers.</li>
+    </ul>
+
+    <h3>C. Real-time Status Tracking Flow</h3>
+    <p>The live order status bar (Order placed ➔ Cooking ➔ Packed ➔ Out for delivery ➔ Delivered) is powered by a dynamic status polling pipeline:</p>
+    <ol>
+        <li><strong>Order Placement:</strong> When a customer submits their cart, the system creates a unique order record with status <code>Pending</code> and forwards the invoice details to the kitchen via WhatsApp.</li>
+        <li><strong>Dashboard Tracking:</strong> The order immediately appears inside the Admin Panel's <strong>Orders</strong> list.</li>
+        <li><strong>Status Changes:</strong> The administrator changes the order status using a dropdown selector. This writes the new status (e.g. <code>Packed</code>) to the database.</li>
+        <li><strong>Customer Status Polling:</strong> The customer-facing tracking page runs an active polling loop using a JavaScript interval. Every 3 seconds, it queries the database for the active order ID. When a status change is detected, the UI updates automatically to light up the progress slider!</li>
+    </ol>
+
+    <div class="page-break"></div>
+
+    <h2>3. Repository Directory Structure</h2>
     <table>
         <thead>
             <tr>
-                <th>File / Folder Path</th>
-                <th>Description</th>
-                <th>What you edit here</th>
+                <th>Directory / File</th>
+                <th>Purpose</th>
+                <th>Key Customization Action</th>
             </tr>
         </thead>
         <tbody>
             <tr>
                 <td><code>vite.config.ts</code></td>
-                <td>Vite build configuration file.</td>
-                <td>Change the <code>base</code> path to match your new GitHub repository name.</td>
+                <td>Vite packaging configuration.</td>
+                <td>Set the <code>base</code> folder for GitHub Pages hosting.</td>
             </tr>
             <tr>
                 <td><code>src/App.tsx</code></td>
-                <td>Main application router entry point.</td>
-                <td>Manage page routing (uses <code>HashRouter</code> for static page routing safety).</td>
+                <td>Application router & entry.</td>
+                <td>Switch between <code>BrowserRouter</code> and <code>HashRouter</code>.</td>
             </tr>
             <tr>
                 <td><code>src/Home.tsx</code></td>
-                <td>The main customer-facing landing page.</td>
-                <td>Contact fallbacks, page sections, scroll animations, WhatsApp templates.</td>
+                <td>Main customer portal landing.</td>
+                <td>Change layout columns, sections, scrolling effects, and WhatsApp template text.</td>
             </tr>
             <tr>
                 <td><code>src/lib/store.ts</code></td>
-                <td>Local storage state management file.</td>
-                <td>Initial default menu items, default timings, prices, brand logo paths.</td>
+                <td>Data layer / State store.</td>
+                <td>Set default menu dishes, categories, pricing grids, and brand logos.</td>
             </tr>
             <tr>
                 <td><code>src/lib/firebase.ts</code></td>
-                <td>Firebase connection logic.</td>
-                <td>Connect your cloud database for syncing menu changes and order lists.</td>
+                <td>Cloud database interface.</td>
+                <td>Add Firebase credentials and handle read/write functions.</td>
             </tr>
             <tr>
                 <td><code>src/admin/Login.tsx</code></td>
-                <td>Admin credentials check.</td>
-                <td>Change login email/password validation check.</td>
+                <td>Dashboard login controller.</td>
+                <td>Define permitted email addresses and password criteria.</td>
             </tr>
             <tr>
-                <td><code>src/index.css</code></td>
-                <td>Core styles and Tailwind styles.</td>
-                <td>Configure button styles, fonts, core inputs, and custom scrollbars.</td>
+                <td><code>public/404.html</code></td>
+                <td>GitHub Pages router helper.</td>
+                <td>Direct URL requests to HashRouter equivalent pages.</td>
             </tr>
         </tbody>
     </table>
 
-    <h2>2. Step-by-Step Customization</h2>
+    <h2>4. How to Duplicate this Website for a New Brand</h2>
+    <p>To copy this codebase and set it up for a new client or kitchen brand, follow these step-by-step instructions:</p>
 
-    <h3>Step A: Updating Base Path (For New GitHub Repo)</h3>
-    <p>When deploying to a new GitHub repository (e.g. <code>https://github.com/user/new-brand</code>), update the base folder config:</p>
+    <h3>Step 1: Clone the Codebase & Create a New GitHub Repo</h3>
+    <p>Clone this folder locally, remove the existing Git history (optional), create an empty repository on GitHub under your account, and push the source code there.</p>
+
+    <h3>Step 2: Update the Hosting Base URL</h3>
+    <p>Ensure the base asset path matches your new GitHub repository name. Open the config file and edit the <code>base</code> property:</p>
     <div class="file-path">vite.config.ts</div>
     <pre>export default defineConfig({
-  base: '/new-brand/', // Replace 'new-brand' with your new repository name
+  base: '/your-new-repo-name/', // Must match the repository name exactly
   server: { ... }</pre>
 
-    <h3>Step B: Customizing default branding and logos</h3>
-    <p>Change default menu prices, thali categories, and default branding configurations inside the storage script:</p>
+    <h3>Step 3: Modify Default Configurations</h3>
+    <p>Set up the default branding, contact email, phone number, address, and default dishes for the new brand:</p>
     <div class="file-path">src/lib/store.ts</div>
     <pre>const defaultSettings: GlobalSettings = {
   hero: {
-    title: 'Authentic Homestyle Food.',
-    subtitle: 'Delicious dishes cooked fresh and delivered to your doorstep.',
-    backgroundImage: 'https://images.unsplash.com/...'
+    title: 'Brand Title Here',
+    subtitle: 'Brand Subtitle Details...',
+    backgroundImage: 'URL to your hero image'
   },
   contact: {
-    email: 'hello@newbrand.com',
-    phone: '+919999999999',
-    address: 'Your Kitchen Address Here',
+    email: 'contact@brand.com',
+    phone: '+919999999999', // Default phone number
+    address: 'Kitchen Address, India',
     openingHours: 'Mon-Sun: 8:00 AM - 11:00 PM'
   },
   brand: {
-    name: 'New Brand Name',
-    logo: '/new-brand/logo.png' // Matches the assets base path
+    name: 'Brand Name',
+    logo: '/your-new-repo-name/logo.png' // Ensure path matches new base
   }
 };</pre>
 
-    <h3>Step C: Editing WhatsApp order templates</h3>
-    <p>Customize the invoice text layout that is sent to WhatsApp during customer checkout:</p>
-    <div class="file-path">src/Home.tsx</div>
-    <pre>const createWhatsAppMessage = (order: StoredOrder) => {
-  const lines = order.items.map((item) => `- ${item.quantity} x ${item.name} (${formatCurrency(item.price * item.quantity)})`);
-  return [
-    '====================================',
-    '       *NEW CUSTOMER ORDER*         ',
-    '====================================',
-    '',
-    `*Customer:* ${order.customer.name}`,
-    `*Phone:* ${order.customer.phone}`,
-    `*Address:* ${order.customer.address}`,
-    '',
-    '*Items:*',
-    ...lines,
-    '',
-    '------------------------------------',
-    `*Total:* ${formatCurrency(order.totals.grandTotal)}`,
-    `*Payment:* ${order.paymentMethod}`,
-    '===================================='
-  ].join('\n');
-};</pre>
-
-    <h3>Step D: Changing Admin Login details</h3>
-    <p>To update the admin login credentials, edit the validation checks inside the Login page controller:</p>
+    <h3>Step 4: Update the Admin Credentials</h3>
+    <p>Set the email address and password required to access the owner's dashboard:</p>
     <div class="file-path">src/admin/Login.tsx</div>
-    <pre>// Look for this verification check:
-if (email === 'admin@swadeshikitchen.com' && password === 'admin123') {
+    <pre>if (email === 'owner@newbrand.com' && password === 'securepassword123') {
   localStorage.setItem('swadeshi-admin-auth', 'true');
   navigate('/admin');
 }</pre>
 
-    <div class="box">
-        <div class="box-title">💡 Fast Color Customization Tip</div>
-        <p>This template uses Tailwind CSS. To change the visual color scheme (e.g. from Orange to Blue), use a search-and-replace tool in your editor to swap all occurrences of <code>orange</code> classes (like <code>bg-orange-600</code>, <code>hover:bg-orange-700</code>, <code>text-orange-700</code>) to your new color (like <code>blue</code> classes: <code>bg-blue-600</code>, <code>hover:bg-blue-700</code>, <code>text-blue-700</code>).</p>
-    </div>
+    <div class="page-break"></div>
 
-    <h2>3. Local Development & Deployment Commands</h2>
-    <p>Run these commands inside your project terminal to test and publish changes:</p>
-    <pre># 1. Install dependencies
+    <h3>Step 5: Customize Style Themes & Accent Colors</h3>
+    <p>This website uses Tailwind CSS class design. Colors are managed primarily through utility classes:</p>
+    <ol>
+        <li>To change the site accents (e.g. from Orange/Green to Blue/Indigo), open <code>src/Home.tsx</code> and files inside the <code>src/admin/</code> directory.</li>
+        <li>Perform a global search-and-replace to change color names. For example, replace <code>orange-600</code> with <code>blue-600</code> and <code>orange-700</code> with <code>blue-700</code>.</li>
+        <li>Customize base elements like borders and buttons inside the CSS file:</li>
+    </ol>
+    <div class="file-path">src/index.css</div>
+    <pre>.btn-primary {
+  @apply bg-orange-600 hover:bg-orange-700 text-white transition-all active:scale-95;
+}</pre>
+
+    <h2>5. Deployment Commands</h2>
+    <p>Use these command lines inside the project terminal to manage local development, build, and deploy the new website:</p>
+    <pre># 1. Install all dependencies
 npm install
 
 # 2. Run local development server
 npm run dev
 
-# 3. Compile and build the production bundle
+# 3. Test build compilation for production
 npm run build
 
-# 4. Push updates to main branch
+# 4. Save and commit changes to Git
 git add .
-git commit -m "update customizations"
+git commit -m "feat: customize brand and configurations"
 git push origin main
 
 # 5. Build and Deploy live to GitHub Pages
 npm run deploy</pre>
+
+    <div class="info-box">
+        <div class="info-title">💡 GitHub Pages Hosting Activation Note</div>
+        <p>After pushing the build using <code>npm run deploy</code>, log in to your GitHub account web panel, go to <strong>Settings ➔ Pages</strong> on the repository, set the build source to <strong>"Deploy from a branch"</strong>, select the <strong><code>gh-pages</code></strong> branch, and click <strong>Save</strong>. The site will go live in less than 60 seconds.</p>
+    </div>
 
 </body>
 </html>
