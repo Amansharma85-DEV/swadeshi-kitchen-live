@@ -469,7 +469,7 @@ function App() {
               <p className="mt-6 text-lg leading-8 text-slate-600 dark:text-slate-300">
                 Homemade daily thalis and stuffed parathas for Dwarka, Delhi. Freshly made, pocket friendly, and ready for lunch, dinner, bulk orders and self pick-up.
               </p>
-              <div className="mt-8 flex flex-wrap gap-3">
+              <div className="mt-8 grid grid-cols-2 gap-3 sm:flex sm:flex-wrap">
                 {/* View Menu */}
                 <a
                   href="#menu"
@@ -477,7 +477,7 @@ function App() {
                     e.preventDefault();
                     scrollToSection('menu');
                   }}
-                  className="inline-flex items-center gap-2 rounded-full bg-orange-600 px-6 py-3 font-black text-white shadow-lg hover:bg-orange-700 transition-all hover:scale-105 active:scale-95"
+                  className="inline-flex items-center justify-center gap-2 rounded-full bg-orange-600 px-5 py-3.5 font-black text-white shadow-lg hover:bg-orange-700 transition-all hover:scale-105 active:scale-95 text-sm sm:text-base"
                 >
                   <ShoppingBag size={18} />
                   View Menu
@@ -487,7 +487,7 @@ function App() {
                 <button
                   type="button"
                   onClick={() => setIsMenuCardOpen(true)}
-                  className="inline-flex items-center gap-2 rounded-full bg-amber-700 px-6 py-3 font-black text-white shadow-lg hover:bg-amber-800 transition-all hover:scale-105 active:scale-95"
+                  className="inline-flex items-center justify-center gap-2 rounded-full bg-amber-700 px-5 py-3.5 font-black text-white shadow-lg hover:bg-amber-800 transition-all hover:scale-105 active:scale-95 text-sm sm:text-base"
                 >
                   <QrCode size={18} />
                   Menu Card
@@ -496,10 +496,10 @@ function App() {
                 {/* Phone */}
                 <a
                   href={`tel:${phoneNumber}`}
-                  className="inline-flex items-center gap-2 rounded-full border-2 border-orange-300 bg-white px-6 py-3 font-black text-slate-900 shadow hover:bg-orange-50 dark:border-slate-600 dark:bg-slate-900 dark:text-white dark:hover:bg-slate-800 transition-all hover:scale-105 active:scale-95"
+                  className="inline-flex items-center justify-center gap-2 rounded-full border-2 border-orange-300 bg-white px-5 py-3.5 font-black text-slate-900 shadow hover:bg-orange-50 dark:border-slate-600 dark:bg-slate-900 dark:text-white dark:hover:bg-slate-800 transition-all hover:scale-105 active:scale-95 text-sm sm:text-base"
                 >
                   <Phone size={18} />
-                  {displayPhoneNumber}
+                  Call Us
                 </a>
 
                 {/* Instagram */}
@@ -507,7 +507,7 @@ function App() {
                   href={instagramUrl}
                   target="_blank"
                   rel="noreferrer"
-                  className="inline-flex items-center gap-2 rounded-full border-2 border-pink-300 bg-white px-6 py-3 font-black text-pink-700 shadow hover:bg-pink-50 dark:border-slate-600 dark:bg-slate-900 dark:text-pink-300 dark:hover:bg-slate-800 transition-all hover:scale-105 active:scale-95"
+                  className="inline-flex items-center justify-center gap-2 rounded-full border-2 border-pink-300 bg-white px-5 py-3.5 font-black text-pink-700 shadow hover:bg-pink-50 dark:border-slate-600 dark:bg-slate-900 dark:text-pink-300 dark:hover:bg-slate-800 transition-all hover:scale-105 active:scale-95 text-sm sm:text-base"
                 >
                   <Instagram size={18} />
                   Instagram
