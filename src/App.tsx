@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { HashRouter, Routes, Route, Navigate } from 'react-router-dom';
 import Home from './Home';
 
 import AdminLayout from './admin/AdminLayout';
@@ -7,7 +7,7 @@ import ProtectedRoute from './admin/ProtectedRoute';
 
 function App() {
   return (
-    <BrowserRouter basename="/swadeshi-kitchen">
+    <HashRouter>
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/admin/login" element={<Login />} />
@@ -17,7 +17,7 @@ function App() {
           </ProtectedRoute>
         } />
       </Routes>
-    </BrowserRouter>
+    </HashRouter>
   );
 }
 
