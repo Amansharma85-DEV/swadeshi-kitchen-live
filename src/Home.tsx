@@ -131,7 +131,7 @@ function App() {
   const displayPhoneNumber = settings?.contact?.phone || '+91 95997 49976';
   const businessAddress = settings?.contact?.address || '53-A Arjun Park, Najafgarh, New Delhi 110043';
   
-  const zomatoUrl = 'https://zomato.onelink.me/xqzv/gv2aw1bn';
+  const zomatoUrl = 'https://zomato.onelink.me/xqzv/89ovd91e';
   const instagramUrl = 'https://www.instagram.com/swade_shikitchen?igsh=MTI2MDk2ejc3OHF1aw==';
   const upiId = '9958033982@ptsbi';
   const whatsAppOrderNumber = settings?.whatsapp?.number || '919599749976';

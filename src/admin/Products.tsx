@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Plus, Edit2, Trash2, Search, Image as ImageIcon } from 'lucide-react';
-import { getMenu, deleteMenuItem, type MenuItem } from '../lib/store';
+import { getMenu, deleteMenuItem, saveMenu, defaultMenu, type MenuItem } from '../lib/store';
 import ProductForm from './ProductForm';
 
 export default function Products() {
@@ -43,16 +43,29 @@ export default function Products() {
           <h1 className="text-3xl font-black text-slate-900 dark:text-white">Products</h1>
           <p className="mt-1 text-slate-500">Manage your menu items, prices, and stock.</p>
         </div>
-        <button 
-          onClick={() => {
-            setEditingProduct(undefined);
-            setIsFormOpen(true);
-          }}
-          className="bg-orange-600 hover:bg-orange-700 text-white px-5 py-2.5 rounded-lg font-bold flex items-center gap-2 transition-colors"
-        >
-          <Plus size={18} />
-          Add Product
-        </button>
+        <div className="flex gap-2">
+          <button 
+            onClick={() => {
+              if (window.confirm("Are you sure you want to restore all 28 default dishes? This will reset your products list.")) {
+                saveMenu(defaultMenu);
+                loadProducts();
+              }
+            }}
+            className="border border-slate-200 bg-white hover:bg-slate-50 text-slate-800 dark:border-slate-700 dark:bg-slate-900 dark:text-white dark:hover:bg-slate-800 px-5 py-2.5 rounded-lg font-bold flex items-center gap-2 transition-colors"
+          >
+            Restore Default Menu
+          </button>
+          <button 
+            onClick={() => {
+              setEditingProduct(undefined);
+              setIsFormOpen(true);
+            }}
+            className="bg-orange-600 hover:bg-orange-700 text-white px-5 py-2.5 rounded-lg font-bold flex items-center gap-2 transition-colors"
+          >
+            <Plus size={18} />
+            Add Product
+          </button>
+        </div>
       </div>
 
       {isFormOpen && (
