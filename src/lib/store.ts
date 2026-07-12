@@ -474,7 +474,7 @@ const defaultSettings: GlobalSettings = {
   },
   brand: {
     name: 'Swadeshi Kitchen',
-    logo: '/swadeshi-kitchen/logo.png' // Using the existing BASE_URL logo
+    logo: '/swadeshi-kitchen-live/logo.png' // Using the existing BASE_URL logo
   }
 };
 
@@ -487,7 +487,8 @@ export function getSettings(): GlobalSettings {
       if (
         parsed.contact?.phone === '+919999999999' ||
         parsed.contact?.email === 'amansharma85.dev@gmail.com' ||
-        parsed.contact?.openingHours === 'Mon-Sun: 11:00 AM - 11:00 PM'
+        parsed.contact?.openingHours === 'Mon-Sun: 11:00 AM - 11:00 PM' ||
+        parsed.brand?.logo === '/swadeshi-kitchen/logo.png'
       ) {
         const migrated = {
           ...parsed,
@@ -501,6 +502,10 @@ export function getSettings(): GlobalSettings {
           whatsapp: {
             ...parsed.whatsapp,
             number: '919599749976'
+          },
+          brand: {
+            ...parsed.brand,
+            logo: '/swadeshi-kitchen-live/logo.png'
           }
         };
         saveSettings(migrated);
