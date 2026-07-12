@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Swadeshi Kitchen - Developer Guide & Template Customization</title>
+    <style>
+        body {
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            line-height: 1.6;
+            color: #334155;
+            max-width: 900px;
+            margin: 40px auto;
+            padding: 20px;
+            background-color: #fff;
+        }
+        h1 {
+            color: #ea580c;
+            font-size: 2.5em;
+            border-bottom: 3px solid #ea580c;
+            padding-bottom: 12px;
+            margin-bottom: 30px;
+        }
+        h2 {
+            color: #0f172a;
+            font-size: 1.8em;
+            margin-top: 40px;
+            border-left: 5px solid #ea580c;
+            padding-left: 15px;
+        }
+        h3 {
+            color: #1e293b;
+            font-size: 1.3em;
+            margin-top: 25px;
+        }
+        p {
+            margin-bottom: 18px;
+        }
+        code {
+            background-color: #f1f5f9;
+            color: #0f172a;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 0.95em;
+        }
+        pre {
+            background: #1e293b;
+            color: #f8fafc;
+            padding: 18px;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 0.9em;
+            line-height: 1.5;
+            margin: 20px 0;
+        }
+        .file-path {
+            background-color: #fff7ed;
+            color: #c2410c;
+            padding: 4px 8px;
+            border-radius: 6px;
+            border: 1px solid #ffedd5;
+            font-weight: bold;
+            font-size: 0.9em;
+            display: inline-block;
+            margin-bottom: 10px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 25px 0;
+            font-size: 0.95em;
+        }
+        th, td {
+            border: 1px solid #e2e8f0;
+            padding: 12px 15px;
+            text-align: left;
+        }
+        th {
+            background-color: #f8fafc;
+            color: #0f172a;
+            font-weight: bold;
+        }
+        tr:nth-child(even) td {
+            background-color: #f8fafc;
+        }
+        .box {
+            background: #fff7ed;
+            border-left: 5px solid #ea580c;
+            padding: 20px;
+            margin: 25px 0;
+            border-radius: 0 8px 8px 0;
+        }
+        .box-title {
+            font-weight: bold;
+            color: #c2410c;
+            margin-bottom: 8px;
+            font-size: 1.1em;
+        }
+        .btn-print {
+            background-color: #ea580c;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 30px;
+            font-size: 1em;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+            transition: all 0.2s;
+            margin-bottom: 30px;
+        }
+        .btn-print:hover {
+            background-color: #c2410c;
+            transform: translateY(-1px);
+        }
+        @media print {
+            .btn-print {
+                display: none;
+            }
+            body {
+                margin: 0;
+                padding: 0;
+                color: #000;
+            }
+            pre {
+                white-space: pre-wrap;
+                word-wrap: break-word;
+                background: #f8fafc;
+                color: #0f172a;
+                border: 1px solid #cbd5e1;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div style="text-align: right;">
+        <button class="btn-print" onclick="window.print()">🖨️ Save as PDF / Print</button>
+    </div>
+
+    <h1>Swadeshi Kitchen - Customization Guide</h1>
+    <p>This guide explains how to copy, customize, and deploy this cloud kitchen web application template for other brands or projects.</p>
+
+    <h2>1. Project Structure Map</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>File / Folder Path</th>
+                <th>Description</th>
+                <th>What you edit here</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><code>vite.config.ts</code></td>
+                <td>Vite build configuration file.</td>
+                <td>Change the <code>base</code> path to match your new GitHub repository name.</td>
+            </tr>
+            <tr>
+                <td><code>src/App.tsx</code></td>
+                <td>Main application router entry point.</td>
+                <td>Manage page routing (uses <code>HashRouter</code> for static page routing safety).</td>
+            </tr>
+            <tr>
+                <td><code>src/Home.tsx</code></td>
+                <td>The main customer-facing landing page.</td>
+                <td>Contact fallbacks, page sections, scroll animations, WhatsApp templates.</td>
+            </tr>
+            <tr>
+                <td><code>src/lib/store.ts</code></td>
+                <td>Local storage state management file.</td>
+                <td>Initial default menu items, default timings, prices, brand logo paths.</td>
+            </tr>
+            <tr>
+                <td><code>src/lib/firebase.ts</code></td>
+                <td>Firebase connection logic.</td>
+                <td>Connect your cloud database for syncing menu changes and order lists.</td>
+            </tr>
+            <tr>
+                <td><code>src/admin/Login.tsx</code></td>
+                <td>Admin credentials check.</td>
+                <td>Change login email/password validation check.</td>
+            </tr>
+            <tr>
+                <td><code>src/index.css</code></td>
+                <td>Core styles and Tailwind styles.</td>
+                <td>Configure button styles, fonts, core inputs, and custom scrollbars.</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h2>2. Step-by-Step Customization</h2>
+
+    <h3>Step A: Updating Base Path (For New GitHub Repo)</h3>
+    <p>When deploying to a new GitHub repository (e.g. <code>https://github.com/user/new-brand</code>), update the base folder config:</p>
+    <div class="file-path">vite.config.ts</div>
+    <pre>export default defineConfig({
+  base: '/new-brand/', // Replace 'new-brand' with your new repository name
+  server: { ... }</pre>
+
+    <h3>Step B: Customizing default branding and logos</h3>
+    <p>Change default menu prices, thali categories, and default branding configurations inside the storage script:</p>
+    <div class="file-path">src/lib/store.ts</div>
+    <pre>const defaultSettings: GlobalSettings = {
+  hero: {
+    title: 'Authentic Homestyle Food.',
+    subtitle: 'Delicious dishes cooked fresh and delivered to your doorstep.',
+    backgroundImage: 'https://images.unsplash.com/...'
+  },
+  contact: {
+    email: 'hello@newbrand.com',
+    phone: '+919999999999',
+    address: 'Your Kitchen Address Here',
+    openingHours: 'Mon-Sun: 8:00 AM - 11:00 PM'
+  },
+  brand: {
+    name: 'New Brand Name',
+    logo: '/new-brand/logo.png' // Matches the assets base path
+  }
+};</pre>
+
+    <h3>Step C: Editing WhatsApp order templates</h3>
+    <p>Customize the invoice text layout that is sent to WhatsApp during customer checkout:</p>
+    <div class="file-path">src/Home.tsx</div>
+    <pre>const createWhatsAppMessage = (order: StoredOrder) => {
+  const lines = order.items.map((item) => `- ${item.quantity} x ${item.name} (${formatCurrency(item.price * item.quantity)})`);
+  return [
+    '====================================',
+    '       *NEW CUSTOMER ORDER*         ',
+    '====================================',
+    '',
+    `*Customer:* ${order.customer.name}`,
+    `*Phone:* ${order.customer.phone}`,
+    `*Address:* ${order.customer.address}`,
+    '',
+    '*Items:*',
+    ...lines,
+    '',
+    '------------------------------------',
+    `*Total:* ${formatCurrency(order.totals.grandTotal)}`,
+    `*Payment:* ${order.paymentMethod}`,
+    '===================================='
+  ].join('\n');
+};</pre>
+
+    <h3>Step D: Changing Admin Login details</h3>
+    <p>To update the admin login credentials, edit the validation checks inside the Login page controller:</p>
+    <div class="file-path">src/admin/Login.tsx</div>
+    <pre>// Look for this verification check:
+if (email === 'admin@swadeshikitchen.com' && password === 'admin123') {
+  localStorage.setItem('swadeshi-admin-auth', 'true');
+  navigate('/admin');
+}</pre>
+
+    <div class="box">
+        <div class="box-title">💡 Fast Color Customization Tip</div>
+        <p>This template uses Tailwind CSS. To change the visual color scheme (e.g. from Orange to Blue), use a search-and-replace tool in your editor to swap all occurrences of <code>orange</code> classes (like <code>bg-orange-600</code>, <code>hover:bg-orange-700</code>, <code>text-orange-700</code>) to your new color (like <code>blue</code> classes: <code>bg-blue-600</code>, <code>hover:bg-blue-700</code>, <code>text-blue-700</code>).</p>
+    </div>
+
+    <h2>3. Local Development & Deployment Commands</h2>
+    <p>Run these commands inside your project terminal to test and publish changes:</p>
+    <pre># 1. Install dependencies
+npm install
+
+# 2. Run local development server
+npm run dev
+
+# 3. Compile and build the production bundle
+npm run build
+
+# 4. Push updates to main branch
+git add .
+git commit -m "update customizations"
+git push origin main
+
+# 5. Build and Deploy live to GitHub Pages
+npm run deploy</pre>
+
+</body>
+</html>
