@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Swadeshi Kitchen</title>
+    <script type="text/javascript">
+      // GitHub Pages SPA routing fallback script
+      // It redirects standard paths back to the React Router HashRouter structure
+      var pathSegmentsToKeep = 1; // '/swadeshi-kitchen' has 1 path segment
+      var l = window.location;
+      var redirectUrl = l.protocol + '//' + l.hostname + (l.port ? ':' + l.port : '') +
+        l.pathname.split('/').slice(0, 1 + pathSegmentsToKeep).join('/') + '/#/' +
+        l.pathname.slice(1).split('/').slice(pathSegmentsToKeep).join('/') +
+        l.search + l.hash;
+      
+      l.replace(redirectUrl);
+    </script>
+  </head>
+  <body>
+    Redirecting...
+  </body>
+</html>
