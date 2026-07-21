@@ -667,7 +667,7 @@ function App() {
                 </div>
               </div>
 
-              <div className="mt-8 grid gap-6 grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+              <div className="mt-8 grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4">
                 {filteredMenu.length === 0 && (
                   <div className="col-span-full py-16 text-center">
                     <p className="text-2xl font-black text-slate-400">No dishes found</p>
@@ -675,20 +675,54 @@ function App() {
                   </div>
                 )}
                 {filteredMenu.map((item, index) => (
-                  <motion.article initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: index * 0.04 }} key={item.id} className="flex flex-col overflow-hidden rounded-lg border border-orange-100 bg-[#fffaf3] shadow-sm dark:border-slate-800 dark:bg-slate-950">
-                    <div className="relative aspect-[4/3] overflow-hidden">
-                      <img src={item.image} alt={item.name} className="h-full w-full object-cover transition duration-300 hover:scale-105" loading="lazy" />
-                      <span className="absolute left-4 top-4 rounded-full bg-white px-3 py-1 text-xs font-black text-orange-700">
-                        {item.tag}
-                      </span>
+                  <motion.article 
+                    initial={{ opacity: 0, y: 20 }} 
+                    whileInView={{ opacity: 1, y: 0 }} 
+                    viewport={{ once: true }} 
+                    transition={{ delay: index * 0.03 }} 
+                    key={item.id} 
+                    className="flex flex-col h-full overflow-hidden rounded-2xl border border-orange-100 bg-[#fffaf3] shadow-sm hover:shadow-md transition-shadow dark:border-slate-800 dark:bg-slate-950"
+                  >
+                    {/* Image container with top-left badge */}
+                    <div className="relative h-32 sm:h-36 w-full overflow-hidden bg-slate-100 dark:bg-slate-900">
+                      <img 
+                        src={item.image} 
+                        alt={item.name} 
+                        className="h-full w-full object-cover transition duration-300 hover:scale-105" 
+                        loading="lazy" 
+                      />
+                      {item.tag && (
+                        <span className="absolute left-2 top-2 rounded-full bg-white/95 px-2 py-0.5 text-[10px] sm:text-xs font-black text-orange-700 shadow-sm backdrop-blur-xs">
+                          {item.tag}
+                        </span>
+                      )}
                     </div>
-                    <div className="p-5 flex-1 flex flex-col">
-                      <div className="flex items-start justify-between gap-3">
-                        <h3 className="text-xl font-black">{item.name}</h3>
-                        <span className="font-black text-orange-700 dark:text-orange-300">{formatCurrency(item.price)}</span>
+
+                    {/* Content area */}
+                    <div className="p-3 sm:p-4 flex-1 flex flex-col justify-between">
+                      <div>
+                        {/* Title & Price */}
+                        <div className="flex items-start justify-between gap-1.5">
+                          <h3 className="text-sm sm:text-base font-black leading-snug line-clamp-2 text-slate-900 dark:text-white min-h-[2.5rem]">
+                            {item.name}
+                          </h3>
+                          <span className="font-black text-orange-700 dark:text-orange-300 text-sm sm:text-base whitespace-nowrap pt-0.5">
+                            {formatCurrency(item.price)}
+                          </span>
+                        </div>
+
+                        {/* 1-line Description with ellipsis */}
+                        <p className="mt-1 text-xs text-slate-500 dark:text-slate-400 truncate">
+                          {item.description}
+                        </p>
                       </div>
-                      <p className="mt-2 min-h-[72px] text-sm leading-6 text-slate-600 dark:text-slate-300">{item.description}</p>
-                      <button type="button" onClick={() => addToCart(item)} className="btn-primary mt-auto w-full">
+
+                      {/* Full-width compact Add to cart button */}
+                      <button 
+                        type="button" 
+                        onClick={() => addToCart(item)} 
+                        className="btn-primary mt-3 w-full py-1.5 sm:py-2 px-2 text-xs sm:text-sm font-black rounded-full shadow-sm hover:scale-[1.02] active:scale-95 transition-transform flex items-center justify-center gap-1"
+                      >
                         Add to cart
                       </button>
                     </div>
