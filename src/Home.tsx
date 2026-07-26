@@ -27,6 +27,7 @@ import { FormEvent, useMemo, useState, useEffect } from 'react';
 import { getMenu, getPricing, getOffers, getGallery, getSettings, getTestimonials, type MenuItem as StoreMenuItem, type PricingSection, type Offer, type GalleryImage, type GlobalSettings, type Testimonial } from './lib/store';
 import { readLocalOrders, storeOrder, type StoredOrder } from './lib/firebase';
 import { defaultMenu } from './lib/store';
+import { fetchApiMenu, submitApiOrder } from './lib/api';
 
 type MenuItem = {
   id: number;
@@ -111,6 +112,22 @@ function App() {
     setGallery(getGallery());
     setSettings(getSettings());
     setTestimonials(getTestimonials());
+
+    // Fetch live menu from AWS EC2 Backend API
+    fetchApiMenu().then((apiItems) => {
+      if (apiItems && apiItems.length > 0) {
+        const mappedItems: StoreMenuItem[] = apiItems.map(item => ({
+          id: item.id,
+          name: item.name,
+          category: item.category_name || 'Our Special Paranthas',
+          description: item.description,
+          price: Number(item.price),
+          image: item.image_url || 'https://amansharma85-dev.github.io/swadeshi-kitchen-live/stuffed_paratha.png',
+          tag: item.tag || 'Popular'
+        }));
+        setMenuStore(mappedItems);
+      }
+    });
 
     const handleScroll = () => {
       const sections = ['daily-menu', 'menu', 'gallery', 'bulk-orders', 'tracking', 'contact'];
