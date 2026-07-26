@@ -341,10 +341,36 @@ function App() {
 
     const stored = await storeOrder(order);
     const savedOrder = { ...order, id: stored.id || order.id };
+
+    // Post Order directly to AWS EC2 MariaDB Database
+    try {
+      await submitApiOrder({
+        customer_name: customer.name,
+        customer_phone: customer.phone,
+        customer_address: customer.address,
+        customer_note: customer.note,
+        subtotal: totals.subtotal,
+        discount: totals.discount,
+        delivery_fee: totals.deliveryFee,
+        grand_total: totals.grandTotal,
+        payment_method: selectedPayment,
+        delivery_method: selectedDelivery,
+        coupon_code: appliedCoupon || undefined,
+        items: cart.map((item) => ({
+          menu_item_id: item.id,
+          item_name: item.name,
+          quantity: item.quantity,
+          unit_price: item.price
+        }))
+      });
+    } catch (apiErr) {
+      console.warn('API Order submit error:', apiErr);
+    }
+
     setActiveOrder(savedOrder);
     setOrders([savedOrder, ...orders]);
     setOrderStep(0);
-    setCouponMessage(`Order saved to ${stored.mode === 'firebase' ? 'Firebase' : 'local storage'}.`);
+    setCouponMessage('Order placed and saved successfully!');
 
     const whatsappUrl = `https://wa.me/${whatsAppOrderNumber}?text=${encodeURIComponent(createWhatsAppMessage(savedOrder))}`;
     // Same-tab navigation is reliable on mobile browsers, which can block pop-up windows.
