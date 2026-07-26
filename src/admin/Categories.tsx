@@ -8,7 +8,7 @@ export default function Categories() {
   const [editingCatId, setEditingCatId] = useState<number | string | null>(null);
   const [editValue, setEditValue] = useState('');
   const [newCatName, setNewCatName] = useState('');
-  const [isAdding, setIsAdding] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const loadCategories = async () => {
     const apiCats = await fetchApiCategories();
@@ -49,11 +49,13 @@ export default function Categories() {
     setEditingCatId(null);
   };
 
-  const handleAddCategory = async () => {
+  const handleAddCategory = async (e: React.FormEvent) => {
+    e.preventDefault();
     if (newCatName.trim()) {
+      setIsSubmitting(true);
       await createCategoryApi({ name: newCatName.trim() });
       setNewCatName('');
-      setIsAdding(false);
+      setIsSubmitting(false);
       await loadCategories();
     }
   };
@@ -73,41 +75,35 @@ export default function Categories() {
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
           <h1 className="text-3xl font-black text-slate-900 dark:text-white">Categories</h1>
-          <p className="mt-1 text-slate-500">Manage categories saved live in your database.</p>
+          <p className="mt-1 text-slate-500">Manage categories saved live in your AWS database.</p>
         </div>
-
-        <button
-          onClick={() => setIsAdding(!isAdding)}
-          className="flex items-center gap-2 px-4 py-2.5 bg-orange-600 hover:bg-orange-700 text-white font-bold rounded-xl shadow-lg shadow-orange-600/20 transition-colors"
-        >
-          <Plus size={18} /> Add New Category
-        </button>
       </div>
 
-      {isAdding && (
-        <div className="mt-4 p-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm max-w-3xl flex items-center gap-3">
+      {/* Prominent Add Category Box */}
+      <div className="mt-6 p-5 bg-white dark:bg-slate-900 border border-orange-200 dark:border-slate-800 rounded-xl shadow-md max-w-3xl">
+        <h2 className="text-sm font-bold uppercase tracking-wider text-orange-600 dark:text-orange-400 mb-3 flex items-center gap-2">
+          <Plus size={18} /> Add New Category
+        </h2>
+        <form onSubmit={handleAddCategory} className="flex flex-col sm:flex-row gap-3">
           <input
             type="text"
-            placeholder="Category Name..."
+            placeholder="Enter new category name (e.g. Sweets, Beverages)..."
             value={newCatName}
             onChange={(e) => setNewCatName(e.target.value)}
-            className="flex-1 px-4 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-orange-500"
+            className="flex-1 px-4 py-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-orange-500 font-medium"
+            required
           />
           <button
-            onClick={handleAddCategory}
-            className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-lg transition-colors"
+            type="submit"
+            disabled={isSubmitting}
+            className="px-6 py-2.5 bg-orange-600 hover:bg-orange-700 text-white font-black rounded-xl shadow-lg shadow-orange-600/20 transition-colors flex items-center justify-center gap-2"
           >
-            Save
+            <Plus size={18} /> {isSubmitting ? 'Saving...' : 'Add Category'}
           </button>
-          <button
-            onClick={() => setIsAdding(false)}
-            className="px-4 py-2 bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold rounded-lg transition-colors"
-          >
-            Cancel
-          </button>
-        </div>
-      )}
+        </form>
+      </div>
 
+      {/* Categories List */}
       <div className="mt-8 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl overflow-hidden shadow-sm max-w-3xl">
         <div className="p-4 border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50 flex items-center gap-2">
           <Layers className="text-slate-400" size={18} />
