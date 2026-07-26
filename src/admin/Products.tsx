@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Plus, Edit2, Trash2, Search, Image as ImageIcon } from 'lucide-react';
-import { getMenu, deleteMenuItem, saveMenu, defaultMenu, type MenuItem } from '../lib/store';
+import { getMenu, deleteMenuItem, type MenuItem } from '../lib/store';
+import { fetchApiMenu, deleteMenuItemApi } from '../lib/api';
 import ProductForm from './ProductForm';
 
 export default function Products() {
@@ -9,16 +10,31 @@ export default function Products() {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<MenuItem | undefined>(undefined);
 
-  const loadProducts = () => {
-    setProducts(getMenu());
+  const loadProducts = async () => {
+    const apiItems = await fetchApiMenu();
+    if (apiItems && apiItems.length > 0) {
+      const mapped: MenuItem[] = apiItems.map(item => ({
+        id: item.id,
+        name: item.name,
+        category: item.category_name || 'Our Special Paranthas',
+        description: item.description,
+        price: Number(item.price),
+        image: item.image_url || 'https://amansharma85-dev.github.io/swadeshi-kitchen-live/stuffed_paratha.png',
+        tag: item.tag || 'Popular'
+      }));
+      setProducts(mapped);
+    } else {
+      setProducts(getMenu());
+    }
   };
 
   useEffect(() => {
     loadProducts();
   }, []);
 
-  const handleDelete = (id: number) => {
+  const handleDelete = async (id: number) => {
     if (window.confirm('Are you sure you want to delete this product?')) {
+      await deleteMenuItemApi(id);
       deleteMenuItem(id);
       loadProducts();
     }

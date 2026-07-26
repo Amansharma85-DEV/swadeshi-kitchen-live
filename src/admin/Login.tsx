@@ -2,21 +2,32 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Lock, Mail } from 'lucide-react';
 
+import { adminLoginApi } from '../lib/api';
+
 export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const navigate = useNavigate();
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Mock authentication
+    // Call live AWS EC2 Auth API
+    const res = await adminLoginApi(email, password);
+    if (res.success && res.data?.token) {
+      localStorage.setItem('swadeshi_admin_auth', 'true');
+      localStorage.setItem('swadeshi_token', res.data.token);
+      navigate('/admin');
+      return;
+    }
+
+    // Fallback for demo admin account
     if (email === 'admin@swadeshikitchen.com' && password === 'admin123') {
       localStorage.setItem('swadeshi_admin_auth', 'true');
       navigate('/admin');
     } else {
-      setError('Invalid email or password');
+      setError(res.message || 'Invalid email or password');
     }
   };
 

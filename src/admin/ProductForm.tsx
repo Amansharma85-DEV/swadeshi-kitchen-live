@@ -1,6 +1,7 @@
 import { useState, useRef } from 'react';
 import { X, Upload, Image as ImageIcon } from 'lucide-react';
 import { addMenuItem, editMenuItem, type MenuItem } from '../lib/store';
+import { createMenuItemApi, updateMenuItemApi } from '../lib/api';
 
 export default function ProductForm({ 
   onClose, 
@@ -63,7 +64,7 @@ export default function ProductForm({
     reader.readAsDataURL(file);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.name || !formData.price || !formData.category) {
       alert("Name, Category, and Price are required.");
@@ -82,8 +83,22 @@ export default function ProductForm({
     };
 
     if (initialData) {
+      await updateMenuItemApi(initialData.id, {
+        name: productData.name,
+        description: productData.description,
+        price: productData.price,
+        image_url: productData.image,
+        tag: productData.tag
+      });
       editMenuItem(initialData.id, productData);
     } else {
+      await createMenuItemApi({
+        name: productData.name,
+        description: productData.description,
+        price: productData.price,
+        image_url: productData.image,
+        tag: productData.tag
+      });
       addMenuItem(productData);
     }
     

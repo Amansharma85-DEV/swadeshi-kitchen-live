@@ -1,25 +1,60 @@
 import { useState, useEffect } from 'react';
 import { Package, Search, Clock, CheckCircle, Truck, XCircle } from 'lucide-react';
 import { readLocalOrders, updateOrderStatus, type StoredOrder } from '../lib/firebase';
+import { fetchApiOrders, updateOrderStatusApi } from '../lib/api';
 
-const STATUS_OPTIONS = ['Pending', 'Preparing', 'Packed', 'Out for Delivery', 'Delivered', 'Cancelled'];
+const STATUS_OPTIONS = ['Pending', 'Preparing', 'Ready', 'Out for Delivery', 'Delivered', 'Cancelled'];
 
 export default function Orders() {
   const [orders, setOrders] = useState<StoredOrder[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
 
-  const loadOrders = () => {
-    setOrders(readLocalOrders());
+  const loadOrders = async () => {
+    const apiOrders = await fetchApiOrders();
+    if (apiOrders && apiOrders.length > 0) {
+      const mapped: StoredOrder[] = apiOrders.map((o: any) => ({
+        id: o.order_code || `SK-${o.id}`,
+        db_id: o.id,
+        customer: {
+          name: o.customer_name,
+          phone: o.customer_phone,
+          address: o.customer_address,
+          note: o.customer_note || ''
+        },
+        items: Array.isArray(o.items) ? o.items.map((i: any) => ({
+          name: i.item_name,
+          quantity: i.quantity,
+          price: Number(i.unit_price)
+        })) : [],
+        totals: {
+          subtotal: Number(o.subtotal),
+          discount: Number(o.discount),
+          deliveryFee: Number(o.delivery_fee),
+          grandTotal: Number(o.grand_total)
+        },
+        paymentMethod: o.payment_method,
+        deliveryMethod: o.delivery_method,
+        couponCode: o.coupon_code || 'None',
+        status: o.status,
+        createdAt: o.created_at
+      }));
+      setOrders(mapped);
+    } else {
+      setOrders(readLocalOrders());
+    }
   };
 
   useEffect(() => {
     loadOrders();
-    // In a real app we'd set up a Firebase listener here
     const interval = setInterval(loadOrders, 5000);
     return () => clearInterval(interval);
   }, []);
 
-  const handleStatusChange = (orderId: string, newStatus: string) => {
+  const handleStatusChange = async (orderId: string, newStatus: string) => {
+    const targetOrder: any = orders.find(o => o.id === orderId);
+    if (targetOrder?.db_id) {
+      await updateOrderStatusApi(targetOrder.db_id, newStatus);
+    }
     updateOrderStatus(orderId, newStatus);
     loadOrders();
   };
