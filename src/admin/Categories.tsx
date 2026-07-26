@@ -1,21 +1,28 @@
 import { useState, useEffect } from 'react';
 import { Layers, Edit2, Trash2, Check, X } from 'lucide-react';
 import { getMenu, renameCategory, deleteCategory } from '../lib/store';
+import { fetchApiCategories, createCategoryApi, updateCategoryApi, deleteCategoryApi } from '../lib/api';
 
 export default function Categories() {
-  const [categories, setCategories] = useState<{name: string, count: number}[]>([]);
+  const [categories, setCategories] = useState<{id?: number, name: string, count: number}[]>([]);
   const [editingCat, setEditingCat] = useState<string | null>(null);
   const [editValue, setEditValue] = useState('');
 
-  const loadCategories = () => {
-    const menu = getMenu();
-    const catMap = new Map<string, number>();
-    menu.forEach(item => {
-      const c = item.category || 'Uncategorized';
-      catMap.set(c, (catMap.get(c) || 0) + 1);
-    });
-    const sorted = Array.from(catMap.entries()).map(([name, count]) => ({name, count}));
-    setCategories(sorted);
+  const loadCategories = async () => {
+    const apiCats = await fetchApiCategories();
+    if (apiCats && apiCats.length > 0) {
+      const mapped = apiCats.map(c => ({ id: c.id, name: c.name, count: 0 }));
+      setCategories(mapped);
+    } else {
+      const menu = getMenu();
+      const catMap = new Map<string, number>();
+      menu.forEach(item => {
+        const c = item.category || 'Uncategorized';
+        catMap.set(c, (catMap.get(c) || 0) + 1);
+      });
+      const sorted = Array.from(catMap.entries()).map(([name, count]) => ({name, count}));
+      setCategories(sorted);
+    }
   };
 
   useEffect(() => {
@@ -27,16 +34,26 @@ export default function Categories() {
     setEditValue(name);
   };
 
-  const handleSaveEdit = (oldName: string) => {
+  const handleSaveEdit = async (oldName: string) => {
     if (editValue.trim() && editValue.trim() !== oldName) {
+      const catObj = categories.find(c => c.name === oldName);
+      if (catObj?.id) {
+        await updateCategoryApi(catObj.id, { name: editValue.trim() });
+      } else {
+        await createCategoryApi({ name: editValue.trim() });
+      }
       renameCategory(oldName, editValue.trim());
       loadCategories();
     }
     setEditingCat(null);
   };
 
-  const handleDelete = (name: string) => {
+  const handleDelete = async (name: string) => {
     if (window.confirm(`Are you sure you want to delete the category "${name}"? All items in it will become Uncategorized.`)) {
+      const catObj = categories.find(c => c.name === name);
+      if (catObj?.id) {
+        await deleteCategoryApi(catObj.id);
+      }
       deleteCategory(name);
       loadCategories();
     }
