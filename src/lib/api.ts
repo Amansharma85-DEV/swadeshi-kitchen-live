@@ -1,4 +1,4 @@
-export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://43.204.145.203/api';
+export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://protect-cooperative-blocking-what.trycloudflare.com/api';
 
 export type ApiMenuItem = {
   id: number;
