@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { Plus, Edit2, Trash2, Search, Image as ImageIcon } from 'lucide-react';
 import { getMenu, saveMenu, type MenuItem } from '../lib/store';
-import { fetchApiMenu, updateMenuItemApi, deleteMenuItemApi } from '../lib/api';
+import { fetchApiMenu, updateMenuItemApi, deleteMenuItemApi, subscribeToLiveSync } from '../lib/api';
 import ProductForm from './ProductForm';
 
 export default function Products() {
