@@ -23,7 +23,9 @@ export type ApiCategory = {
 // Fetch all menu items from AWS EC2 API
 export async function fetchApiMenu(): Promise<ApiMenuItem[] | null> {
   try {
-    const res = await fetch(`${API_BASE_URL}/menu`);
+    const res = await fetch(`${API_BASE_URL}/menu?_t=${Date.now()}`, {
+      headers: { 'Cache-Control': 'no-cache, no-store, must-revalidate' }
+    });
     if (!res.ok) return null;
     const json = await res.json();
     if (json.success && Array.isArray(json.data?.menu)) {
@@ -38,7 +40,9 @@ export async function fetchApiMenu(): Promise<ApiMenuItem[] | null> {
 // Fetch all categories from AWS EC2 API
 export async function fetchApiCategories(): Promise<ApiCategory[] | null> {
   try {
-    const res = await fetch(`${API_BASE_URL}/categories`);
+    const res = await fetch(`${API_BASE_URL}/categories?_t=${Date.now()}`, {
+      headers: { 'Cache-Control': 'no-cache, no-store, must-revalidate' }
+    });
     if (!res.ok) return null;
     const json = await res.json();
     if (json.success && Array.isArray(json.data?.categories)) {
@@ -173,8 +177,9 @@ export async function deleteCategoryApi(id: number) {
 export async function fetchApiOrders() {
   try {
     const token = localStorage.getItem('swadeshi_token');
-    const res = await fetch(`${API_BASE_URL}/orders`, {
+    const res = await fetch(`${API_BASE_URL}/orders?_t=${Date.now()}`, {
       headers: {
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
         ...(token ? { 'Authorization': `Bearer ${token}` } : {})
       }
     });
