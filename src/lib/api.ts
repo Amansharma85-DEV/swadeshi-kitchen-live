@@ -352,13 +352,18 @@ export async function submitApiOrder(orderData: {
   const url = `${API_BASE_URL}/orders`;
   console.log('[API REQ] POST Order:', url, '[PAYLOAD]:', orderData);
   try {
+    const payload = {
+      ...orderData,
+      customer_address: orderData.delivery_address,
+      grand_total: orderData.total_amount
+    };
     const res = await fetch(url, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         ...ZERO_CACHE_HEADERS
       },
-      body: JSON.stringify(orderData)
+      body: JSON.stringify(payload)
     });
     const json = await res.json();
     console.log('[API RES] POST Order status:', res.status, '[DATA]:', json);
