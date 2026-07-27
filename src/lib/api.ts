@@ -140,6 +140,7 @@ export async function createMenuItemApi(item: {
   description: string;
   price: number;
   image_url?: string;
+  imageFile?: File;
   tag?: string;
   is_available?: boolean;
 }) {
@@ -147,13 +148,37 @@ export async function createMenuItemApi(item: {
   console.log('[API REQ] POST Menu Item:', url, '[PAYLOAD]:', item);
   try {
     const token = localStorage.getItem('swadeshi_token');
+    let bodyData: any;
+    let headers: Record<string, string> = token ? { 'Authorization': `Bearer ${token}` } : {};
+
+    if (item.imageFile) {
+      const formData = new FormData();
+      formData.append('image', item.imageFile);
+      formData.append('name', item.name);
+      if (item.category_id !== undefined) formData.append('category_id', String(item.category_id));
+      if (item.description !== undefined) formData.append('description', item.description);
+      if (item.price !== undefined) formData.append('price', String(item.price));
+      if (item.tag !== undefined) formData.append('tag', item.tag);
+      if (item.is_available !== undefined) formData.append('is_available', String(item.is_available));
+      // NOTE: Do NOT set Content-Type header when sending FormData!
+      bodyData = formData;
+    } else {
+      headers['Content-Type'] = 'application/json';
+      bodyData = JSON.stringify({
+        name: item.name,
+        category_id: item.category_id,
+        description: item.description,
+        price: item.price,
+        image_url: item.image_url,
+        tag: item.tag,
+        is_available: item.is_available
+      });
+    }
+
     const res = await fetch(url, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        ...(token ? { 'Authorization': `Bearer ${token}` } : {})
-      },
-      body: JSON.stringify(item)
+      headers,
+      body: bodyData
     });
     const json = await res.json();
     console.log('[API RES] POST Menu Item status:', res.status, '[DATA]:', json);
@@ -175,6 +200,7 @@ export async function updateMenuItemApi(id: number, item: {
   description?: string;
   price?: number;
   image_url?: string;
+  imageFile?: File;
   tag?: string;
   is_available?: boolean;
 }) {
@@ -182,13 +208,37 @@ export async function updateMenuItemApi(id: number, item: {
   console.log('[API REQ] PUT Menu Item ID:', id, url, '[PAYLOAD]:', item);
   try {
     const token = localStorage.getItem('swadeshi_token');
+    let bodyData: any;
+    let headers: Record<string, string> = token ? { 'Authorization': `Bearer ${token}` } : {};
+
+    if (item.imageFile) {
+      const formData = new FormData();
+      formData.append('image', item.imageFile);
+      if (item.name) formData.append('name', item.name);
+      if (item.category_id !== undefined) formData.append('category_id', String(item.category_id));
+      if (item.description !== undefined) formData.append('description', item.description);
+      if (item.price !== undefined) formData.append('price', String(item.price));
+      if (item.tag !== undefined) formData.append('tag', item.tag);
+      if (item.is_available !== undefined) formData.append('is_available', String(item.is_available));
+      // NOTE: Do NOT set Content-Type header when sending FormData!
+      bodyData = formData;
+    } else {
+      headers['Content-Type'] = 'application/json';
+      bodyData = JSON.stringify({
+        name: item.name,
+        category_id: item.category_id,
+        description: item.description,
+        price: item.price,
+        image_url: item.image_url,
+        tag: item.tag,
+        is_available: item.is_available
+      });
+    }
+
     const res = await fetch(url, {
       method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-        ...(token ? { 'Authorization': `Bearer ${token}` } : {})
-      },
-      body: JSON.stringify(item)
+      headers,
+      body: bodyData
     });
     const json = await res.json();
     console.log('[API RES] PUT Menu Item ID:', id, 'status:', res.status, '[DATA]:', json);

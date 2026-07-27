@@ -27,6 +27,7 @@ export default function ProductForm({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [imageTab, setImageTab] = useState<'upload' | 'url' | 'presets'>('upload');
   const [isDragging, setIsDragging] = useState(false);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [uploadProgress, setUploadProgress] = useState<number | null>(null);
   const [uploadError, setUploadError] = useState<string | null>(null);
 
@@ -55,6 +56,7 @@ export default function ProductForm({
   // Process file with direct API upload & fallback
   const processImageFile = async (file: File) => {
     setUploadError(null);
+    setSelectedFile(file);
 
     // File type validation
     const validTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'image/svg+xml'];
@@ -80,7 +82,7 @@ export default function ProductForm({
       return;
     }
 
-    // Fallback to reading file and compressing to clean image URL or compact preview
+    // Fallback preview
     const reader = new FileReader();
     reader.onload = (event) => {
       setUploadProgress(80);
@@ -165,6 +167,7 @@ export default function ProductForm({
         description: productData.description,
         price: productData.price,
         image_url: productData.image,
+        imageFile: selectedFile || undefined,
         tag: productData.tag,
         is_available: formData.inStock
       });
@@ -175,6 +178,7 @@ export default function ProductForm({
         description: productData.description,
         price: productData.price,
         image_url: productData.image,
+        imageFile: selectedFile || undefined,
         tag: productData.tag,
         is_available: formData.inStock
       });
