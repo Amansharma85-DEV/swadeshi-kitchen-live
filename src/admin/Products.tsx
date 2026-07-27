@@ -12,7 +12,7 @@ export default function Products() {
 
   const loadProducts = async () => {
     const apiItems = await fetchApiMenu();
-    if (apiItems && apiItems.length > 0) {
+    if (apiItems && Array.isArray(apiItems)) {
       const mapped: MenuItem[] = apiItems.map(item => ({
         id: item.id,
         name: item.name,
@@ -23,8 +23,6 @@ export default function Products() {
         tag: item.tag || 'Popular'
       }));
       setProducts(mapped);
-    } else {
-      setProducts(getMenu());
     }
   };
 
@@ -37,8 +35,7 @@ export default function Products() {
   const handleDelete = async (id: number) => {
     if (window.confirm('Are you sure you want to delete this product?')) {
       await deleteMenuItemApi(id);
-      deleteMenuItem(id);
-      loadProducts();
+      await loadProducts();
     }
   };
 

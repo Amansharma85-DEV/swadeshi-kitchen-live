@@ -12,18 +12,9 @@ export default function Categories() {
 
   const loadCategories = async () => {
     const apiCats = await fetchApiCategories();
-    if (apiCats && apiCats.length > 0) {
+    if (apiCats && Array.isArray(apiCats)) {
       const mapped = apiCats.map((c) => ({ id: c.id, name: c.name, count: 0 }));
       setCategories(mapped);
-    } else {
-      const menu = getMenu();
-      const catMap = new Map<string, number>();
-      menu.forEach((item) => {
-        const c = item.category || 'Uncategorized';
-        catMap.set(c, (catMap.get(c) || 0) + 1);
-      });
-      const sorted = Array.from(catMap.entries()).map(([name, count]) => ({ name, count }));
-      setCategories(sorted);
     }
   };
 

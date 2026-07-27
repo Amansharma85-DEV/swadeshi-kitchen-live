@@ -22,34 +22,46 @@ export type ApiCategory = {
 
 // Fetch all menu items from AWS EC2 API
 export async function fetchApiMenu(): Promise<ApiMenuItem[] | null> {
+  const url = `${API_BASE_URL}/menu?_t=${Date.now()}`;
+  console.log('[API REQ] GET Menu:', url);
   try {
-    const res = await fetch(`${API_BASE_URL}/menu?_t=${Date.now()}`, {
+    const res = await fetch(url, {
       headers: { 'Cache-Control': 'no-cache, no-store, must-revalidate' }
     });
-    if (!res.ok) return null;
+    if (!res.ok) {
+      console.warn('[API RES ERR] GET Menu failed with status:', res.status);
+      return null;
+    }
     const json = await res.json();
     if (json.success && Array.isArray(json.data?.menu)) {
+      console.log('[API RES OK] GET Menu items count:', json.data.menu.length);
       return json.data.menu;
     }
   } catch (err) {
-    console.warn('Backend API connection warning:', err);
+    console.warn('[API ERR] GET Menu network error:', err);
   }
   return null;
 }
 
 // Fetch all categories from AWS EC2 API
 export async function fetchApiCategories(): Promise<ApiCategory[] | null> {
+  const url = `${API_BASE_URL}/categories?_t=${Date.now()}`;
+  console.log('[API REQ] GET Categories:', url);
   try {
-    const res = await fetch(`${API_BASE_URL}/categories?_t=${Date.now()}`, {
+    const res = await fetch(url, {
       headers: { 'Cache-Control': 'no-cache, no-store, must-revalidate' }
     });
-    if (!res.ok) return null;
+    if (!res.ok) {
+      console.warn('[API RES ERR] GET Categories failed with status:', res.status);
+      return null;
+    }
     const json = await res.json();
     if (json.success && Array.isArray(json.data?.categories)) {
+      console.log('[API RES OK] GET Categories count:', json.data.categories.length);
       return json.data.categories;
     }
   } catch (err) {
-    console.warn('Backend categories connection warning:', err);
+    console.warn('[API ERR] GET Categories network error:', err);
   }
   return null;
 }
@@ -63,9 +75,11 @@ export async function createMenuItemApi(item: {
   image_url?: string;
   tag?: string;
 }) {
+  const url = `${API_BASE_URL}/menu`;
+  console.log('[API REQ] POST Menu Item:', url, '[PAYLOAD]:', item);
   try {
     const token = localStorage.getItem('swadeshi_token');
-    const res = await fetch(`${API_BASE_URL}/menu`, {
+    const res = await fetch(url, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -73,8 +87,11 @@ export async function createMenuItemApi(item: {
       },
       body: JSON.stringify(item)
     });
-    return await res.json();
+    const json = await res.json();
+    console.log('[API RES] POST Menu Item status:', res.status, '[DATA]:', json);
+    return json;
   } catch (err) {
+    console.error('[API ERR] POST Menu Item failed:', err);
     return { success: false, message: 'Network connection error' };
   }
 }
@@ -89,9 +106,11 @@ export async function updateMenuItemApi(id: number, item: {
   tag?: string;
   is_available?: boolean;
 }) {
+  const url = `${API_BASE_URL}/menu/${id}`;
+  console.log('[API REQ] PUT Menu Item ID:', id, url, '[PAYLOAD]:', item);
   try {
     const token = localStorage.getItem('swadeshi_token');
-    const res = await fetch(`${API_BASE_URL}/menu/${id}`, {
+    const res = await fetch(url, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
@@ -99,33 +118,43 @@ export async function updateMenuItemApi(id: number, item: {
       },
       body: JSON.stringify(item)
     });
-    return await res.json();
+    const json = await res.json();
+    console.log('[API RES] PUT Menu Item ID:', id, 'status:', res.status, '[DATA]:', json);
+    return json;
   } catch (err) {
+    console.error('[API ERR] PUT Menu Item failed:', err);
     return { success: false, message: 'Network connection error' };
   }
 }
 
 // Delete Menu Item from AWS EC2 API
 export async function deleteMenuItemApi(id: number) {
+  const url = `${API_BASE_URL}/menu/${id}`;
+  console.log('[API REQ] DELETE Menu Item ID:', id, url);
   try {
     const token = localStorage.getItem('swadeshi_token');
-    const res = await fetch(`${API_BASE_URL}/menu/${id}`, {
+    const res = await fetch(url, {
       method: 'DELETE',
       headers: {
         ...(token ? { 'Authorization': `Bearer ${token}` } : {})
       }
     });
-    return await res.json();
+    const json = await res.json();
+    console.log('[API RES] DELETE Menu Item ID:', id, 'status:', res.status, '[DATA]:', json);
+    return json;
   } catch (err) {
+    console.error('[API ERR] DELETE Menu Item failed:', err);
     return { success: false, message: 'Network connection error' };
   }
 }
 
 // Create Category in AWS EC2 API
 export async function createCategoryApi(category: { name: string; description?: string }) {
+  const url = `${API_BASE_URL}/categories`;
+  console.log('[API REQ] POST Category:', url, '[PAYLOAD]:', category);
   try {
     const token = localStorage.getItem('swadeshi_token');
-    const res = await fetch(`${API_BASE_URL}/categories`, {
+    const res = await fetch(url, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -133,17 +162,22 @@ export async function createCategoryApi(category: { name: string; description?: 
       },
       body: JSON.stringify(category)
     });
-    return await res.json();
+    const json = await res.json();
+    console.log('[API RES] POST Category status:', res.status, '[DATA]:', json);
+    return json;
   } catch (err) {
+    console.error('[API ERR] POST Category failed:', err);
     return { success: false, message: 'Network connection error' };
   }
 }
 
 // Update Category in AWS EC2 API
 export async function updateCategoryApi(id: number, category: { name?: string; description?: string }) {
+  const url = `${API_BASE_URL}/categories/${id}`;
+  console.log('[API REQ] PUT Category ID:', id, url, '[PAYLOAD]:', category);
   try {
     const token = localStorage.getItem('swadeshi_token');
-    const res = await fetch(`${API_BASE_URL}/categories/${id}`, {
+    const res = await fetch(url, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
@@ -151,33 +185,43 @@ export async function updateCategoryApi(id: number, category: { name?: string; d
       },
       body: JSON.stringify(category)
     });
-    return await res.json();
+    const json = await res.json();
+    console.log('[API RES] PUT Category ID:', id, 'status:', res.status, '[DATA]:', json);
+    return json;
   } catch (err) {
+    console.error('[API ERR] PUT Category failed:', err);
     return { success: false, message: 'Network connection error' };
   }
 }
 
 // Delete Category from AWS EC2 API
 export async function deleteCategoryApi(id: number) {
+  const url = `${API_BASE_URL}/categories/${id}`;
+  console.log('[API REQ] DELETE Category ID:', id, url);
   try {
     const token = localStorage.getItem('swadeshi_token');
-    const res = await fetch(`${API_BASE_URL}/categories/${id}`, {
+    const res = await fetch(url, {
       method: 'DELETE',
       headers: {
         ...(token ? { 'Authorization': `Bearer ${token}` } : {})
       }
     });
-    return await res.json();
+    const json = await res.json();
+    console.log('[API RES] DELETE Category ID:', id, 'status:', res.status, '[DATA]:', json);
+    return json;
   } catch (err) {
+    console.error('[API ERR] DELETE Category failed:', err);
     return { success: false, message: 'Network connection error' };
   }
 }
 
 // Fetch all orders from AWS EC2 API
 export async function fetchApiOrders() {
+  const url = `${API_BASE_URL}/orders?_t=${Date.now()}`;
+  console.log('[API REQ] GET Orders:', url);
   try {
     const token = localStorage.getItem('swadeshi_token');
-    const res = await fetch(`${API_BASE_URL}/orders?_t=${Date.now()}`, {
+    const res = await fetch(url, {
       headers: {
         'Cache-Control': 'no-cache, no-store, must-revalidate',
         ...(token ? { 'Authorization': `Bearer ${token}` } : {})
@@ -186,19 +230,22 @@ export async function fetchApiOrders() {
     if (!res.ok) return null;
     const json = await res.json();
     if (json.success && Array.isArray(json.data?.orders)) {
+      console.log('[API RES OK] GET Orders count:', json.data.orders.length);
       return json.data.orders;
     }
   } catch (err) {
-    console.warn('Backend orders connection warning:', err);
+    console.warn('[API ERR] GET Orders network warning:', err);
   }
   return null;
 }
 
 // Update Order Status in AWS EC2 API
 export async function updateOrderStatusApi(id: number, status: string) {
+  const url = `${API_BASE_URL}/orders/${id}/status`;
+  console.log('[API REQ] PUT Order Status ID:', id, status, url);
   try {
     const token = localStorage.getItem('swadeshi_token');
-    const res = await fetch(`${API_BASE_URL}/orders/${id}/status`, {
+    const res = await fetch(url, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
@@ -206,13 +253,16 @@ export async function updateOrderStatusApi(id: number, status: string) {
       },
       body: JSON.stringify({ status })
     });
-    return await res.json();
+    const json = await res.json();
+    console.log('[API RES] PUT Order Status ID:', id, 'status:', res.status, '[DATA]:', json);
+    return json;
   } catch (err) {
+    console.error('[API ERR] PUT Order Status failed:', err);
     return { success: false, message: 'Network connection error' };
   }
 }
 
-// Submit Customer Order to AWS EC2 Database
+// Submit Customer Order to AWS EC2 API
 export async function submitApiOrder(orderData: {
   customer_name: string;
   customer_phone: string;
@@ -227,35 +277,43 @@ export async function submitApiOrder(orderData: {
   coupon_code?: string;
   items: Array<{
     menu_item_id?: number;
-    item_name: string;
+    name: string;
     quantity: number;
-    unit_price: number;
+    price: number;
   }>;
 }) {
+  const url = `${API_BASE_URL}/orders`;
+  console.log('[API REQ] POST Customer Order:', url, '[PAYLOAD]:', orderData);
   try {
-    const res = await fetch(`${API_BASE_URL}/orders`, {
+    const res = await fetch(url, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(orderData)
     });
     const json = await res.json();
+    console.log('[API RES] POST Customer Order status:', res.status, '[DATA]:', json);
     return json;
   } catch (err) {
+    console.error('[API ERR] POST Customer Order failed:', err);
     return { success: false, message: 'Network connection error' };
   }
 }
 
 // Admin Login API
-export async function adminLoginApi(email: string, password: string) {
+export async function adminLoginApi(credentials: { email: string; password: string }) {
+  const url = `${API_BASE_URL}/auth/login`;
+  console.log('[API REQ] POST Admin Login:', url);
   try {
-    const res = await fetch(`${API_BASE_URL}/auth/login`, {
+    const res = await fetch(url, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password })
+      body: JSON.stringify(credentials)
     });
     const json = await res.json();
+    console.log('[API RES] POST Admin Login status:', res.status, '[DATA]:', json);
     return json;
   } catch (err) {
+    console.error('[API ERR] Admin Login failed:', err);
     return { success: false, message: 'Network connection error' };
   }
 }

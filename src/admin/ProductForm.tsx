@@ -106,7 +106,6 @@ export default function ProductForm({
         image_url: productData.image,
         tag: productData.tag
       });
-      editMenuItem(initialData.id, productData);
     } else {
       await createMenuItemApi({
         category_id,
@@ -116,7 +115,6 @@ export default function ProductForm({
         image_url: productData.image,
         tag: productData.tag
       });
-      addMenuItem(productData);
     }
     
     onSave();
