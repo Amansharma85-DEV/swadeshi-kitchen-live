@@ -12,7 +12,7 @@ export default function Products() {
 
   const loadProducts = async () => {
     const apiItems = await fetchApiMenu();
-    if (apiItems && Array.isArray(apiItems)) {
+    if (apiItems && apiItems.length > 0) {
       const mapped: MenuItem[] = apiItems.map(item => ({
         id: item.id,
         name: item.name,
@@ -23,6 +23,8 @@ export default function Products() {
         tag: item.tag || 'Popular'
       }));
       setProducts(mapped);
+    } else {
+      setProducts(getMenu());
     }
   };
 
