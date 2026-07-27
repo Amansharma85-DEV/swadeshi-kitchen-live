@@ -27,7 +27,7 @@ import { FormEvent, useMemo, useState, useEffect } from 'react';
 import { getMenu, getPricing, getOffers, getGallery, getSettings, getTestimonials, type MenuItem as StoreMenuItem, type PricingSection, type Offer, type GalleryImage, type GlobalSettings, type Testimonial } from './lib/store';
 import { readLocalOrders, storeOrder, type StoredOrder } from './lib/firebase';
 import { defaultMenu } from './lib/store';
-import { fetchApiMenu, submitApiOrder, fetchApiSetting } from './lib/api';
+import { fetchApiMenu, submitApiOrder, fetchApiSetting, subscribeToLiveSync } from './lib/api';
 
 type MenuItem = {
   id: number;
@@ -142,7 +142,8 @@ function App() {
     };
 
     syncLiveMenu();
-    const liveSyncInterval = setInterval(syncLiveMenu, 3000);
+    const liveSyncInterval = setInterval(syncLiveMenu, 2000);
+    const unsubscribeSync = subscribeToLiveSync(syncLiveMenu);
 
     const handleScroll = () => {
       const sections = ['daily-menu', 'menu', 'gallery', 'bulk-orders', 'tracking', 'contact'];
@@ -165,6 +166,7 @@ function App() {
     return () => {
       window.removeEventListener('scroll', handleScroll);
       clearInterval(liveSyncInterval);
+      unsubscribeSync();
     };
   }, []);
   const businessEmail = settings?.contact?.email || 'swadeshikitchen0@gmail.com';

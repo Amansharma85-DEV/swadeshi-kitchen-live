@@ -47,12 +47,11 @@ export default function Products() {
 
   useEffect(() => {
     loadProducts(true);
-    const interval = setInterval(() => loadProducts(false), 3000);
-    const handleForceSync = () => loadProducts(true);
-    window.addEventListener('swadeshi-force-sync', handleForceSync);
+    const interval = setInterval(() => loadProducts(false), 2000);
+    const unsubscribe = subscribeToLiveSync(() => loadProducts(true));
     return () => {
       clearInterval(interval);
-      window.removeEventListener('swadeshi-force-sync', handleForceSync);
+      unsubscribe();
     };
   }, []);
 

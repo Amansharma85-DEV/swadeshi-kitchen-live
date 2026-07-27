@@ -18,8 +18,12 @@ export default function Pricing() {
 
   useEffect(() => {
     loadPricingData();
-    const interval = setInterval(loadPricingData, 3000);
-    return () => clearInterval(interval);
+    const interval = setInterval(loadPricingData, 2000);
+    const unsubscribe = subscribeToLiveSync(loadPricingData);
+    return () => {
+      clearInterval(interval);
+      unsubscribe();
+    };
   }, []);
 
   const syncState = async (nextPricing: PricingSection[]) => {

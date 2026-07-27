@@ -43,8 +43,12 @@ export default function Dashboard() {
 
   useEffect(() => {
     loadDashboardData();
-    const interval = setInterval(loadDashboardData, 3000);
-    return () => clearInterval(interval);
+    const interval = setInterval(loadDashboardData, 2000);
+    const unsubscribe = subscribeToLiveSync(loadDashboardData);
+    return () => {
+      clearInterval(interval);
+      unsubscribe();
+    };
   }, []);
 
   return (

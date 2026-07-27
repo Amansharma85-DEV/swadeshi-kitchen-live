@@ -20,8 +20,12 @@ export default function Settings() {
 
   useEffect(() => {
     loadSettingsData();
-    const interval = setInterval(loadSettingsData, 3000);
-    return () => clearInterval(interval);
+    const interval = setInterval(loadSettingsData, 2000);
+    const unsubscribe = subscribeToLiveSync(loadSettingsData);
+    return () => {
+      clearInterval(interval);
+      unsubscribe();
+    };
   }, []);
 
   if (!settings) return null;

@@ -46,8 +46,12 @@ export default function Orders() {
 
   useEffect(() => {
     loadOrders();
-    const interval = setInterval(loadOrders, 5000);
-    return () => clearInterval(interval);
+    const interval = setInterval(loadOrders, 2000);
+    const unsubscribe = subscribeToLiveSync(loadOrders);
+    return () => {
+      clearInterval(interval);
+      unsubscribe();
+    };
   }, []);
 
   const handleStatusChange = async (orderId: string, newStatus: string) => {

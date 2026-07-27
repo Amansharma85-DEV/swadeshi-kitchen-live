@@ -21,8 +21,12 @@ export default function Testimonials() {
 
   useEffect(() => {
     loadTestimonialsData();
-    const interval = setInterval(loadTestimonialsData, 3000);
-    return () => clearInterval(interval);
+    const interval = setInterval(loadTestimonialsData, 2000);
+    const unsubscribe = subscribeToLiveSync(loadTestimonialsData);
+    return () => {
+      clearInterval(interval);
+      unsubscribe();
+    };
   }, []);
 
   const syncTestimonialsState = async (updated: Testimonial[]) => {

@@ -20,13 +20,61 @@ export type ApiCategory = {
   description: string;
 };
 
+// --- REAL-TIME BROADCAST CHANNEL & EVENT BUS ---
+const liveSyncChannel = typeof window !== 'undefined' && 'BroadcastChannel' in window 
+  ? new BroadcastChannel('swadeshi_realtime_sync') 
+  : null;
+
+export function notifyDataChange() {
+  if (typeof window !== 'undefined') {
+    window.dispatchEvent(new CustomEvent('swadeshi-force-sync'));
+    if (liveSyncChannel) {
+      try {
+        liveSyncChannel.postMessage({ type: 'SWADESHI_DATA_UPDATE', timestamp: Date.now() });
+      } catch (e) {
+        console.warn('BroadcastChannel error:', e);
+      }
+    }
+  }
+}
+
+export function subscribeToLiveSync(onUpdate: () => void) {
+  if (typeof window === 'undefined') return () => {};
+
+  const handleEvent = () => onUpdate();
+  window.addEventListener('swadeshi-force-sync', handleEvent);
+
+  let handleChannelMsg: ((e: MessageEvent) => void) | null = null;
+  if (liveSyncChannel) {
+    handleChannelMsg = (e: MessageEvent) => {
+      if (e.data?.type === 'SWADESHI_DATA_UPDATE') {
+        onUpdate();
+      }
+    };
+    liveSyncChannel.addEventListener('message', handleChannelMsg);
+  }
+
+  return () => {
+    window.removeEventListener('swadeshi-force-sync', handleEvent);
+    if (liveSyncChannel && handleChannelMsg) {
+      liveSyncChannel.removeEventListener('message', handleChannelMsg);
+    }
+  };
+}
+
+const ZERO_CACHE_HEADERS = {
+  'Cache-Control': 'no-cache, no-store, must-revalidate',
+  'Pragma': 'no-cache',
+  'Expires': '0'
+};
+
 // Fetch all menu items from AWS EC2 API
 export async function fetchApiMenu(): Promise<ApiMenuItem[] | null> {
   const url = `${API_BASE_URL}/menu?_t=${Date.now()}`;
   console.log('[API REQ] GET Menu:', url);
   try {
     const res = await fetch(url, {
-      headers: { 'Cache-Control': 'no-cache, no-store, must-revalidate' }
+      headers: ZERO_CACHE_HEADERS
     });
     if (!res.ok) {
       console.warn('[API RES ERR] GET Menu failed with status:', res.status);
@@ -49,7 +97,7 @@ export async function fetchApiCategories(): Promise<ApiCategory[] | null> {
   console.log('[API REQ] GET Categories:', url);
   try {
     const res = await fetch(url, {
-      headers: { 'Cache-Control': 'no-cache, no-store, must-revalidate' }
+      headers: ZERO_CACHE_HEADERS
     });
     if (!res.ok) {
       console.warn('[API RES ERR] GET Categories failed with status:', res.status);
@@ -74,6 +122,7 @@ export async function createMenuItemApi(item: {
   price: number;
   image_url?: string;
   tag?: string;
+  is_available?: boolean;
 }) {
   const url = `${API_BASE_URL}/menu`;
   console.log('[API REQ] POST Menu Item:', url, '[PAYLOAD]:', item);
@@ -83,12 +132,14 @@ export async function createMenuItemApi(item: {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        ...ZERO_CACHE_HEADERS,
         ...(token ? { 'Authorization': `Bearer ${token}` } : {})
       },
       body: JSON.stringify(item)
     });
     const json = await res.json();
     console.log('[API RES] POST Menu Item status:', res.status, '[DATA]:', json);
+    notifyDataChange();
     return json;
   } catch (err) {
     console.error('[API ERR] POST Menu Item failed:', err);
@@ -114,12 +165,14 @@ export async function updateMenuItemApi(id: number, item: {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
+        ...ZERO_CACHE_HEADERS,
         ...(token ? { 'Authorization': `Bearer ${token}` } : {})
       },
       body: JSON.stringify(item)
     });
     const json = await res.json();
     console.log('[API RES] PUT Menu Item ID:', id, 'status:', res.status, '[DATA]:', json);
+    notifyDataChange();
     return json;
   } catch (err) {
     console.error('[API ERR] PUT Menu Item failed:', err);
@@ -136,11 +189,13 @@ export async function deleteMenuItemApi(id: number) {
     const res = await fetch(url, {
       method: 'DELETE',
       headers: {
+        ...ZERO_CACHE_HEADERS,
         ...(token ? { 'Authorization': `Bearer ${token}` } : {})
       }
     });
     const json = await res.json();
     console.log('[API RES] DELETE Menu Item ID:', id, 'status:', res.status, '[DATA]:', json);
+    notifyDataChange();
     return json;
   } catch (err) {
     console.error('[API ERR] DELETE Menu Item failed:', err);
@@ -158,12 +213,14 @@ export async function createCategoryApi(category: { name: string; description?: 
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        ...ZERO_CACHE_HEADERS,
         ...(token ? { 'Authorization': `Bearer ${token}` } : {})
       },
       body: JSON.stringify(category)
     });
     const json = await res.json();
     console.log('[API RES] POST Category status:', res.status, '[DATA]:', json);
+    notifyDataChange();
     return json;
   } catch (err) {
     console.error('[API ERR] POST Category failed:', err);
@@ -181,12 +238,14 @@ export async function updateCategoryApi(id: number, category: { name?: string; d
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
+        ...ZERO_CACHE_HEADERS,
         ...(token ? { 'Authorization': `Bearer ${token}` } : {})
       },
       body: JSON.stringify(category)
     });
     const json = await res.json();
     console.log('[API RES] PUT Category ID:', id, 'status:', res.status, '[DATA]:', json);
+    notifyDataChange();
     return json;
   } catch (err) {
     console.error('[API ERR] PUT Category failed:', err);
@@ -203,11 +262,13 @@ export async function deleteCategoryApi(id: number) {
     const res = await fetch(url, {
       method: 'DELETE',
       headers: {
+        ...ZERO_CACHE_HEADERS,
         ...(token ? { 'Authorization': `Bearer ${token}` } : {})
       }
     });
     const json = await res.json();
     console.log('[API RES] DELETE Category ID:', id, 'status:', res.status, '[DATA]:', json);
+    notifyDataChange();
     return json;
   } catch (err) {
     console.error('[API ERR] DELETE Category failed:', err);
@@ -215,7 +276,7 @@ export async function deleteCategoryApi(id: number) {
   }
 }
 
-// Fetch all orders from AWS EC2 API
+// Fetch Orders from AWS EC2 API
 export async function fetchApiOrders() {
   const url = `${API_BASE_URL}/orders?_t=${Date.now()}`;
   console.log('[API REQ] GET Orders:', url);
@@ -223,7 +284,7 @@ export async function fetchApiOrders() {
     const token = localStorage.getItem('swadeshi_token');
     const res = await fetch(url, {
       headers: {
-        'Cache-Control': 'no-cache, no-store, must-revalidate',
+        ...ZERO_CACHE_HEADERS,
         ...(token ? { 'Authorization': `Bearer ${token}` } : {})
       }
     });
@@ -234,9 +295,44 @@ export async function fetchApiOrders() {
       return json.data.orders;
     }
   } catch (err) {
-    console.warn('[API ERR] GET Orders network warning:', err);
+    console.warn('[API ERR] GET Orders network error:', err);
   }
   return null;
+}
+
+// Submit Customer Order to AWS EC2 API
+export async function submitApiOrder(orderData: {
+  customer_name: string;
+  customer_phone: string;
+  delivery_address: string;
+  order_notes?: string;
+  payment_method?: string;
+  delivery_method?: string;
+  subtotal: number;
+  delivery_fee: number;
+  discount: number;
+  total_amount: number;
+  items: { product_id: number; quantity: number; unit_price: number }[];
+}) {
+  const url = `${API_BASE_URL}/orders`;
+  console.log('[API REQ] POST Order:', url, '[PAYLOAD]:', orderData);
+  try {
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...ZERO_CACHE_HEADERS
+      },
+      body: JSON.stringify(orderData)
+    });
+    const json = await res.json();
+    console.log('[API RES] POST Order status:', res.status, '[DATA]:', json);
+    notifyDataChange();
+    return json;
+  } catch (err) {
+    console.error('[API ERR] POST Order failed:', err);
+    return { success: false, message: 'Network connection error' };
+  }
 }
 
 // Update Order Status in AWS EC2 API
@@ -249,52 +345,17 @@ export async function updateOrderStatusApi(id: number, status: string) {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
+        ...ZERO_CACHE_HEADERS,
         ...(token ? { 'Authorization': `Bearer ${token}` } : {})
       },
       body: JSON.stringify({ status })
     });
     const json = await res.json();
     console.log('[API RES] PUT Order Status ID:', id, 'status:', res.status, '[DATA]:', json);
+    notifyDataChange();
     return json;
   } catch (err) {
     console.error('[API ERR] PUT Order Status failed:', err);
-    return { success: false, message: 'Network connection error' };
-  }
-}
-
-// Submit Customer Order to AWS EC2 API
-export async function submitApiOrder(orderData: {
-  customer_name: string;
-  customer_phone: string;
-  customer_address: string;
-  customer_note?: string;
-  subtotal: number;
-  discount?: number;
-  delivery_fee?: number;
-  grand_total: number;
-  payment_method?: string;
-  delivery_method?: string;
-  coupon_code?: string;
-  items: Array<{
-    menu_item_id?: number;
-    name: string;
-    quantity: number;
-    price: number;
-  }>;
-}) {
-  const url = `${API_BASE_URL}/orders`;
-  console.log('[API REQ] POST Customer Order:', url, '[PAYLOAD]:', orderData);
-  try {
-    const res = await fetch(url, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(orderData)
-    });
-    const json = await res.json();
-    console.log('[API RES] POST Customer Order status:', res.status, '[DATA]:', json);
-    return json;
-  } catch (err) {
-    console.error('[API ERR] POST Customer Order failed:', err);
     return { success: false, message: 'Network connection error' };
   }
 }
@@ -306,7 +367,10 @@ export async function adminLoginApi(credentials: { email: string; password: stri
   try {
     const res = await fetch(url, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 
+        'Content-Type': 'application/json',
+        ...ZERO_CACHE_HEADERS
+      },
       body: JSON.stringify(credentials)
     });
     const json = await res.json();
@@ -324,7 +388,7 @@ export async function fetchApiSetting<T>(key: string): Promise<T | null> {
   console.log('[API REQ] GET Setting Key:', key, url);
   try {
     const res = await fetch(url, {
-      headers: { 'Cache-Control': 'no-cache, no-store, must-revalidate' }
+      headers: ZERO_CACHE_HEADERS
     });
     if (!res.ok) return null;
     const json = await res.json();
@@ -345,11 +409,15 @@ export async function saveApiSetting<T>(key: string, value: T) {
   try {
     const res = await fetch(url, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        ...ZERO_CACHE_HEADERS
+      },
       body: JSON.stringify({ value })
     });
     const json = await res.json();
     console.log('[API RES] POST Setting Key:', key, 'status:', res.status, '[DATA]:', json);
+    notifyDataChange();
     return json;
   } catch (err) {
     console.error('[API ERR] POST Setting failed:', err);

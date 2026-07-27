@@ -19,8 +19,12 @@ export default function Gallery() {
 
   useEffect(() => {
     loadGalleryData();
-    const interval = setInterval(loadGalleryData, 3000);
-    return () => clearInterval(interval);
+    const interval = setInterval(loadGalleryData, 2000);
+    const unsubscribe = subscribeToLiveSync(loadGalleryData);
+    return () => {
+      clearInterval(interval);
+      unsubscribe();
+    };
   }, []);
 
   const handleAdd = async (e: React.FormEvent) => {

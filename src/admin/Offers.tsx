@@ -18,8 +18,12 @@ export default function Offers() {
 
   useEffect(() => {
     loadOffersData();
-    const interval = setInterval(loadOffersData, 3000);
-    return () => clearInterval(interval);
+    const interval = setInterval(loadOffersData, 2000);
+    const unsubscribe = subscribeToLiveSync(loadOffersData);
+    return () => {
+      clearInterval(interval);
+      unsubscribe();
+    };
   }, []);
 
   const syncOffersState = async (nextOffers: Offer[]) => {
