@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Plus, Edit2, Trash2, Search, Image as ImageIcon } from 'lucide-react';
-import { getMenu, type MenuItem } from '../lib/store';
+import { getMenu, saveMenu, type MenuItem } from '../lib/store';
 import { fetchApiMenu, updateMenuItemApi, deleteMenuItemApi } from '../lib/api';
 import ProductForm from './ProductForm';
 
@@ -10,8 +10,14 @@ export default function Products() {
   const [products, setProducts] = useState<MenuItem[]>([]);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<MenuItem | undefined>(undefined);
+  const lastActionTimeRef = useRef<number>(0);
 
-  const loadProducts = async () => {
+  const loadProducts = async (force: boolean = false) => {
+    // Skip background interval polling if user performed an action within last 4 seconds (prevents race conditions)
+    if (!force && Date.now() - lastActionTimeRef.current < 4000) {
+      return;
+    }
+
     const apiItems = await fetchApiMenu();
     if (apiItems && apiItems.length > 0) {
       const mapped: MenuItem[] = apiItems.map(item => {
@@ -29,6 +35,7 @@ export default function Products() {
         };
       });
       setProducts(mapped);
+      saveMenu(mapped);
     } else {
       setProducts(getMenu().map(item => ({
         ...item,
@@ -39,9 +46,9 @@ export default function Products() {
   };
 
   useEffect(() => {
-    loadProducts();
-    const interval = setInterval(loadProducts, 3000);
-    const handleForceSync = () => loadProducts();
+    loadProducts(true);
+    const interval = setInterval(() => loadProducts(false), 3000);
+    const handleForceSync = () => loadProducts(true);
     window.addEventListener('swadeshi-force-sync', handleForceSync);
     return () => {
       clearInterval(interval);
@@ -50,33 +57,38 @@ export default function Products() {
   }, []);
 
   const handleToggleStock = async (product: MenuItem) => {
+    lastActionTimeRef.current = Date.now();
     const nextStock = !product.inStock;
     
-    // ⚡ Optimistic UI Update for zero-lag instant UI flip
-    setProducts(prev => prev.map(p => 
+    // ⚡ Instant Optimistic UI Update
+    const updatedList = products.map(p => 
       p.id === product.id 
         ? { ...p, inStock: nextStock, status: nextStock ? 'In Stock' : 'Out of Stock' } 
         : p
-    ));
+    );
+    setProducts(updatedList);
+    saveMenu(updatedList);
 
     try {
       await updateMenuItemApi(product.id, { is_available: nextStock });
-      window.dispatchEvent(new Event('swadeshi-force-sync'));
     } catch (err) {
       console.error('Failed to update stock status on server:', err);
       // Revert if API failed
-      setProducts(prev => prev.map(p => 
+      const revertedList = products.map(p => 
         p.id === product.id 
           ? { ...p, inStock: product.inStock, status: product.inStock ? 'In Stock' : 'Out of Stock' } 
           : p
-      ));
+      );
+      setProducts(revertedList);
+      saveMenu(revertedList);
     }
   };
 
   const handleDelete = async (id: number) => {
     if (window.confirm('Are you sure you want to delete this product?')) {
+      lastActionTimeRef.current = Date.now();
       await deleteMenuItemApi(id);
-      await loadProducts();
+      await loadProducts(true);
     }
   };
 
@@ -124,7 +136,7 @@ export default function Products() {
       {isFormOpen && (
         <ProductForm 
           onClose={handleCloseForm} 
-          onSave={loadProducts} 
+          onSave={() => loadProducts(true)} 
           initialData={editingProduct}
         />
       )}
@@ -201,16 +213,17 @@ export default function Products() {
                       <td className="px-6 py-4 text-slate-600 dark:text-slate-400 font-semibold">{product.category}</td>
                       <td className="px-6 py-4 text-slate-900 dark:text-white font-black">Rs {product.price}</td>
                       <td className="px-6 py-4">
-                        {/* Premium iOS-style Toggle Switch */}
+                        {/* Interactive Stock Toggle Switch + Badge */}
                         <button
+                          type="button"
                           onClick={() => handleToggleStock(product)}
                           title="Click to toggle stock status"
-                          className="flex items-center gap-3 group focus:outline-none"
+                          className="flex items-center gap-3 group focus:outline-none cursor-pointer"
                         >
-                          <div className={`w-11 h-6 flex items-center rounded-full p-1 cursor-pointer transition-colors duration-300 ${isInStock ? 'bg-emerald-500' : 'bg-slate-300 dark:bg-slate-700'}`}>
+                          <div className={`w-11 h-6 flex items-center rounded-full p-1 transition-colors duration-300 ${isInStock ? 'bg-emerald-500' : 'bg-slate-300 dark:bg-slate-700'}`}>
                             <div className={`bg-white w-4 h-4 rounded-full shadow-md transform transition-transform duration-300 ${isInStock ? 'translate-x-5' : 'translate-x-0'}`} />
                           </div>
-                          <span className={`text-xs font-black uppercase tracking-wider px-2.5 py-1 rounded-full border ${isInStock ? 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-400 dark:border-emerald-800/40' : 'bg-red-50 text-red-700 border-red-200 dark:bg-red-950/40 dark:text-red-400 dark:border-red-800/40'}`}>
+                          <span className={`text-xs font-black uppercase tracking-wider px-2.5 py-1 rounded-full border transition-all group-hover:scale-105 active:scale-95 ${isInStock ? 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-400 dark:border-emerald-800/40' : 'bg-red-50 text-red-700 border-red-200 dark:bg-red-950/40 dark:text-red-400 dark:border-red-800/40'}`}>
                             {isInStock ? '🟢 In Stock' : '🔴 Out of Stock'}
                           </span>
                         </button>
