@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { X, Upload, Image as ImageIcon, Link as LinkIcon, RefreshCw, Trash2, CheckCircle, AlertCircle } from 'lucide-react';
 import { addMenuItem, editMenuItem, type MenuItem } from '../lib/store';
-import { createMenuItemApi, updateMenuItemApi, fetchApiCategories, type ApiCategory } from '../lib/api';
+import { createMenuItemApi, updateMenuItemApi, fetchApiCategories, uploadImageFileApi, type ApiCategory } from '../lib/api';
 
 export default function ProductForm({ 
   onClose, 
@@ -41,8 +41,8 @@ export default function ProductForm({
     });
   }, []);
 
-  // Process file with compression & validation
-  const processImageFile = (file: File) => {
+  // Process file with direct API upload & compressed canvas fallback
+  const processImageFile = async (file: File) => {
     setUploadError(null);
 
     // File type validation
@@ -52,29 +52,32 @@ export default function ProductForm({
       return;
     }
 
-    // File size validation (10MB)
-    if (file.size > 10 * 1024 * 1024) {
-      setUploadError('File is too large. Maximum allowed file size is 10MB.');
+    // File size validation (50MB)
+    if (file.size > 50 * 1024 * 1024) {
+      setUploadError('File is too large. Maximum allowed file size is 50MB.');
       return;
     }
 
     setUploadProgress(20);
-    const reader = new FileReader();
-    
-    reader.onprogress = (e) => {
-      if (e.lengthComputable) {
-        const percent = Math.round((e.loaded / e.total) * 60) + 20;
-        setUploadProgress(percent);
-      }
-    };
 
+    // Try direct multipart upload to backend first
+    const uploadRes = await uploadImageFileApi(file);
+    if (uploadRes.success && uploadRes.url) {
+      setFormData(prev => ({ ...prev, image: uploadRes.url! }));
+      setUploadProgress(100);
+      setTimeout(() => setUploadProgress(null), 800);
+      return;
+    }
+
+    // Fallback to local compressed WebP/JPEG canvas string
+    const reader = new FileReader();
     reader.onload = (event) => {
       setUploadProgress(80);
       const img = new Image();
       img.onload = () => {
         const canvas = document.createElement('canvas');
-        const MAX_WIDTH = 500;
-        const MAX_HEIGHT = 500;
+        const MAX_WIDTH = 400;
+        const MAX_HEIGHT = 400;
         let width = img.width;
         let height = img.height;
 
@@ -110,12 +113,6 @@ export default function ProductForm({
       };
       img.src = event.target?.result as string;
     };
-
-    reader.onerror = () => {
-      setUploadError('Failed to read image file.');
-      setUploadProgress(null);
-    };
-
     reader.readAsDataURL(file);
   };
 
@@ -146,6 +143,18 @@ export default function ProductForm({
     setUploadError(null);
   };
 
+  function cleanImageUrl(rawUrl: string): string {
+    if (!rawUrl) return '';
+    if (rawUrl.startsWith('data:image')) return rawUrl;
+    try {
+      const parsed = new URL(rawUrl);
+      if (parsed.hostname.includes('unsplash.com')) {
+        return `${parsed.origin}${parsed.pathname}?auto=format&fit=crop&w=600&q=80`;
+      }
+    } catch (e) {}
+    return rawUrl;
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.name || !formData.price || !formData.category) {
@@ -157,13 +166,14 @@ export default function ProductForm({
 
     const matchedCat = categories.find(c => c.name.toLowerCase() === formData.category.toLowerCase());
     const category_id = matchedCat ? matchedCat.id : 1;
+    const finalImage = cleanImageUrl(formData.image) || 'https://images.unsplash.com/photo-1546833999-b9f581a1996d?auto=format&fit=crop&w=600&q=80';
     
     const productData = {
       name: formData.name,
       category: formData.category,
       description: formData.description,
       price: Number(formData.price),
-      image: formData.image || 'https://images.unsplash.com/photo-1546833999-b9f581a1996d?auto=format&fit=crop&w=900&q=80',
+      image: finalImage,
       tag: formData.tag || 'New',
       inStock: formData.inStock
     };

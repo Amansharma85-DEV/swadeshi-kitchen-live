@@ -114,6 +114,35 @@ export async function fetchApiCategories(): Promise<ApiCategory[] | null> {
   return null;
 }
 
+// Direct Multipart/Form-Data File Upload to AWS Backend
+export async function uploadImageFileApi(file: File): Promise<{ success: boolean; url?: string; message?: string }> {
+  const url = `${API_BASE_URL}/menu/upload`;
+  console.log('[API REQ] POST Upload File:', url, file.name, file.size);
+  try {
+    const formData = new FormData();
+    formData.append('image', file);
+
+    const token = localStorage.getItem('swadeshi_token');
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: {
+        ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+      },
+      body: formData
+    });
+
+    const json = await res.json();
+    console.log('[API RES] POST Upload File status:', res.status, json);
+    if (res.ok && json.success && json.data?.url) {
+      return { success: true, url: json.data.url };
+    }
+    return { success: false, message: json.message || `Server returned HTTP ${res.status}` };
+  } catch (err: any) {
+    console.warn('[API ERR] Direct upload failed, falling back to local compressed base64:', err.message);
+    return { success: false, message: err.message || 'Direct upload unavailable' };
+  }
+}
+
 // Create Menu Item in AWS EC2 API
 export async function createMenuItemApi(item: {
   name: string;
@@ -139,11 +168,14 @@ export async function createMenuItemApi(item: {
     });
     const json = await res.json();
     console.log('[API RES] POST Menu Item status:', res.status, '[DATA]:', json);
-    notifyDataChange();
-    return json;
-  } catch (err) {
+    if (res.ok && json.success) {
+      notifyDataChange();
+      return json;
+    }
+    return { success: false, message: json.message || `HTTP ${res.status} Error` };
+  } catch (err: any) {
     console.error('[API ERR] POST Menu Item failed:', err);
-    return { success: false, message: 'Network connection error' };
+    return { success: false, message: err.message ? `Network Error: ${err.message}` : 'Failed to reach server. Please check internet connection.' };
   }
 }
 
@@ -172,11 +204,14 @@ export async function updateMenuItemApi(id: number, item: {
     });
     const json = await res.json();
     console.log('[API RES] PUT Menu Item ID:', id, 'status:', res.status, '[DATA]:', json);
-    notifyDataChange();
-    return json;
-  } catch (err) {
+    if (res.ok && json.success) {
+      notifyDataChange();
+      return json;
+    }
+    return { success: false, message: json.message || `HTTP ${res.status} Error` };
+  } catch (err: any) {
     console.error('[API ERR] PUT Menu Item failed:', err);
-    return { success: false, message: 'Network connection error' };
+    return { success: false, message: err.message ? `Network Error: ${err.message}` : 'Failed to reach server. Please check internet connection.' };
   }
 }
 
