@@ -226,13 +226,16 @@ function App() {
   });
 
   const categories = useMemo(() => {
-    return ['All', ...Array.from(new Set(menuStore.map((item) => item.category)))];
+    const activeItems = menuStore.filter((item) => item.inStock !== false);
+    return ['All', ...Array.from(new Set(activeItems.map((item) => item.category)))];
   }, [menuStore]);
 
   const filteredMenu = useMemo(() => {
-    let result = selectedCategory === 'All'
-      ? menuStore
-      : menuStore.filter((item) => item.category === selectedCategory);
+    let result = menuStore.filter((item) => item.inStock !== false);
+
+    if (selectedCategory !== 'All') {
+      result = result.filter((item) => item.category === selectedCategory);
+    }
 
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase();
@@ -735,71 +738,60 @@ function App() {
                     <p className="mt-2 text-slate-400">Try a different search or category</p>
                   </div>
                 )}
-                {filteredMenu.map((item, index) => {
-                  const isInStock = item.inStock !== false;
-                  return (
-                    <motion.article 
-                      initial={{ opacity: 0, y: 20 }} 
-                      whileInView={{ opacity: 1, y: 0 }} 
-                      viewport={{ once: true }} 
-                      transition={{ delay: index * 0.03 }} 
-                      key={item.id} 
-                      className={`flex flex-col h-full overflow-hidden rounded-2xl border bg-[#fffaf3] shadow-sm hover:shadow-md transition-shadow dark:bg-slate-950 ${isInStock ? 'border-orange-100 dark:border-slate-800' : 'border-red-200 dark:border-red-900/40 opacity-90'}`}
-                    >
-                      {/* Image container with top-left badge & Out of Stock overlay */}
-                      <div className="relative h-32 sm:h-36 w-full overflow-hidden bg-slate-100 dark:bg-slate-900">
-                        <img 
-                          src={item.image} 
-                          alt={item.name} 
-                          className={`h-full w-full object-cover transition duration-300 ${isInStock ? 'hover:scale-105' : 'grayscale-[40%]'}`} 
-                          loading="lazy" 
-                        />
-                        {item.tag && isInStock && (
-                          <span className="absolute left-2 top-2 rounded-full bg-white/95 px-2 py-0.5 text-[10px] sm:text-xs font-black text-orange-700 shadow-sm backdrop-blur-xs">
-                            {item.tag}
+                {filteredMenu.map((item, index) => (
+                  <motion.article 
+                    initial={{ opacity: 0, y: 20 }} 
+                    whileInView={{ opacity: 1, y: 0 }} 
+                    viewport={{ once: true }} 
+                    transition={{ delay: index * 0.03 }} 
+                    key={item.id} 
+                    className="flex flex-col h-full overflow-hidden rounded-2xl border border-orange-100 bg-[#fffaf3] shadow-sm hover:shadow-md transition-shadow dark:border-slate-800 dark:bg-slate-950"
+                  >
+                    {/* Image container with top-left badge */}
+                    <div className="relative h-32 sm:h-36 w-full overflow-hidden bg-slate-100 dark:bg-slate-900">
+                      <img 
+                        src={item.image} 
+                        alt={item.name} 
+                        className="h-full w-full object-cover transition duration-300 hover:scale-105" 
+                        loading="lazy" 
+                      />
+                      {item.tag && (
+                        <span className="absolute left-2 top-2 rounded-full bg-white/95 px-2 py-0.5 text-[10px] sm:text-xs font-black text-orange-700 shadow-sm backdrop-blur-xs">
+                          {item.tag}
+                        </span>
+                      )}
+                    </div>
+
+                    {/* Content area */}
+                    <div className="p-3 sm:p-4 flex-1 flex flex-col justify-between">
+                      <div>
+                        {/* Title & Price */}
+                        <div className="flex items-start justify-between gap-1.5">
+                          <h3 className="text-sm sm:text-base font-black leading-snug line-clamp-2 text-slate-900 dark:text-white min-h-[2.5rem]">
+                            {item.name}
+                          </h3>
+                          <span className="font-black text-orange-700 dark:text-orange-300 text-sm sm:text-base whitespace-nowrap pt-0.5">
+                            {formatCurrency(item.price)}
                           </span>
-                        )}
-                        {!isInStock && (
-                          <div className="absolute inset-0 bg-slate-950/60 backdrop-blur-[1px] flex items-center justify-center p-2">
-                            <span className="bg-red-600 text-white text-[10px] sm:text-xs font-black px-2.5 py-1 rounded-full uppercase tracking-wider shadow-lg border border-red-400 animate-pulse">
-                              🔴 OUT OF STOCK
-                            </span>
-                          </div>
-                        )}
-                      </div>
-
-                      {/* Content area */}
-                      <div className="p-3 sm:p-4 flex-1 flex flex-col justify-between">
-                        <div>
-                          {/* Title & Price */}
-                          <div className="flex items-start justify-between gap-1.5">
-                            <h3 className="text-sm sm:text-base font-black leading-snug line-clamp-2 text-slate-900 dark:text-white min-h-[2.5rem]">
-                              {item.name}
-                            </h3>
-                            <span className="font-black text-orange-700 dark:text-orange-300 text-sm sm:text-base whitespace-nowrap pt-0.5">
-                              {formatCurrency(item.price)}
-                            </span>
-                          </div>
-
-                          {/* 1-line Description with ellipsis */}
-                          <p className="mt-1 text-xs text-slate-500 dark:text-slate-400 truncate">
-                            {item.description}
-                          </p>
                         </div>
 
-                        {/* Full-width compact Add to cart button */}
-                        <button 
-                          type="button" 
-                          disabled={!isInStock}
-                          onClick={() => isInStock && addToCart(item)} 
-                          className={`mt-3 w-full py-1.5 sm:py-2 px-2 text-xs sm:text-sm font-black rounded-full shadow-sm transition-all flex items-center justify-center gap-1 ${isInStock ? 'btn-primary hover:scale-[1.02] active:scale-95' : 'bg-slate-200 text-slate-500 dark:bg-slate-800 dark:text-slate-500 cursor-not-allowed'}`}
-                        >
-                          {isInStock ? 'Add to cart' : 'Currently Out of Stock'}
-                        </button>
+                        {/* 1-line Description with ellipsis */}
+                        <p className="mt-1 text-xs text-slate-500 dark:text-slate-400 truncate">
+                          {item.description}
+                        </p>
                       </div>
-                    </motion.article>
-                  );
-                })}
+
+                      {/* Full-width compact Add to cart button */}
+                      <button 
+                        type="button" 
+                        onClick={() => addToCart(item)} 
+                        className="btn-primary mt-3 w-full py-1.5 sm:py-2 px-2 text-xs sm:text-sm font-black rounded-full shadow-sm hover:scale-[1.02] active:scale-95 transition-transform flex items-center justify-center gap-1"
+                      >
+                        Add to cart
+                      </button>
+                    </div>
+                  </motion.article>
+                ))}
               </div>
             </div>
           </motion.section>
