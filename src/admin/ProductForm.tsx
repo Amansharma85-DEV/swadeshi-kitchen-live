@@ -1,7 +1,7 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { X, Upload, Image as ImageIcon } from 'lucide-react';
 import { addMenuItem, editMenuItem, type MenuItem } from '../lib/store';
-import { createMenuItemApi, updateMenuItemApi } from '../lib/api';
+import { createMenuItemApi, updateMenuItemApi, fetchApiCategories, type ApiCategory } from '../lib/api';
 
 export default function ProductForm({ 
   onClose, 
@@ -12,6 +12,7 @@ export default function ProductForm({
   onSave: () => void,
   initialData?: MenuItem 
 }) {
+  const [categories, setCategories] = useState<ApiCategory[]>([]);
   const [formData, setFormData] = useState({
     name: initialData?.name || '',
     category: initialData?.category || '',
@@ -21,6 +22,17 @@ export default function ProductForm({
     tag: initialData?.tag || ''
   });
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    fetchApiCategories().then((cats) => {
+      if (cats && cats.length > 0) {
+        setCategories(cats);
+        if (!formData.category) {
+          setFormData(prev => ({ ...prev, category: cats[0].name }));
+        }
+      }
+    });
+  }, []);
 
   // Handle local image upload and convert to base64
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -70,6 +82,9 @@ export default function ProductForm({
       alert("Name, Category, and Price are required.");
       return;
     }
+
+    const matchedCat = categories.find(c => c.name.toLowerCase() === formData.category.toLowerCase());
+    const category_id = matchedCat ? matchedCat.id : 1;
     
     const productData = {
       name: formData.name,
@@ -84,6 +99,7 @@ export default function ProductForm({
 
     if (initialData) {
       await updateMenuItemApi(initialData.id, {
+        category_id,
         name: productData.name,
         description: productData.description,
         price: productData.price,
@@ -93,6 +109,7 @@ export default function ProductForm({
       editMenuItem(initialData.id, productData);
     } else {
       await createMenuItemApi({
+        category_id,
         name: productData.name,
         description: productData.description,
         price: productData.price,
