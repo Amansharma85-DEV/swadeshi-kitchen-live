@@ -62,20 +62,12 @@ export function subscribeToLiveSync(onUpdate: () => void) {
   };
 }
 
-const ZERO_CACHE_HEADERS = {
-  'Cache-Control': 'no-cache, no-store, must-revalidate',
-  'Pragma': 'no-cache',
-  'Expires': '0'
-};
-
 // Fetch all menu items from AWS EC2 API
 export async function fetchApiMenu(): Promise<ApiMenuItem[] | null> {
   const url = `${API_BASE_URL}/menu?_t=${Date.now()}`;
   console.log('[API REQ] GET Menu:', url);
   try {
-    const res = await fetch(url, {
-      headers: ZERO_CACHE_HEADERS
-    });
+    const res = await fetch(url);
     if (!res.ok) {
       console.warn('[API RES ERR] GET Menu failed with status:', res.status);
       return null;
@@ -96,9 +88,7 @@ export async function fetchApiCategories(): Promise<ApiCategory[] | null> {
   const url = `${API_BASE_URL}/categories?_t=${Date.now()}`;
   console.log('[API REQ] GET Categories:', url);
   try {
-    const res = await fetch(url, {
-      headers: ZERO_CACHE_HEADERS
-    });
+    const res = await fetch(url);
     if (!res.ok) {
       console.warn('[API RES ERR] GET Categories failed with status:', res.status);
       return null;
@@ -138,7 +128,7 @@ export async function uploadImageFileApi(file: File): Promise<{ success: boolean
     }
     return { success: false, message: json.message || `Server returned HTTP ${res.status}` };
   } catch (err: any) {
-    console.warn('[API ERR] Direct upload failed, falling back to local compressed base64:', err.message);
+    console.warn('[API ERR] Direct upload failed:', err.message);
     return { success: false, message: err.message || 'Direct upload unavailable' };
   }
 }
@@ -161,7 +151,6 @@ export async function createMenuItemApi(item: {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        ...ZERO_CACHE_HEADERS,
         ...(token ? { 'Authorization': `Bearer ${token}` } : {})
       },
       body: JSON.stringify(item)
@@ -197,7 +186,6 @@ export async function updateMenuItemApi(id: number, item: {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
-        ...ZERO_CACHE_HEADERS,
         ...(token ? { 'Authorization': `Bearer ${token}` } : {})
       },
       body: JSON.stringify(item)
@@ -224,7 +212,6 @@ export async function deleteMenuItemApi(id: number) {
     const res = await fetch(url, {
       method: 'DELETE',
       headers: {
-        ...ZERO_CACHE_HEADERS,
         ...(token ? { 'Authorization': `Bearer ${token}` } : {})
       }
     });
@@ -248,7 +235,6 @@ export async function createCategoryApi(category: { name: string; description?: 
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        ...ZERO_CACHE_HEADERS,
         ...(token ? { 'Authorization': `Bearer ${token}` } : {})
       },
       body: JSON.stringify(category)
@@ -273,7 +259,6 @@ export async function updateCategoryApi(id: number, category: { name?: string; d
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
-        ...ZERO_CACHE_HEADERS,
         ...(token ? { 'Authorization': `Bearer ${token}` } : {})
       },
       body: JSON.stringify(category)
@@ -297,7 +282,6 @@ export async function deleteCategoryApi(id: number) {
     const res = await fetch(url, {
       method: 'DELETE',
       headers: {
-        ...ZERO_CACHE_HEADERS,
         ...(token ? { 'Authorization': `Bearer ${token}` } : {})
       }
     });
@@ -319,7 +303,6 @@ export async function fetchApiOrders() {
     const token = localStorage.getItem('swadeshi_token');
     const res = await fetch(url, {
       headers: {
-        ...ZERO_CACHE_HEADERS,
         ...(token ? { 'Authorization': `Bearer ${token}` } : {})
       }
     });
@@ -360,8 +343,7 @@ export async function submitApiOrder(orderData: {
     const res = await fetch(url, {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json',
-        ...ZERO_CACHE_HEADERS
+        'Content-Type': 'application/json'
       },
       body: JSON.stringify(payload)
     });
@@ -385,7 +367,6 @@ export async function updateOrderStatusApi(id: number, status: string) {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
-        ...ZERO_CACHE_HEADERS,
         ...(token ? { 'Authorization': `Bearer ${token}` } : {})
       },
       body: JSON.stringify({ status })
@@ -408,8 +389,7 @@ export async function adminLoginApi(credentials: { email: string; password: stri
     const res = await fetch(url, {
       method: 'POST',
       headers: { 
-        'Content-Type': 'application/json',
-        ...ZERO_CACHE_HEADERS
+        'Content-Type': 'application/json'
       },
       body: JSON.stringify(credentials)
     });
@@ -427,9 +407,7 @@ export async function fetchApiSetting<T>(key: string): Promise<T | null> {
   const url = `${API_BASE_URL}/settings/${key}?_t=${Date.now()}`;
   console.log('[API REQ] GET Setting Key:', key, url);
   try {
-    const res = await fetch(url, {
-      headers: ZERO_CACHE_HEADERS
-    });
+    const res = await fetch(url);
     if (!res.ok) return null;
     const json = await res.json();
     if (json.success && json.data?.value !== undefined) {
@@ -450,8 +428,7 @@ export async function saveApiSetting<T>(key: string, value: T) {
     const res = await fetch(url, {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json',
-        ...ZERO_CACHE_HEADERS
+        'Content-Type': 'application/json'
       },
       body: JSON.stringify({ value })
     });
