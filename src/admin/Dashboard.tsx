@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
 import { ShoppingCart, DollarSign, Package, TrendingUp } from 'lucide-react';
-import { getMenu } from '../lib/store';
-import { readLocalOrders, type StoredOrder } from '../lib/firebase';
+import { fetchApiMenu, fetchApiOrders } from '../lib/api';
 
 export default function Dashboard() {
   const [metrics, setMetrics] = useState({
@@ -9,22 +8,43 @@ export default function Dashboard() {
     activeMenuItems: 0,
     revenueToday: 0,
   });
-  const [recentOrders, setRecentOrders] = useState<StoredOrder[]>([]);
+  const [recentOrders, setRecentOrders] = useState<any[]>([]);
 
-  useEffect(() => {
-    const menu = getMenu();
-    const orders = readLocalOrders();
-    
-    // Calculate today's revenue (just summing all for now in this demo)
-    const revenue = orders.reduce((sum, order) => sum + (order.totals?.grandTotal || 0), 0);
+  const loadDashboardData = async () => {
+    const [apiItems, apiOrders] = await Promise.all([
+      fetchApiMenu(),
+      fetchApiOrders()
+    ]);
+
+    const activeCount = apiItems ? apiItems.length : 0;
+    const ordersList = apiOrders || [];
+
+    const revenue = ordersList.reduce((sum: number, order: any) => sum + Number(order.grand_total || 0), 0);
 
     setMetrics({
-      totalOrders: orders.length,
-      activeMenuItems: menu.length,
+      totalOrders: ordersList.length,
+      activeMenuItems: activeCount,
       revenueToday: revenue,
     });
 
-    setRecentOrders(orders.slice(0, 5));
+    const mappedOrders = ordersList.slice(0, 5).map((o: any) => ({
+      id: o.order_code || `SK-${o.id}`,
+      customer: {
+        name: o.customer_name,
+        phone: o.customer_phone,
+      },
+      items: Array.isArray(o.items) ? o.items : [],
+      totals: { grandTotal: Number(o.grand_total) },
+      status: o.status
+    }));
+
+    setRecentOrders(mappedOrders);
+  };
+
+  useEffect(() => {
+    loadDashboardData();
+    const interval = setInterval(loadDashboardData, 3000);
+    return () => clearInterval(interval);
   }, []);
 
   return (
@@ -92,7 +112,7 @@ export default function Dashboard() {
               ) : (
                 recentOrders.map((order) => (
                   <tr key={order.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/50">
-                    <td className="px-6 py-4 font-mono font-bold text-slate-900 dark:text-white">#{order.id.slice(0,6).toUpperCase()}</td>
+                    <td className="px-6 py-4 font-mono font-bold text-slate-900 dark:text-white">#{order.id.slice(0,10).toUpperCase()}</td>
                     <td className="px-6 py-4">
                       <p className="font-bold">{order.customer.name}</p>
                       <p className="text-xs text-slate-500">{order.customer.phone}</p>
