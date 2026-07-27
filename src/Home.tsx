@@ -117,16 +117,19 @@ function App() {
     const syncLiveMenu = () => {
       fetchApiMenu().then((apiItems) => {
         if (apiItems && apiItems.length > 0) {
-          const mappedItems: StoreMenuItem[] = apiItems.map(item => ({
-            id: item.id,
-            name: item.name,
-            category: item.category_name || 'Our Special Paranthas',
-            description: item.description,
-            price: Number(item.price),
-            image: item.image_url || 'https://amansharma85-dev.github.io/swadeshi-kitchen-live/stuffed_paratha.png',
-            tag: item.tag || 'Popular',
-            inStock: item.is_available
-          }));
+          const mappedItems: StoreMenuItem[] = apiItems.map(item => {
+            const isInStock = item.is_available === undefined || item.is_available === 1 || item.is_available === true || item.is_available === '1' || item.is_available === 'true';
+            return {
+              id: item.id,
+              name: item.name,
+              category: item.category_name || 'Our Special Paranthas',
+              description: item.description,
+              price: Number(item.price),
+              image: item.image_url || 'https://amansharma85-dev.github.io/swadeshi-kitchen-live/stuffed_paratha.png',
+              tag: item.tag || 'Popular',
+              inStock: isInStock
+            };
+          });
           setMenuStore(mappedItems);
         }
       });

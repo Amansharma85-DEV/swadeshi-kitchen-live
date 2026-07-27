@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
-import { Plus, Edit2, Trash2, Search, Image as ImageIcon, ToggleLeft, ToggleRight } from 'lucide-react';
-import { getMenu, deleteMenuItem, type MenuItem } from '../lib/store';
+import { Plus, Edit2, Trash2, Search, Image as ImageIcon } from 'lucide-react';
+import { getMenu, type MenuItem } from '../lib/store';
 import { fetchApiMenu, updateMenuItemApi, deleteMenuItemApi } from '../lib/api';
 import ProductForm from './ProductForm';
 
@@ -14,17 +14,20 @@ export default function Products() {
   const loadProducts = async () => {
     const apiItems = await fetchApiMenu();
     if (apiItems && apiItems.length > 0) {
-      const mapped: MenuItem[] = apiItems.map(item => ({
-        id: item.id,
-        name: item.name,
-        category: item.category_name || 'Our Special Paranthas',
-        description: item.description,
-        price: Number(item.price),
-        image: item.image_url || 'https://amansharma85-dev.github.io/swadeshi-kitchen-live/stuffed_paratha.png',
-        tag: item.tag || 'Popular',
-        status: item.is_available ? 'In Stock' : 'Out of Stock',
-        inStock: item.is_available
-      }));
+      const mapped: MenuItem[] = apiItems.map(item => {
+        const isInStock = item.is_available === undefined || item.is_available === 1 || item.is_available === true || item.is_available === '1' || item.is_available === 'true';
+        return {
+          id: item.id,
+          name: item.name,
+          category: item.category_name || 'Our Special Paranthas',
+          description: item.description,
+          price: Number(item.price),
+          image: item.image_url || 'https://amansharma85-dev.github.io/swadeshi-kitchen-live/stuffed_paratha.png',
+          tag: item.tag || 'Popular',
+          status: isInStock ? 'In Stock' : 'Out of Stock',
+          inStock: isInStock
+        };
+      });
       setProducts(mapped);
     } else {
       setProducts(getMenu().map(item => ({
@@ -48,8 +51,26 @@ export default function Products() {
 
   const handleToggleStock = async (product: MenuItem) => {
     const nextStock = !product.inStock;
-    await updateMenuItemApi(product.id, { is_available: nextStock });
-    loadProducts();
+    
+    // ⚡ Optimistic UI Update for zero-lag instant UI flip
+    setProducts(prev => prev.map(p => 
+      p.id === product.id 
+        ? { ...p, inStock: nextStock, status: nextStock ? 'In Stock' : 'Out of Stock' } 
+        : p
+    ));
+
+    try {
+      await updateMenuItemApi(product.id, { is_available: nextStock });
+      window.dispatchEvent(new Event('swadeshi-force-sync'));
+    } catch (err) {
+      console.error('Failed to update stock status on server:', err);
+      // Revert if API failed
+      setProducts(prev => prev.map(p => 
+        p.id === product.id 
+          ? { ...p, inStock: product.inStock, status: product.inStock ? 'In Stock' : 'Out of Stock' } 
+          : p
+      ));
+    }
   };
 
   const handleDelete = async (id: number) => {
@@ -112,19 +133,19 @@ export default function Products() {
       <div className="mt-6 flex flex-wrap gap-2">
         <button
           onClick={() => setStockFilter('all')}
-          className={`px-4 py-2 rounded-lg text-xs font-black uppercase tracking-wider transition-colors ${stockFilter === 'all' ? 'bg-slate-900 text-white dark:bg-white dark:text-slate-900' : 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-800'}`}
+          className={`px-4 py-2 rounded-lg text-xs font-black uppercase tracking-wider transition-colors ${stockFilter === 'all' ? 'bg-slate-900 text-white dark:bg-white dark:text-slate-900 shadow-sm' : 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-800'}`}
         >
           All Products ({products.length})
         </button>
         <button
           onClick={() => setStockFilter('in_stock')}
-          className={`px-4 py-2 rounded-lg text-xs font-black uppercase tracking-wider flex items-center gap-1.5 transition-colors ${stockFilter === 'in_stock' ? 'bg-emerald-600 text-white' : 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800/40'}`}
+          className={`px-4 py-2 rounded-lg text-xs font-black uppercase tracking-wider flex items-center gap-1.5 transition-colors ${stockFilter === 'in_stock' ? 'bg-emerald-600 text-white shadow-sm' : 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800/40'}`}
         >
           <span>🟢</span> In Stock ({inStockCount})
         </button>
         <button
           onClick={() => setStockFilter('out_of_stock')}
-          className={`px-4 py-2 rounded-lg text-xs font-black uppercase tracking-wider flex items-center gap-1.5 transition-colors ${stockFilter === 'out_of_stock' ? 'bg-red-600 text-white' : 'bg-red-50 dark:bg-red-950/40 text-red-700 dark:text-red-400 border border-red-200 dark:border-red-800/40'}`}
+          className={`px-4 py-2 rounded-lg text-xs font-black uppercase tracking-wider flex items-center gap-1.5 transition-colors ${stockFilter === 'out_of_stock' ? 'bg-red-600 text-white shadow-sm' : 'bg-red-50 dark:bg-red-950/40 text-red-700 dark:text-red-400 border border-red-200 dark:border-red-800/40'}`}
         >
           <span>🔴</span> Out of Stock ({outOfStockCount})
         </button>
@@ -151,7 +172,7 @@ export default function Products() {
                 <th className="px-6 py-4">Product Name</th>
                 <th className="px-6 py-4">Category</th>
                 <th className="px-6 py-4">Price</th>
-                <th className="px-6 py-4">Stock Status</th>
+                <th className="px-6 py-4">Stock Availability</th>
                 <th className="px-6 py-4 text-right">Actions</th>
               </tr>
             </thead>
@@ -175,25 +196,23 @@ export default function Products() {
                             <ImageIcon size={18} />
                           )}
                         </div>
-                        <span className="text-slate-900 dark:text-white">{product.name}</span>
+                        <span className="text-slate-900 dark:text-white font-bold">{product.name}</span>
                       </td>
                       <td className="px-6 py-4 text-slate-600 dark:text-slate-400 font-semibold">{product.category}</td>
                       <td className="px-6 py-4 text-slate-900 dark:text-white font-black">Rs {product.price}</td>
                       <td className="px-6 py-4">
+                        {/* Premium iOS-style Toggle Switch */}
                         <button
                           onClick={() => handleToggleStock(product)}
                           title="Click to toggle stock status"
-                          className="flex items-center gap-2 group focus:outline-none"
+                          className="flex items-center gap-3 group focus:outline-none"
                         >
-                          {isInStock ? (
-                            <span className="bg-emerald-100 text-emerald-800 dark:bg-emerald-500/20 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800/50 px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider flex items-center gap-1.5 hover:bg-emerald-200 transition-colors">
-                              <span>🟢</span> In Stock
-                            </span>
-                          ) : (
-                            <span className="bg-red-100 text-red-800 dark:bg-red-500/20 dark:text-red-400 border border-red-200 dark:border-red-800/50 px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider flex items-center gap-1.5 hover:bg-red-200 transition-colors">
-                              <span>🔴</span> Out of Stock
-                            </span>
-                          )}
+                          <div className={`w-11 h-6 flex items-center rounded-full p-1 cursor-pointer transition-colors duration-300 ${isInStock ? 'bg-emerald-500' : 'bg-slate-300 dark:bg-slate-700'}`}>
+                            <div className={`bg-white w-4 h-4 rounded-full shadow-md transform transition-transform duration-300 ${isInStock ? 'translate-x-5' : 'translate-x-0'}`} />
+                          </div>
+                          <span className={`text-xs font-black uppercase tracking-wider px-2.5 py-1 rounded-full border ${isInStock ? 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-400 dark:border-emerald-800/40' : 'bg-red-50 text-red-700 border-red-200 dark:bg-red-950/40 dark:text-red-400 dark:border-red-800/40'}`}>
+                            {isInStock ? '🟢 In Stock' : '🔴 Out of Stock'}
+                          </span>
                         </button>
                       </td>
                       <td className="px-6 py-4 text-right">
