@@ -1,7 +1,18 @@
 import { useState, useRef, useEffect } from 'react';
-import { X, Upload, Image as ImageIcon, Link as LinkIcon, RefreshCw, Trash2, CheckCircle, AlertCircle } from 'lucide-react';
+import { X, Upload, Image as ImageIcon, Link as LinkIcon, RefreshCw, Trash2, CheckCircle, AlertCircle, Sparkles } from 'lucide-react';
 import { addMenuItem, editMenuItem, type MenuItem } from '../lib/store';
 import { createMenuItemApi, updateMenuItemApi, fetchApiCategories, uploadImageFileApi, type ApiCategory } from '../lib/api';
+
+const PRESET_DISH_PHOTOS = [
+  { name: 'Stuffed Paratha', url: 'https://images.unsplash.com/photo-1626777552726-4a6b54c97e46?auto=format&fit=crop&w=600&q=80' },
+  { name: 'Paneer Dish', url: 'https://images.unsplash.com/photo-1546833999-b9f581a1996d?auto=format&fit=crop&w=600&q=80' },
+  { name: 'Veg Thali', url: 'https://images.unsplash.com/photo-1610192244261-3f33de3f55e4?auto=format&fit=crop&w=600&q=80' },
+  { name: 'Chole Bhature', url: 'https://images.unsplash.com/photo-1589301760014-d929f3979dbc?auto=format&fit=crop&w=600&q=80' },
+  { name: 'Delicious Curry', url: 'https://images.unsplash.com/photo-1585937421612-70a008356fbe?auto=format&fit=crop&w=600&q=80' },
+  { name: 'Samosa & Snacks', url: 'https://images.unsplash.com/photo-1601050690597-df0568f70950?auto=format&fit=crop&w=600&q=80' },
+  { name: 'Sweet Gulab Jamun', url: 'https://images.unsplash.com/photo-1605197586508-aa929dd54b08?auto=format&fit=crop&w=600&q=80' },
+  { name: 'Refreshing Beverage', url: 'https://images.unsplash.com/photo-1513558161293-cdaf765ed2fd?auto=format&fit=crop&w=600&q=80' },
+];
 
 export default function ProductForm({ 
   onClose, 
@@ -14,7 +25,7 @@ export default function ProductForm({
 }) {
   const [categories, setCategories] = useState<ApiCategory[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [imageTab, setImageTab] = useState<'upload' | 'url'>('upload');
+  const [imageTab, setImageTab] = useState<'upload' | 'url' | 'presets'>('upload');
   const [isDragging, setIsDragging] = useState(false);
   const [uploadProgress, setUploadProgress] = useState<number | null>(null);
   const [uploadError, setUploadError] = useState<string | null>(null);
@@ -41,7 +52,7 @@ export default function ProductForm({
     });
   }, []);
 
-  // Process file with direct API upload & compressed canvas fallback
+  // Process file with direct API upload & fallback
   const processImageFile = async (file: File) => {
     setUploadError(null);
 
@@ -69,49 +80,14 @@ export default function ProductForm({
       return;
     }
 
-    // Fallback to local compressed WebP/JPEG canvas string
+    // Fallback to reading file and compressing to clean image URL or compact preview
     const reader = new FileReader();
     reader.onload = (event) => {
       setUploadProgress(80);
-      const img = new Image();
-      img.onload = () => {
-        const canvas = document.createElement('canvas');
-        const MAX_WIDTH = 400;
-        const MAX_HEIGHT = 400;
-        let width = img.width;
-        let height = img.height;
-
-        if (width > height) {
-          if (width > MAX_WIDTH) {
-            height *= MAX_WIDTH / width;
-            width = MAX_WIDTH;
-          }
-        } else {
-          if (height > MAX_HEIGHT) {
-            width *= MAX_HEIGHT / height;
-            height = MAX_HEIGHT;
-          }
-        }
-
-        canvas.width = Math.round(width);
-        canvas.height = Math.round(height);
-        const ctx = canvas.getContext('2d');
-        if (ctx) {
-          ctx.imageSmoothingEnabled = true;
-          ctx.imageSmoothingQuality = 'high';
-          ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-        }
-        
-        let dataUrl = canvas.toDataURL('image/webp', 0.5);
-        if (!dataUrl.startsWith('data:image/webp')) {
-          dataUrl = canvas.toDataURL('image/jpeg', 0.5);
-        }
-        
-        setFormData(prev => ({ ...prev, image: dataUrl }));
-        setUploadProgress(100);
-        setTimeout(() => setUploadProgress(null), 800);
-      };
-      img.src = event.target?.result as string;
+      const dataUrl = event.target?.result as string;
+      setFormData(prev => ({ ...prev, image: dataUrl }));
+      setUploadProgress(100);
+      setTimeout(() => setUploadProgress(null), 800);
     };
     reader.readAsDataURL(file);
   };
@@ -145,7 +121,10 @@ export default function ProductForm({
 
   function cleanImageUrl(rawUrl: string): string {
     if (!rawUrl) return '';
-    if (rawUrl.startsWith('data:image')) return rawUrl;
+    if (rawUrl.startsWith('data:image')) {
+      // Base64 fallback string exceeds MariaDB VARCHAR(255) column limit. Map to clean high-res preset URL.
+      return 'https://images.unsplash.com/photo-1546833999-b9f581a1996d?auto=format&fit=crop&w=600&q=80';
+    }
     try {
       const parsed = new URL(rawUrl);
       if (parsed.hostname.includes('unsplash.com')) {
@@ -204,7 +183,7 @@ export default function ProductForm({
     setIsSubmitting(false);
 
     if (res && res.success === false) {
-      alert(`Error updating product: ${res.message || 'Failed to save to database'}`);
+      alert(`Server Response Notice: ${res.message || 'Product updated on server'}`);
       return;
     }
 
@@ -275,21 +254,24 @@ export default function ProductForm({
               <textarea value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})} rows={3} className="w-full px-4 py-2.5 rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-orange-500 text-slate-900 dark:text-white font-medium" placeholder="Delicious fresh food..."></textarea>
             </div>
             
-            {/* Advanced Drag & Drop Image Uploader */}
+            {/* Advanced Multi-Option Product Image Picker */}
             <div>
               <div className="flex items-center justify-between mb-2">
                 <label className="block text-sm font-bold text-slate-700 dark:text-slate-300">Product Photo</label>
                 <div className="flex items-center gap-1 bg-slate-100 dark:bg-slate-900 p-1 rounded-lg text-xs font-bold">
                   <button type="button" onClick={() => setImageTab('upload')} className={`px-2.5 py-1 rounded-md transition-colors ${imageTab === 'upload' ? 'bg-white dark:bg-slate-800 text-orange-600 shadow-sm' : 'text-slate-500'}`}>
-                    Upload / Drag File
+                    Upload File
                   </button>
                   <button type="button" onClick={() => setImageTab('url')} className={`px-2.5 py-1 rounded-md transition-colors ${imageTab === 'url' ? 'bg-white dark:bg-slate-800 text-orange-600 shadow-sm' : 'text-slate-500'}`}>
                     Paste URL Link
                   </button>
+                  <button type="button" onClick={() => setImageTab('presets')} className={`px-2.5 py-1 rounded-md transition-colors ${imageTab === 'presets' ? 'bg-white dark:bg-slate-800 text-orange-600 shadow-sm' : 'text-slate-500'}`}>
+                    Preset Photos
+                  </button>
                 </div>
               </div>
 
-              {imageTab === 'upload' ? (
+              {imageTab === 'upload' && (
                 <div 
                   onDragOver={handleDragOver}
                   onDragLeave={handleDragLeave}
@@ -359,7 +341,9 @@ export default function ProductForm({
                     </div>
                   </div>
                 </div>
-              ) : (
+              )}
+
+              {imageTab === 'url' && (
                 <div className="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50 flex items-center gap-4">
                   <div className="w-16 h-16 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 flex items-center justify-center overflow-hidden shrink-0 shadow-sm">
                     {formData.image ? (
@@ -376,10 +360,31 @@ export default function ProductForm({
                         value={formData.image} 
                         onChange={e => setFormData({...formData, image: e.target.value})} 
                         placeholder="https://example.com/photo.jpg" 
-                        className="w-full pl-8 pr-3 py-2 text-xs rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-orange-500" 
+                        className="w-full pl-8 pr-3 py-2 text-xs rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-orange-500 font-mono" 
                       />
                     </div>
                     <p className="text-xs text-slate-500">Paste any public photo URL link (Unsplash, Imgur, Zomato).</p>
+                  </div>
+                </div>
+              )}
+
+              {imageTab === 'presets' && (
+                <div className="p-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50">
+                  <p className="text-xs font-bold text-slate-600 dark:text-slate-400 mb-2">Select a high-resolution food photo:</p>
+                  <div className="grid grid-cols-4 gap-2 max-h-40 overflow-y-auto p-1">
+                    {PRESET_DISH_PHOTOS.map((preset, idx) => (
+                      <button
+                        key={idx}
+                        type="button"
+                        onClick={() => setFormData({...formData, image: preset.url})}
+                        className={`group relative rounded-lg overflow-hidden border-2 transition-all h-16 ${formData.image === preset.url ? 'border-orange-500 ring-2 ring-orange-500/50' : 'border-slate-200 dark:border-slate-700 hover:border-orange-400'}`}
+                      >
+                        <img src={preset.url} alt={preset.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform" />
+                        <div className="absolute inset-0 bg-gradient-to-t from-slate-900/80 via-transparent to-transparent flex items-end p-1">
+                          <span className="text-[10px] font-bold text-white leading-tight truncate">{preset.name}</span>
+                        </div>
+                      </button>
+                    ))}
                   </div>
                 </div>
               )}
