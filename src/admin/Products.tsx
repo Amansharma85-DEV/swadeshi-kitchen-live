@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Plus, Edit2, Trash2, Search, Image as ImageIcon } from 'lucide-react';
+import { Plus, Edit2, Trash2, Search, Image as ImageIcon, Copy, ChevronLeft, ChevronRight } from 'lucide-react';
 import { getMenu, saveMenu, type MenuItem } from '../lib/store';
 import { fetchApiMenu, updateMenuItemApi, deleteMenuItemApi, subscribeToLiveSync } from '../lib/api';
 import ProductForm from './ProductForm';
@@ -10,6 +10,8 @@ export default function Products() {
   const [products, setProducts] = useState<MenuItem[]>([]);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<MenuItem | undefined>(undefined);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
   const lastActionTimeRef = useRef<number>(0);
 
   const loadProducts = async (force: boolean = false) => {
@@ -96,6 +98,15 @@ export default function Products() {
     setIsFormOpen(true);
   };
 
+  const handleDuplicate = (product: MenuItem) => {
+    setEditingProduct({
+      ...product,
+      id: 0,
+      name: `${product.name} (Copy)`
+    });
+    setIsFormOpen(true);
+  };
+
   const handleCloseForm = () => {
     setIsFormOpen(false);
     setEditingProduct(undefined);
@@ -110,6 +121,11 @@ export default function Products() {
     if (stockFilter === 'out_of_stock') return matchesSearch && p.inStock === false;
     return matchesSearch;
   });
+
+  // Pagination calculation
+  const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const paginatedProducts = filteredProducts.slice(startIndex, startIndex + itemsPerPage);
 
   return (
     <div>
@@ -143,19 +159,19 @@ export default function Products() {
       {/* Filter Tabs */}
       <div className="mt-6 flex flex-wrap gap-2">
         <button
-          onClick={() => setStockFilter('all')}
+          onClick={() => { setStockFilter('all'); setCurrentPage(1); }}
           className={`px-4 py-2 rounded-lg text-xs font-black uppercase tracking-wider transition-colors ${stockFilter === 'all' ? 'bg-slate-900 text-white dark:bg-white dark:text-slate-900 shadow-sm' : 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-800'}`}
         >
           All Products ({products.length})
         </button>
         <button
-          onClick={() => setStockFilter('in_stock')}
+          onClick={() => { setStockFilter('in_stock'); setCurrentPage(1); }}
           className={`px-4 py-2 rounded-lg text-xs font-black uppercase tracking-wider flex items-center gap-1.5 transition-colors ${stockFilter === 'in_stock' ? 'bg-emerald-600 text-white shadow-sm' : 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800/40'}`}
         >
           <span>🟢</span> In Stock ({inStockCount})
         </button>
         <button
-          onClick={() => setStockFilter('out_of_stock')}
+          onClick={() => { setStockFilter('out_of_stock'); setCurrentPage(1); }}
           className={`px-4 py-2 rounded-lg text-xs font-black uppercase tracking-wider flex items-center gap-1.5 transition-colors ${stockFilter === 'out_of_stock' ? 'bg-red-600 text-white shadow-sm' : 'bg-red-50 dark:bg-red-950/40 text-red-700 dark:text-red-400 border border-red-200 dark:border-red-800/40'}`}
         >
           <span>🔴</span> Out of Stock ({outOfStockCount})
@@ -170,7 +186,7 @@ export default function Products() {
               type="text" 
               placeholder="Search products or categories..." 
               value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
+              onChange={(e) => { setSearchTerm(e.target.value); setCurrentPage(1); }}
               className="w-full pl-10 pr-4 py-2 border border-slate-200 dark:border-slate-700 rounded-lg text-sm bg-white dark:bg-slate-950 focus:outline-none focus:ring-2 focus:ring-orange-500 text-slate-900 dark:text-white"
             />
           </div>
@@ -188,14 +204,14 @@ export default function Products() {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
-              {filteredProducts.length === 0 ? (
+              {paginatedProducts.length === 0 ? (
                 <tr>
                   <td colSpan={5} className="px-6 py-8 text-center text-slate-500">
                     No products found matching filter.
                   </td>
                 </tr>
               ) : (
-                filteredProducts.map((product) => {
+                paginatedProducts.map((product) => {
                   const isInStock = product.inStock !== false;
                   return (
                     <tr key={product.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
@@ -228,7 +244,14 @@ export default function Products() {
                         </button>
                       </td>
                       <td className="px-6 py-4 text-right">
-                        <div className="flex justify-end gap-2">
+                        <div className="flex justify-end gap-1.5">
+                          <button 
+                            onClick={() => handleDuplicate(product)}
+                            className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-500/20 rounded-lg transition-colors"
+                            title="Duplicate / Copy Product"
+                          >
+                            <Copy size={16} />
+                          </button>
                           <button 
                             onClick={() => handleEdit(product)}
                             className="p-2 text-slate-400 hover:text-orange-600 hover:bg-orange-50 dark:hover:bg-orange-500/20 rounded-lg transition-colors"
@@ -252,6 +275,39 @@ export default function Products() {
             </tbody>
           </table>
         </div>
+
+        {/* Pagination Footer */}
+        {filteredProducts.length > 0 && (
+          <div className="p-4 border-t border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row justify-between items-center gap-4 bg-slate-50 dark:bg-slate-900/50 text-xs text-slate-500 font-medium">
+            <div>
+              Showing <span className="font-bold text-slate-900 dark:text-white">{startIndex + 1}</span> to <span className="font-bold text-slate-900 dark:text-white">{Math.min(startIndex + itemsPerPage, filteredProducts.length)}</span> of <span className="font-bold text-slate-900 dark:text-white">{filteredProducts.length}</span> products
+            </div>
+            
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                disabled={currentPage === 1}
+                className="px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 disabled:opacity-40 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors flex items-center gap-1 font-bold text-slate-700 dark:text-slate-300"
+              >
+                <ChevronLeft size={14} />
+                Previous
+              </button>
+
+              <span className="font-bold px-2 text-slate-700 dark:text-slate-300">
+                Page {currentPage} of {totalPages || 1}
+              </span>
+
+              <button
+                onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                disabled={currentPage >= totalPages || totalPages === 0}
+                className="px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 disabled:opacity-40 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors flex items-center gap-1 font-bold text-slate-700 dark:text-slate-300"
+              >
+                Next
+                <ChevronRight size={14} />
+              </button>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
