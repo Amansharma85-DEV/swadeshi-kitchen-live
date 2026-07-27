@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Plus, Trash2, Edit2, X } from 'lucide-react';
 import { getTestimonials, saveTestimonials, type Testimonial } from '../lib/store';
-import { fetchApiSetting, saveApiSetting } from '../lib/api';
+import { fetchApiSetting, saveApiSetting, subscribeToLiveSync } from '../lib/api';
 
 export default function Testimonials() {
   const [testimonials, setTestimonials] = useState<Testimonial[]>([]);

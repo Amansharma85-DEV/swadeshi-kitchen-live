@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Plus, Trash2 } from 'lucide-react';
 import { getOffers, saveOffers, type Offer } from '../lib/store';
-import { fetchApiSetting, saveApiSetting } from '../lib/api';
+import { fetchApiSetting, saveApiSetting, subscribeToLiveSync } from '../lib/api';
 
 export default function Offers() {
   const [offers, setOffers] = useState<Offer[]>([]);

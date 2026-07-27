@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Save, Image as ImageIcon, MessageCircle, Globe, Phone, MapPin, Mail, Clock } from 'lucide-react';
 import { getSettings, saveSettings, type GlobalSettings } from '../lib/store';
-import { fetchApiSetting, saveApiSetting } from '../lib/api';
+import { fetchApiSetting, saveApiSetting, subscribeToLiveSync } from '../lib/api';
 
 export default function Settings() {
   const [settings, setSettings] = useState<GlobalSettings | null>(null);

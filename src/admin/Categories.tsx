@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Layers, Edit2, Trash2, Check, X, Plus } from 'lucide-react';
 import { getMenu, renameCategory, deleteCategory } from '../lib/store';
-import { fetchApiCategories, createCategoryApi, updateCategoryApi, deleteCategoryApi } from '../lib/api';
+import { fetchApiCategories, createCategoryApi, updateCategoryApi, deleteCategoryApi, subscribeToLiveSync } from '../lib/api';
 
 export default function Categories() {
   const [categories, setCategories] = useState<{ id?: number; name: string; count: number }[]>([]);

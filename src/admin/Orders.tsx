@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Package, Search, Clock, CheckCircle, Truck, XCircle } from 'lucide-react';
 import { readLocalOrders, updateOrderStatus, type StoredOrder } from '../lib/firebase';
-import { fetchApiOrders, updateOrderStatusApi } from '../lib/api';
+import { fetchApiOrders, updateOrderStatusApi, subscribeToLiveSync } from '../lib/api';
 
 const STATUS_OPTIONS = ['Pending', 'Preparing', 'Ready', 'Out for Delivery', 'Delivered', 'Cancelled'];
 

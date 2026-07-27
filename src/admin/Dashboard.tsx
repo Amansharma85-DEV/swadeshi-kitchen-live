@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { ShoppingCart, DollarSign, Package, TrendingUp } from 'lucide-react';
-import { fetchApiMenu, fetchApiOrders } from '../lib/api';
+import { fetchApiMenu, fetchApiOrders, subscribeToLiveSync } from '../lib/api';
 
 export default function Dashboard() {
   const [metrics, setMetrics] = useState({
