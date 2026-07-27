@@ -30,6 +30,8 @@ export default function Products() {
 
   useEffect(() => {
     loadProducts();
+    const interval = setInterval(loadProducts, 3000);
+    return () => clearInterval(interval);
   }, []);
 
   const handleDelete = async (id: number) => {

@@ -29,6 +29,8 @@ export default function Categories() {
 
   useEffect(() => {
     loadCategories();
+    const interval = setInterval(loadCategories, 3000);
+    return () => clearInterval(interval);
   }, []);
 
   const handleEdit = (cat: { id?: number; name: string }) => {

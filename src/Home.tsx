@@ -113,21 +113,26 @@ function App() {
     setSettings(getSettings());
     setTestimonials(getTestimonials());
 
-    // Fetch live menu from AWS EC2 Backend API
-    fetchApiMenu().then((apiItems) => {
-      if (apiItems && apiItems.length > 0) {
-        const mappedItems: StoreMenuItem[] = apiItems.map(item => ({
-          id: item.id,
-          name: item.name,
-          category: item.category_name || 'Our Special Paranthas',
-          description: item.description,
-          price: Number(item.price),
-          image: item.image_url || 'https://amansharma85-dev.github.io/swadeshi-kitchen-live/stuffed_paratha.png',
-          tag: item.tag || 'Popular'
-        }));
-        setMenuStore(mappedItems);
-      }
-    });
+    // Function to load live menu from AWS API
+    const syncLiveMenu = () => {
+      fetchApiMenu().then((apiItems) => {
+        if (apiItems && apiItems.length > 0) {
+          const mappedItems: StoreMenuItem[] = apiItems.map(item => ({
+            id: item.id,
+            name: item.name,
+            category: item.category_name || 'Our Special Paranthas',
+            description: item.description,
+            price: Number(item.price),
+            image: item.image_url || 'https://amansharma85-dev.github.io/swadeshi-kitchen-live/stuffed_paratha.png',
+            tag: item.tag || 'Popular'
+          }));
+          setMenuStore(mappedItems);
+        }
+      });
+    };
+
+    syncLiveMenu();
+    const liveSyncInterval = setInterval(syncLiveMenu, 3000);
 
     const handleScroll = () => {
       const sections = ['daily-menu', 'menu', 'gallery', 'bulk-orders', 'tracking', 'contact'];
@@ -147,7 +152,10 @@ function App() {
     };
 
     window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      clearInterval(liveSyncInterval);
+    };
   }, []);
   const businessEmail = settings?.contact?.email || 'swadeshikitchen0@gmail.com';
   const phoneNumber = settings?.contact?.phone || '+919599749976';
