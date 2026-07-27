@@ -31,7 +31,12 @@ export default function Products() {
   useEffect(() => {
     loadProducts();
     const interval = setInterval(loadProducts, 3000);
-    return () => clearInterval(interval);
+    const handleForceSync = () => loadProducts();
+    window.addEventListener('swadeshi-force-sync', handleForceSync);
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener('swadeshi-force-sync', handleForceSync);
+    };
   }, []);
 
   const handleDelete = async (id: number) => {
