@@ -19,7 +19,8 @@ export default function ProductForm({
     description: initialData?.description || '',
     price: initialData?.price?.toString() || '',
     image: initialData?.image || '',
-    tag: initialData?.tag || ''
+    tag: initialData?.tag || '',
+    inStock: initialData?.inStock !== false
   });
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -93,8 +94,7 @@ export default function ProductForm({
       price: Number(formData.price),
       image: formData.image || 'https://images.unsplash.com/photo-1546833999-b9f581a1996d?auto=format&fit=crop&w=900&q=80',
       tag: formData.tag || 'New',
-      status: initialData?.status || 'Active',
-      inStock: initialData?.inStock !== false
+      inStock: formData.inStock
     };
 
     if (initialData) {
@@ -104,7 +104,8 @@ export default function ProductForm({
         description: productData.description,
         price: productData.price,
         image_url: productData.image,
-        tag: productData.tag
+        tag: productData.tag,
+        is_available: formData.inStock
       });
     } else {
       await createMenuItemApi({
@@ -113,7 +114,8 @@ export default function ProductForm({
         description: productData.description,
         price: productData.price,
         image_url: productData.image,
-        tag: productData.tag
+        tag: productData.tag,
+        is_available: formData.inStock
       });
     }
     
@@ -148,6 +150,20 @@ export default function ProductForm({
               <div>
                 <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">Price (Rs) *</label>
                 <input required type="number" value={formData.price} onChange={e => setFormData({...formData, price: e.target.value})} className="w-full px-4 py-2.5 rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-orange-500 text-slate-900 dark:text-white" placeholder="e.g. 199" />
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">Inventory Status *</label>
+              <div className="flex gap-4">
+                <label className={`flex-1 flex items-center justify-center gap-2 p-3 rounded-lg border cursor-pointer font-bold transition-all ${formData.inStock ? 'bg-emerald-50 border-emerald-500 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-400' : 'bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-500'}`}>
+                  <input type="radio" name="inStock" checked={formData.inStock} onChange={() => setFormData({...formData, inStock: true})} className="hidden" />
+                  <span>🟢 In Stock</span>
+                </label>
+                <label className={`flex-1 flex items-center justify-center gap-2 p-3 rounded-lg border cursor-pointer font-bold transition-all ${!formData.inStock ? 'bg-red-50 border-red-500 text-red-700 dark:bg-red-950/40 dark:text-red-400' : 'bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-500'}`}>
+                  <input type="radio" name="inStock" checked={!formData.inStock} onChange={() => setFormData({...formData, inStock: false})} className="hidden" />
+                  <span>🔴 Out of Stock</span>
+                </label>
               </div>
             </div>
             
