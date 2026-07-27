@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { X, Upload, Image as ImageIcon } from 'lucide-react';
+import { X, Upload, Image as ImageIcon, Link as LinkIcon } from 'lucide-react';
 import { addMenuItem, editMenuItem, type MenuItem } from '../lib/store';
 import { createMenuItemApi, updateMenuItemApi, fetchApiCategories, type ApiCategory } from '../lib/api';
 
@@ -13,6 +13,8 @@ export default function ProductForm({
   initialData?: MenuItem 
 }) {
   const [categories, setCategories] = useState<ApiCategory[]>([]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [imageTab, setImageTab] = useState<'upload' | 'url'>('upload');
   const [formData, setFormData] = useState({
     name: initialData?.name || '',
     category: initialData?.category || '',
@@ -35,7 +37,7 @@ export default function ProductForm({
     });
   }, []);
 
-  // Handle local image upload and convert to base64
+  // Handle local image upload and convert to lightweight WebP base64
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -46,8 +48,8 @@ export default function ProductForm({
       img.onload = () => {
         // Compress image using canvas
         const canvas = document.createElement('canvas');
-        const MAX_WIDTH = 800;
-        const MAX_HEIGHT = 800;
+        const MAX_WIDTH = 600;
+        const MAX_HEIGHT = 600;
         let width = img.width;
         let height = img.height;
 
@@ -68,8 +70,8 @@ export default function ProductForm({
         const ctx = canvas.getContext('2d');
         ctx?.drawImage(img, 0, 0, width, height);
         
-        // Convert to WebP format for better compression, 0.7 quality
-        const dataUrl = canvas.toDataURL('image/webp', 0.7);
+        // Convert to WebP format for ultra compression, 0.6 quality (~20KB)
+        const dataUrl = canvas.toDataURL('image/webp', 0.6);
         setFormData(prev => ({ ...prev, image: dataUrl }));
       };
       img.src = event.target?.result as string;
@@ -84,6 +86,8 @@ export default function ProductForm({
       return;
     }
 
+    setIsSubmitting(true);
+
     const matchedCat = categories.find(c => c.name.toLowerCase() === formData.category.toLowerCase());
     const category_id = matchedCat ? matchedCat.id : 1;
     
@@ -97,8 +101,9 @@ export default function ProductForm({
       inStock: formData.inStock
     };
 
+    let res: any;
     if (initialData) {
-      await updateMenuItemApi(initialData.id, {
+      res = await updateMenuItemApi(initialData.id, {
         category_id,
         name: productData.name,
         description: productData.description,
@@ -108,7 +113,7 @@ export default function ProductForm({
         is_available: formData.inStock
       });
     } else {
-      await createMenuItemApi({
+      res = await createMenuItemApi({
         category_id,
         name: productData.name,
         description: productData.description,
@@ -119,6 +124,13 @@ export default function ProductForm({
       });
     }
     
+    setIsSubmitting(false);
+
+    if (res && res.success === false) {
+      alert(`Error updating product: ${res.message || 'Failed to save to database'}`);
+      return;
+    }
+
     onSave();
     onClose();
   };
@@ -130,38 +142,52 @@ export default function ProductForm({
           <h2 className="text-xl font-black text-slate-900 dark:text-white">
             {initialData ? 'Edit Product' : 'Add New Product'}
           </h2>
-          <button onClick={onClose} className="p-2 bg-slate-200 dark:bg-slate-800 rounded-full hover:bg-slate-300 dark:hover:bg-slate-700 transition-colors text-slate-600 dark:text-slate-300">
-            <X size={18} />
+          <button onClick={onClose} className="p-2 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-800 transition-colors">
+            <X size={20} />
           </button>
         </div>
         
-        <div className="p-6 overflow-y-auto">
-          <form id="productForm" onSubmit={handleSubmit} className="flex flex-col gap-5">
+        <div className="p-6 overflow-y-auto space-y-4">
+          <form id="productForm" onSubmit={handleSubmit} className="space-y-4">
             <div>
               <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">Product Name *</label>
-              <input required type="text" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} className="w-full px-4 py-2.5 rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-orange-500 text-slate-900 dark:text-white" placeholder="e.g. Paneer Tikka" />
+              <input type="text" required value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} className="w-full px-4 py-2.5 rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-orange-500 text-slate-900 dark:text-white" placeholder="e.g. Special Paneer Paratha" />
             </div>
-            
+
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">Category *</label>
-                <input required type="text" value={formData.category} onChange={e => setFormData({...formData, category: e.target.value})} className="w-full px-4 py-2.5 rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-orange-500 text-slate-900 dark:text-white" placeholder="e.g. Snacks" />
+                <select value={formData.category} onChange={e => setFormData({...formData, category: e.target.value})} className="w-full px-4 py-2.5 rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-orange-500 text-slate-900 dark:text-white">
+                  {categories.length > 0 ? (
+                    categories.map(c => <option key={c.id} value={c.name}>{c.name}</option>)
+                  ) : (
+                    <>
+                      <option value="Our Special paratha">Our Special paratha</option>
+                      <option value="Thali & Rice Combos">Thali & Rice Combos</option>
+                      <option value="Snacks">Snacks</option>
+                      <option value="Extras">Extras</option>
+                      <option value="Desserts">Desserts</option>
+                    </>
+                  )}
+                </select>
               </div>
+
               <div>
-                <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">Price (Rs) *</label>
-                <input required type="number" value={formData.price} onChange={e => setFormData({...formData, price: e.target.value})} className="w-full px-4 py-2.5 rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-orange-500 text-slate-900 dark:text-white" placeholder="e.g. 199" />
+                <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">Price (₹) *</label>
+                <input type="number" step="0.01" required value={formData.price} onChange={e => setFormData({...formData, price: e.target.value})} className="w-full px-4 py-2.5 rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-orange-500 text-slate-900 dark:text-white" placeholder="99.00" />
               </div>
             </div>
 
+            {/* Inventory Status Selector */}
             <div>
-              <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">Inventory Status *</label>
-              <div className="flex gap-4">
-                <label className={`flex-1 flex items-center justify-center gap-2 p-3 rounded-lg border cursor-pointer font-bold transition-all ${formData.inStock ? 'bg-emerald-50 border-emerald-500 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-400' : 'bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-500'}`}>
-                  <input type="radio" name="inStock" checked={formData.inStock} onChange={() => setFormData({...formData, inStock: true})} className="hidden" />
+              <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">Stock Availability</label>
+              <div className="grid grid-cols-2 gap-3">
+                <label className={`flex items-center justify-center gap-2 p-3 rounded-lg border-2 cursor-pointer transition-all ${formData.inStock ? 'border-emerald-500 bg-emerald-500/10 text-emerald-600 font-bold' : 'border-slate-200 dark:border-slate-800 text-slate-500'}`}>
+                  <input type="radio" name="inStock" checked={formData.inStock} onChange={() => setFormData({...formData, inStock: true})} className="sr-only" />
                   <span>🟢 In Stock</span>
                 </label>
-                <label className={`flex-1 flex items-center justify-center gap-2 p-3 rounded-lg border cursor-pointer font-bold transition-all ${!formData.inStock ? 'bg-red-50 border-red-500 text-red-700 dark:bg-red-950/40 dark:text-red-400' : 'bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-500'}`}>
-                  <input type="radio" name="inStock" checked={!formData.inStock} onChange={() => setFormData({...formData, inStock: false})} className="hidden" />
+                <label className={`flex items-center justify-center gap-2 p-3 rounded-lg border-2 cursor-pointer transition-all ${!formData.inStock ? 'border-rose-500 bg-rose-500/10 text-rose-600 font-bold' : 'border-slate-200 dark:border-slate-800 text-slate-500'}`}>
+                  <input type="radio" name="inStock" checked={!formData.inStock} onChange={() => setFormData({...formData, inStock: false})} className="sr-only" />
                   <span>🔴 Out of Stock</span>
                 </label>
               </div>
@@ -172,35 +198,64 @@ export default function ProductForm({
               <textarea value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})} rows={3} className="w-full px-4 py-2.5 rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-orange-500 text-slate-900 dark:text-white" placeholder="Delicious fresh food..."></textarea>
             </div>
             
+            {/* Dual Product Image Picker */}
             <div>
-              <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">Product Image</label>
-              
-              <div className="flex items-center gap-4">
-                <div className="w-20 h-20 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 flex items-center justify-center overflow-hidden shrink-0">
+              <div className="flex items-center justify-between mb-2">
+                <label className="block text-sm font-bold text-slate-700 dark:text-slate-300">Product Photo</label>
+                <div className="flex items-center gap-1 bg-slate-100 dark:bg-slate-900 p-1 rounded-lg text-xs font-bold">
+                  <button type="button" onClick={() => setImageTab('upload')} className={`px-2.5 py-1 rounded-md transition-colors ${imageTab === 'upload' ? 'bg-white dark:bg-slate-800 text-orange-600 shadow-sm' : 'text-slate-500'}`}>
+                    Upload File
+                  </button>
+                  <button type="button" onClick={() => setImageTab('url')} className={`px-2.5 py-1 rounded-md transition-colors ${imageTab === 'url' ? 'bg-white dark:bg-slate-800 text-orange-600 shadow-sm' : 'text-slate-500'}`}>
+                    Paste URL Link
+                  </button>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-4 p-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50">
+                <div className="w-20 h-20 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 flex items-center justify-center overflow-hidden shrink-0 shadow-inner">
                   {formData.image ? (
                     <img src={formData.image} alt="Preview" className="w-full h-full object-cover" />
                   ) : (
-                    <ImageIcon className="text-slate-400" size={24} />
+                    <ImageIcon className="text-slate-400" size={28} />
                   )}
                 </div>
-                
-                <div className="flex-1">
-                  <input 
-                    type="file" 
-                    accept="image/*" 
-                    className="hidden" 
-                    ref={fileInputRef}
-                    onChange={handleImageUpload}
-                  />
-                  <button 
-                    type="button" 
-                    onClick={() => fileInputRef.current?.click()}
-                    className="flex items-center gap-2 px-4 py-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-lg font-bold transition-colors text-sm"
-                  >
-                    <Upload size={16} />
-                    Upload Photo
-                  </button>
-                  <p className="text-xs text-slate-500 mt-2">Upload a photo to show on the website.</p>
+
+                <div className="flex-1 space-y-2">
+                  {imageTab === 'upload' ? (
+                    <div>
+                      <input 
+                        type="file" 
+                        accept="image/*" 
+                        className="hidden" 
+                        ref={fileInputRef}
+                        onChange={handleImageUpload}
+                      />
+                      <button 
+                        type="button" 
+                        onClick={() => fileInputRef.current?.click()}
+                        className="flex items-center gap-2 px-4 py-2 bg-orange-600 hover:bg-orange-700 text-white rounded-lg font-bold transition-colors text-sm shadow-sm"
+                      >
+                        <Upload size={16} />
+                        Choose New Photo
+                      </button>
+                      <p className="text-xs text-slate-500 mt-1">Upload a photo from your mobile/laptop.</p>
+                    </div>
+                  ) : (
+                    <div>
+                      <div className="relative">
+                        <LinkIcon size={14} className="absolute left-3 top-3 text-slate-400" />
+                        <input 
+                          type="url" 
+                          value={formData.image} 
+                          onChange={e => setFormData({...formData, image: e.target.value})} 
+                          placeholder="https://example.com/photo.jpg" 
+                          className="w-full pl-8 pr-3 py-2 text-xs rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-orange-500" 
+                        />
+                      </div>
+                      <p className="text-xs text-slate-500 mt-1">Paste any public photo URL link.</p>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
@@ -213,11 +268,11 @@ export default function ProductForm({
         </div>
         
         <div className="px-6 py-4 border-t border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50 flex justify-end gap-3">
-          <button type="button" onClick={onClose} className="px-5 py-2.5 font-bold text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-800 rounded-lg transition-colors">
+          <button type="button" onClick={onClose} disabled={isSubmitting} className="px-5 py-2.5 font-bold text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-800 rounded-lg transition-colors">
             Cancel
           </button>
-          <button type="submit" form="productForm" className="px-5 py-2.5 font-bold bg-orange-600 hover:bg-orange-700 text-white rounded-lg transition-colors shadow-sm">
-            {initialData ? 'Update Product' : 'Save Product'}
+          <button type="submit" form="productForm" disabled={isSubmitting} className="px-5 py-2.5 font-bold bg-orange-600 hover:bg-orange-700 text-white rounded-lg transition-colors shadow-sm disabled:opacity-50">
+            {isSubmitting ? 'Saving...' : initialData ? 'Update Product' : 'Save Product'}
           </button>
         </div>
       </div>
