@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
-import { MessageSquare, Plus, Trash2, Edit2, X, Check } from 'lucide-react';
+import { Plus, Trash2, Edit2, X } from 'lucide-react';
 import { getTestimonials, saveTestimonials, type Testimonial } from '../lib/store';
+import { fetchApiSetting, saveApiSetting } from '../lib/api';
 
 export default function Testimonials() {
   const [testimonials, setTestimonials] = useState<Testimonial[]>([]);
@@ -8,11 +9,29 @@ export default function Testimonials() {
   const [editingId, setEditingId] = useState<number | null>(null);
   const [formData, setFormData] = useState({ name: '', review: '', rating: '5' });
 
+  const loadTestimonialsData = async () => {
+    const apiReviews = await fetchApiSetting<Testimonial[]>('testimonials');
+    if (apiReviews && Array.isArray(apiReviews)) {
+      setTestimonials(apiReviews);
+      saveTestimonials(apiReviews);
+    } else {
+      setTestimonials(getTestimonials());
+    }
+  };
+
   useEffect(() => {
-    setTestimonials(getTestimonials());
+    loadTestimonialsData();
+    const interval = setInterval(loadTestimonialsData, 3000);
+    return () => clearInterval(interval);
   }, []);
 
-  const handleSave = (e: React.FormEvent) => {
+  const syncTestimonialsState = async (updated: Testimonial[]) => {
+    setTestimonials(updated);
+    saveTestimonials(updated);
+    await saveApiSetting('testimonials', updated);
+  };
+
+  const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.name || !formData.review) return;
 
@@ -26,8 +45,7 @@ export default function Testimonials() {
       updated = [...testimonials, { id: nextId, name: formData.name, review: formData.review, rating: Number(formData.rating) }];
     }
 
-    setTestimonials(updated);
-    saveTestimonials(updated);
+    await syncTestimonialsState(updated);
     setIsFormOpen(false);
     setEditingId(null);
     setFormData({ name: '', review: '', rating: '5' });
@@ -39,11 +57,10 @@ export default function Testimonials() {
     setIsFormOpen(true);
   };
 
-  const handleDelete = (id: number) => {
+  const handleDelete = async (id: number) => {
     if (window.confirm('Delete this testimonial?')) {
       const updated = testimonials.filter(t => t.id !== id);
-      setTestimonials(updated);
-      saveTestimonials(updated);
+      await syncTestimonialsState(updated);
     }
   };
 
@@ -52,7 +69,7 @@ export default function Testimonials() {
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
           <h1 className="text-3xl font-black text-slate-900 dark:text-white">Testimonials</h1>
-          <p className="mt-1 text-slate-500">Manage customer reviews shown on your website.</p>
+          <p className="mt-1 text-slate-500">Manage customer reviews shown on your website saved live on AWS.</p>
         </div>
         <button 
           onClick={() => {

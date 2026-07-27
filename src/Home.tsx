@@ -27,7 +27,7 @@ import { FormEvent, useMemo, useState, useEffect } from 'react';
 import { getMenu, getPricing, getOffers, getGallery, getSettings, getTestimonials, type MenuItem as StoreMenuItem, type PricingSection, type Offer, type GalleryImage, type GlobalSettings, type Testimonial } from './lib/store';
 import { readLocalOrders, storeOrder, type StoredOrder } from './lib/firebase';
 import { defaultMenu } from './lib/store';
-import { fetchApiMenu, submitApiOrder } from './lib/api';
+import { fetchApiMenu, submitApiOrder, fetchApiSetting } from './lib/api';
 
 type MenuItem = {
   id: number;
@@ -113,7 +113,7 @@ function App() {
     setSettings(getSettings());
     setTestimonials(getTestimonials());
 
-    // Function to load live menu from AWS API
+    // Function to load live menu and settings from AWS API
     const syncLiveMenu = () => {
       fetchApiMenu().then((apiItems) => {
         if (apiItems && apiItems.length > 0) {
@@ -129,6 +129,12 @@ function App() {
           setMenuStore(mappedItems);
         }
       });
+
+      fetchApiSetting<PricingSection[]>('pricing').then(data => { if (data && Array.isArray(data)) setPricing(data); });
+      fetchApiSetting<Offer[]>('offers').then(data => { if (data && Array.isArray(data)) setOffers(data); });
+      fetchApiSetting<GalleryImage[]>('gallery').then(data => { if (data && Array.isArray(data)) setGallery(data); });
+      fetchApiSetting<GlobalSettings>('global_settings').then(data => { if (data && typeof data === 'object') setSettings(data); });
+      fetchApiSetting<Testimonial[]>('testimonials').then(data => { if (data && Array.isArray(data)) setTestimonials(data); });
     };
 
     syncLiveMenu();

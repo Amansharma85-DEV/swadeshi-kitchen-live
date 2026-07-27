@@ -1,28 +1,43 @@
 import { useState, useEffect } from 'react';
 import { Plus, Trash2 } from 'lucide-react';
 import { getGallery, saveGallery, type GalleryImage } from '../lib/store';
+import { fetchApiSetting, saveApiSetting } from '../lib/api';
 
 export default function Gallery() {
   const [images, setImages] = useState<GalleryImage[]>([]);
   const [newUrl, setNewUrl] = useState('');
 
+  const loadGalleryData = async () => {
+    const apiGallery = await fetchApiSetting<GalleryImage[]>('gallery');
+    if (apiGallery && Array.isArray(apiGallery)) {
+      setImages(apiGallery);
+      saveGallery(apiGallery);
+    } else {
+      setImages(getGallery());
+    }
+  };
+
   useEffect(() => {
-    setImages(getGallery());
+    loadGalleryData();
+    const interval = setInterval(loadGalleryData, 3000);
+    return () => clearInterval(interval);
   }, []);
 
-  const handleAdd = (e: React.FormEvent) => {
+  const handleAdd = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newUrl) return;
     const nextGallery = [...images, { id: Date.now(), url: newUrl }];
     setImages(nextGallery);
     saveGallery(nextGallery);
+    await saveApiSetting('gallery', nextGallery);
     setNewUrl('');
   };
 
-  const handleDelete = (id: number) => {
+  const handleDelete = async (id: number) => {
     const nextGallery = images.filter(img => img.id !== id);
     setImages(nextGallery);
     saveGallery(nextGallery);
+    await saveApiSetting('gallery', nextGallery);
   };
 
   return (
@@ -30,7 +45,7 @@ export default function Gallery() {
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
           <h1 className="text-3xl font-black text-slate-900 dark:text-white">Gallery</h1>
-          <p className="mt-1 text-slate-500">Manage images displayed in the website gallery section.</p>
+          <p className="mt-1 text-slate-500">Manage images displayed in the website gallery section saved live on AWS.</p>
         </div>
       </div>
 

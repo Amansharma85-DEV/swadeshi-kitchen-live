@@ -1,22 +1,36 @@
 import { useState, useEffect } from 'react';
-import { Settings as SettingsIcon, Save, Image as ImageIcon, MessageCircle, Globe, Phone, MapPin, Mail, Clock } from 'lucide-react';
+import { Save, Image as ImageIcon, MessageCircle, Globe, Phone, MapPin, Mail, Clock } from 'lucide-react';
 import { getSettings, saveSettings, type GlobalSettings } from '../lib/store';
+import { fetchApiSetting, saveApiSetting } from '../lib/api';
 
 export default function Settings() {
   const [settings, setSettings] = useState<GlobalSettings | null>(null);
   const [activeTab, setActiveTab] = useState<'hero' | 'contact' | 'whatsapp' | 'seo'>('hero');
   const [isSaving, setIsSaving] = useState(false);
 
+  const loadSettingsData = async () => {
+    const apiSettings = await fetchApiSetting<GlobalSettings>('global_settings');
+    if (apiSettings && typeof apiSettings === 'object') {
+      setSettings(apiSettings);
+      saveSettings(apiSettings);
+    } else {
+      setSettings(getSettings());
+    }
+  };
+
   useEffect(() => {
-    setSettings(getSettings());
+    loadSettingsData();
+    const interval = setInterval(loadSettingsData, 3000);
+    return () => clearInterval(interval);
   }, []);
 
   if (!settings) return null;
 
-  const handleSave = () => {
+  const handleSave = async () => {
     setIsSaving(true);
     saveSettings(settings);
-    setTimeout(() => setIsSaving(false), 800);
+    await saveApiSetting('global_settings', settings);
+    setTimeout(() => setIsSaving(false), 500);
   };
 
   const updateSetting = (section: keyof GlobalSettings, field: string, value: string) => {
@@ -37,7 +51,7 @@ export default function Settings() {
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
           <h1 className="text-3xl font-black text-slate-900 dark:text-white">Website Settings</h1>
-          <p className="mt-1 text-slate-500">Manage your website's content, contact info, and SEO.</p>
+          <p className="mt-1 text-slate-500">Manage your website's content, contact info, and SEO saved live on AWS.</p>
         </div>
         <button 
           onClick={handleSave}
@@ -183,7 +197,7 @@ export default function Settings() {
               
               <div>
                 <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">WhatsApp Number</label>
-                <p className="text-xs text-slate-500 mb-3">Include the country code without any + or symbols (e.g. 919999999999).</p>
+                <p className="text-xs text-slate-500 mb-3">Include the country code without any + or symbols (e.g. 919599749976).</p>
                 <input 
                   type="text" 
                   value={settings.whatsapp.number} 

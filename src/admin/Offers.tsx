@@ -1,31 +1,47 @@
 import { useState, useEffect } from 'react';
-import { Plus, Edit2, Trash2 } from 'lucide-react';
+import { Plus, Trash2 } from 'lucide-react';
 import { getOffers, saveOffers, type Offer } from '../lib/store';
+import { fetchApiSetting, saveApiSetting } from '../lib/api';
 
 export default function Offers() {
   const [offers, setOffers] = useState<Offer[]>([]);
 
+  const loadOffersData = async () => {
+    const apiOffers = await fetchApiSetting<Offer[]>('offers');
+    if (apiOffers && Array.isArray(apiOffers)) {
+      setOffers(apiOffers);
+      saveOffers(apiOffers);
+    } else {
+      setOffers(getOffers());
+    }
+  };
+
   useEffect(() => {
-    setOffers(getOffers());
+    loadOffersData();
+    const interval = setInterval(loadOffersData, 3000);
+    return () => clearInterval(interval);
   }, []);
 
-  const handleAdd = () => {
+  const syncOffersState = async (nextOffers: Offer[]) => {
+    setOffers(nextOffers);
+    saveOffers(nextOffers);
+    await saveApiSetting('offers', nextOffers);
+  };
+
+  const handleAdd = async () => {
     const newOffer = { id: Date.now(), title: 'NEW OFFER', description: 'Describe the offer here', active: true };
     const nextOffers = [...offers, newOffer];
-    setOffers(nextOffers);
-    saveOffers(nextOffers);
+    await syncOffersState(nextOffers);
   };
 
-  const handleDelete = (id: number) => {
+  const handleDelete = async (id: number) => {
     const nextOffers = offers.filter(o => o.id !== id);
-    setOffers(nextOffers);
-    saveOffers(nextOffers);
+    await syncOffersState(nextOffers);
   };
 
-  const toggleActive = (id: number) => {
+  const toggleActive = async (id: number) => {
     const nextOffers = offers.map(o => o.id === id ? { ...o, active: !o.active } : o);
-    setOffers(nextOffers);
-    saveOffers(nextOffers);
+    await syncOffersState(nextOffers);
   };
 
   return (
@@ -33,7 +49,7 @@ export default function Offers() {
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
           <h1 className="text-3xl font-black text-slate-900 dark:text-white">Promotional Offers</h1>
-          <p className="mt-1 text-slate-500">Manage coupon codes and discounts shown on the live website.</p>
+          <p className="mt-1 text-slate-500">Manage coupon codes and discounts shown on the live website saved on AWS.</p>
         </div>
         <button onClick={handleAdd} className="bg-orange-600 hover:bg-orange-700 text-white px-5 py-2.5 rounded-lg font-bold flex items-center gap-2 transition-colors">
           <Plus size={18} />

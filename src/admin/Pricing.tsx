@@ -1,34 +1,51 @@
 import { useState, useEffect } from 'react';
-import { Plus, Edit2, Trash2, Save } from 'lucide-react';
+import { Plus, Trash2 } from 'lucide-react';
 import { getPricing, savePricing, type PricingSection } from '../lib/store';
+import { fetchApiSetting, saveApiSetting } from '../lib/api';
 
 export default function Pricing() {
   const [pricingSections, setPricingSections] = useState<PricingSection[]>([]);
 
+  const loadPricingData = async () => {
+    const apiPricing = await fetchApiSetting<PricingSection[]>('pricing');
+    if (apiPricing && Array.isArray(apiPricing)) {
+      setPricingSections(apiPricing);
+      savePricing(apiPricing);
+    } else {
+      setPricingSections(getPricing());
+    }
+  };
+
   useEffect(() => {
-    setPricingSections(getPricing());
+    loadPricingData();
+    const interval = setInterval(loadPricingData, 3000);
+    return () => clearInterval(interval);
   }, []);
 
-  const handleAddSection = () => {
+  const syncState = async (nextPricing: PricingSection[]) => {
+    setPricingSections(nextPricing);
+    savePricing(nextPricing);
+    await saveApiSetting('pricing', nextPricing);
+  };
+
+  const handleAddSection = async () => {
     const newSection: PricingSection = {
       id: Date.now(),
       title: 'New Section',
       items: []
     };
     const nextPricing = [...pricingSections, newSection];
-    setPricingSections(nextPricing);
-    savePricing(nextPricing);
+    await syncState(nextPricing);
   };
 
-  const handleDeleteSection = (id: number) => {
+  const handleDeleteSection = async (id: number) => {
     if (window.confirm('Delete this entire pricing section?')) {
       const nextPricing = pricingSections.filter(s => s.id !== id);
-      setPricingSections(nextPricing);
-      savePricing(nextPricing);
+      await syncState(nextPricing);
     }
   };
 
-  const handleAddItem = (sectionId: number) => {
+  const handleAddItem = async (sectionId: number) => {
     const nextPricing = pricingSections.map(s => {
       if (s.id === sectionId) {
         return {
@@ -38,11 +55,10 @@ export default function Pricing() {
       }
       return s;
     });
-    setPricingSections(nextPricing);
-    savePricing(nextPricing);
+    await syncState(nextPricing);
   };
 
-  const handleDeleteItem = (sectionId: number, itemIndex: number) => {
+  const handleDeleteItem = async (sectionId: number, itemIndex: number) => {
     const nextPricing = pricingSections.map(s => {
       if (s.id === sectionId) {
         const newItems = [...s.items];
@@ -51,11 +67,10 @@ export default function Pricing() {
       }
       return s;
     });
-    setPricingSections(nextPricing);
-    savePricing(nextPricing);
+    await syncState(nextPricing);
   };
 
-  const handleUpdateItem = (sectionId: number, itemIndex: number, field: string, value: string) => {
+  const handleUpdateItem = async (sectionId: number, itemIndex: number, field: string, value: string) => {
     const nextPricing = pricingSections.map(s => {
       if (s.id === sectionId) {
         const newItems = [...s.items];
@@ -64,14 +79,12 @@ export default function Pricing() {
       }
       return s;
     });
-    setPricingSections(nextPricing);
-    savePricing(nextPricing);
+    await syncState(nextPricing);
   };
 
-  const handleUpdateSectionTitle = (sectionId: number, title: string) => {
+  const handleUpdateSectionTitle = async (sectionId: number, title: string) => {
     const nextPricing = pricingSections.map(s => s.id === sectionId ? { ...s, title } : s);
-    setPricingSections(nextPricing);
-    savePricing(nextPricing);
+    await syncState(nextPricing);
   };
 
   return (
@@ -79,7 +92,7 @@ export default function Pricing() {
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
           <h1 className="text-3xl font-black text-slate-900 dark:text-white">Pricing / Text Menus</h1>
-          <p className="mt-1 text-slate-500">Manage non-visual text menus, extra items, and daily thali schedules.</p>
+          <p className="mt-1 text-slate-500">Manage non-visual text menus, extra items, and daily thali schedules saved live on AWS.</p>
         </div>
         <button onClick={handleAddSection} className="bg-orange-600 hover:bg-orange-700 text-white px-5 py-2.5 rounded-lg font-bold flex items-center gap-2 transition-colors">
           <Plus size={18} />
@@ -98,46 +111,42 @@ export default function Pricing() {
                 className="font-black text-xl bg-transparent border-b border-transparent hover:border-slate-300 focus:border-orange-500 focus:outline-none flex-1 text-slate-900 dark:text-white"
               />
               <div className="flex gap-2 shrink-0">
-                <button onClick={() => handleAddItem(section.id)} className="text-sm font-bold bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 px-3 py-1.5 rounded flex items-center gap-1 hover:text-orange-600">
-                  <Plus size={14} /> Add Row
+                <button onClick={() => handleAddItem(section.id)} className="bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-800 dark:text-white px-3 py-1.5 rounded-lg text-sm font-bold flex items-center gap-1 transition-colors">
+                  <Plus size={16} /> Add Item
                 </button>
-                <button onClick={() => handleDeleteSection(section.id)} className="text-slate-400 hover:text-red-600 p-1.5">
-                  <Trash2 size={18} />
+                <button onClick={() => handleDeleteSection(section.id)} className="bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400 hover:bg-red-200 px-3 py-1.5 rounded-lg text-sm font-bold flex items-center gap-1 transition-colors">
+                  <Trash2 size={16} /> Delete Section
                 </button>
               </div>
             </div>
 
             <div className="p-4">
-              {section.items.map((item, idx) => (
-                <div key={idx} className="flex flex-col md:flex-row gap-3 items-start md:items-center py-3 border-b border-slate-100 dark:border-slate-800/50 last:border-0 group">
-                  <input 
-                    type="text" 
-                    value={item.name}
-                    onChange={e => handleUpdateItem(section.id, idx, 'name', e.target.value)}
-                    className="flex-1 min-w-[200px] px-3 py-2 bg-transparent hover:bg-slate-50 dark:hover:bg-slate-800 rounded border border-transparent hover:border-slate-200 dark:hover:border-slate-700 focus:outline-none focus:border-orange-500"
-                    placeholder="Item Name (e.g. Monday)"
-                  />
-                  <input 
-                    type="text" 
-                    value={item.subText || ''}
-                    onChange={e => handleUpdateItem(section.id, idx, 'subText', e.target.value)}
-                    className="flex-[2] min-w-[200px] px-3 py-2 text-sm text-slate-500 bg-transparent hover:bg-slate-50 dark:hover:bg-slate-800 rounded border border-transparent hover:border-slate-200 dark:hover:border-slate-700 focus:outline-none focus:border-orange-500"
-                    placeholder="Description / Subtext (Optional)"
-                  />
-                  <input 
-                    type="text" 
-                    value={item.priceText}
-                    onChange={e => handleUpdateItem(section.id, idx, 'priceText', e.target.value)}
-                    className="flex-1 min-w-[100px] px-3 py-2 font-bold bg-transparent hover:bg-slate-50 dark:hover:bg-slate-800 rounded border border-transparent hover:border-slate-200 dark:hover:border-slate-700 focus:outline-none focus:border-orange-500 text-right"
-                    placeholder="Price Text"
-                  />
-                  <button onClick={() => handleDeleteItem(section.id, idx)} className="p-2 text-slate-400 hover:text-red-600 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
-                    <Trash2 size={16} />
-                  </button>
+              {section.items.length === 0 ? (
+                <p className="text-sm text-slate-400 italic py-2">No items in this section yet.</p>
+              ) : (
+                <div className="space-y-3">
+                  {section.items.map((item, idx) => (
+                    <div key={idx} className="flex gap-4 items-center bg-slate-50 dark:bg-slate-950 p-3 rounded-lg border border-slate-100 dark:border-slate-800">
+                      <input 
+                        type="text" 
+                        value={item.name} 
+                        onChange={e => handleUpdateItem(section.id, idx, 'name', e.target.value)}
+                        placeholder="Item name"
+                        className="flex-1 px-3 py-1.5 border border-slate-200 dark:border-slate-700 rounded bg-white dark:bg-slate-900 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-orange-500 text-slate-900 dark:text-white"
+                      />
+                      <input 
+                        type="text" 
+                        value={item.priceText} 
+                        onChange={e => handleUpdateItem(section.id, idx, 'priceText', e.target.value)}
+                        placeholder="Price e.g. Rs 149"
+                        className="w-36 px-3 py-1.5 border border-slate-200 dark:border-slate-700 rounded bg-white dark:bg-slate-900 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-orange-500 text-slate-900 dark:text-white"
+                      />
+                      <button onClick={() => handleDeleteItem(section.id, idx)} className="text-slate-400 hover:text-red-500 p-1.5 transition-colors">
+                        <Trash2 size={18} />
+                      </button>
+                    </div>
+                  ))}
                 </div>
-              ))}
-              {section.items.length === 0 && (
-                <p className="text-center text-slate-500 text-sm py-4">No items in this section. Click 'Add Row' to start.</p>
               )}
             </div>
           </div>

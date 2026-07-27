@@ -317,3 +317,42 @@ export async function adminLoginApi(credentials: { email: string; password: stri
     return { success: false, message: 'Network connection error' };
   }
 }
+
+// Fetch Setting by Key from AWS EC2 API
+export async function fetchApiSetting<T>(key: string): Promise<T | null> {
+  const url = `${API_BASE_URL}/settings/${key}?_t=${Date.now()}`;
+  console.log('[API REQ] GET Setting Key:', key, url);
+  try {
+    const res = await fetch(url, {
+      headers: { 'Cache-Control': 'no-cache, no-store, must-revalidate' }
+    });
+    if (!res.ok) return null;
+    const json = await res.json();
+    if (json.success && json.data?.value !== undefined) {
+      console.log('[API RES OK] GET Setting Key:', key, '[VALUE]:', json.data.value);
+      return json.data.value as T;
+    }
+  } catch (err) {
+    console.warn('[API ERR] GET Setting failed:', err);
+  }
+  return null;
+}
+
+// Save Setting by Key to AWS EC2 API
+export async function saveApiSetting<T>(key: string, value: T) {
+  const url = `${API_BASE_URL}/settings/${key}`;
+  console.log('[API REQ] POST Setting Key:', key, url, '[VALUE]:', value);
+  try {
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ value })
+    });
+    const json = await res.json();
+    console.log('[API RES] POST Setting Key:', key, 'status:', res.status, '[DATA]:', json);
+    return json;
+  } catch (err) {
+    console.error('[API ERR] POST Setting failed:', err);
+    return { success: false, message: 'Network connection error' };
+  }
+}
