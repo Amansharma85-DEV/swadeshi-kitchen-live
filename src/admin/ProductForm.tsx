@@ -48,8 +48,8 @@ export default function ProductForm({
       img.onload = () => {
         // Compress image using canvas
         const canvas = document.createElement('canvas');
-        const MAX_WIDTH = 600;
-        const MAX_HEIGHT = 600;
+        const MAX_WIDTH = 400;
+        const MAX_HEIGHT = 400;
         let width = img.width;
         let height = img.height;
 
@@ -65,13 +65,20 @@ export default function ProductForm({
           }
         }
 
-        canvas.width = width;
-        canvas.height = height;
+        canvas.width = Math.round(width);
+        canvas.height = Math.round(height);
         const ctx = canvas.getContext('2d');
-        ctx?.drawImage(img, 0, 0, width, height);
+        if (ctx) {
+          ctx.imageSmoothingEnabled = true;
+          ctx.imageSmoothingQuality = 'high';
+          ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        }
         
-        // Convert to WebP format for ultra compression, 0.6 quality (~20KB)
-        const dataUrl = canvas.toDataURL('image/webp', 0.6);
+        // Convert to WebP/JPEG format for ultra compression (~12KB payload)
+        let dataUrl = canvas.toDataURL('image/webp', 0.5);
+        if (!dataUrl.startsWith('data:image/webp')) {
+          dataUrl = canvas.toDataURL('image/jpeg', 0.5);
+        }
         setFormData(prev => ({ ...prev, image: dataUrl }));
       };
       img.src = event.target?.result as string;
