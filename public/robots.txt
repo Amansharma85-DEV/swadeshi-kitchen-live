@@ -1,6 +1,31 @@
+# ==============================================================================
+# Production Robots.txt for Swadeshi Kitchen
+# Domain: https://swadeshikitchen.shop
+# ==============================================================================
+
 User-agent: *
 Allow: /
 Disallow: /api/
 Disallow: /#/admin
 
+# AI Search Engine Crawlers & Overviews
+User-agent: Googlebot
+Allow: /
+
+User-agent: Bingbot
+Allow: /
+
+User-agent: Applebot
+Allow: /
+
+User-agent: GPTBot
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+# Sitemap Location
 Sitemap: https://swadeshikitchen.shop/sitemap.xml
