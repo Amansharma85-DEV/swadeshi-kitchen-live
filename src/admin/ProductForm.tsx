@@ -53,7 +53,7 @@ export default function ProductForm({
     });
   }, []);
 
-  // Process file with direct API upload & fallback
+  // Process file with direct API upload & instant local preview
   const processImageFile = async (file: File) => {
     setUploadError(null);
     setSelectedFile(file);
@@ -71,9 +71,17 @@ export default function ProductForm({
       return;
     }
 
-    setUploadProgress(20);
+    // 1. INSTANT 0ms Local Blob Preview for instant UI response
+    try {
+      const localBlobUrl = URL.createObjectURL(file);
+      setFormData(prev => ({ ...prev, image: localBlobUrl }));
+    } catch (e) {
+      console.warn('URL.createObjectURL fallback:', e);
+    }
 
-    // Try direct multipart upload to backend first
+    setUploadProgress(40);
+
+    // 2. Direct multipart upload to backend in background
     const uploadRes = await uploadImageFileApi(file);
     if (uploadRes.success && uploadRes.url) {
       setFormData(prev => ({ ...prev, image: uploadRes.url! }));
@@ -82,16 +90,8 @@ export default function ProductForm({
       return;
     }
 
-    // Fallback preview
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      setUploadProgress(80);
-      const dataUrl = event.target?.result as string;
-      setFormData(prev => ({ ...prev, image: dataUrl }));
-      setUploadProgress(100);
-      setTimeout(() => setUploadProgress(null), 800);
-    };
-    reader.readAsDataURL(file);
+    setUploadProgress(100);
+    setTimeout(() => setUploadProgress(null), 800);
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
