@@ -1,7 +1,8 @@
-import { useState } from 'react';
-import { Routes, Route } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { Routes, Route, Link } from 'react-router-dom';
 import Sidebar from './Sidebar';
-import { RefreshCw, Database } from 'lucide-react';
+import { RefreshCw, Database, AlertTriangle, CheckCircle2 } from 'lucide-react';
+import { getApiBaseUrl } from '../lib/api';
 
 import Products from './Products';
 import Pricing from './Pricing';
@@ -15,9 +16,31 @@ import Testimonials from './Testimonials';
 
 export default function AdminLayout() {
   const [isSyncing, setIsSyncing] = useState(false);
+  const [isConnected, setIsConnected] = useState<boolean | null>(null);
+
+  const checkConnection = async () => {
+    try {
+      const url = `${getApiBaseUrl()}/health?_t=${Date.now()}`;
+      const res = await fetch(url);
+      if (res.ok) {
+        setIsConnected(true);
+      } else {
+        setIsConnected(false);
+      }
+    } catch (e) {
+      setIsConnected(false);
+    }
+  };
+
+  useEffect(() => {
+    checkConnection();
+    const interval = setInterval(checkConnection, 5000);
+    return () => clearInterval(interval);
+  }, []);
 
   const triggerLiveSync = () => {
     setIsSyncing(true);
+    checkConnection();
     window.dispatchEvent(new Event('swadeshi-force-sync'));
     setTimeout(() => setIsSyncing(false), 600);
   };
@@ -28,10 +51,23 @@ export default function AdminLayout() {
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Top Sync Header */}
         <header className="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 px-8 py-3 flex items-center justify-between shadow-sm shrink-0">
-          <div className="flex items-center gap-2 text-xs font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/20 px-3 py-1.5 rounded-full border border-emerald-200 dark:border-emerald-800/40">
-            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-            <Database size={14} />
-            AWS MySQL Live Database Connected
+          <div className="flex items-center gap-3">
+            {isConnected === true && (
+              <div className="flex items-center gap-2 text-xs font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/20 px-3 py-1.5 rounded-full border border-emerald-200 dark:border-emerald-800/40">
+                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                <Database size={14} />
+                AWS Backend Connected
+              </div>
+            )}
+            {isConnected === false && (
+              <Link 
+                to="/settings"
+                className="flex items-center gap-2 text-xs font-bold text-rose-700 dark:text-rose-300 bg-rose-50 dark:bg-rose-950/50 hover:bg-rose-100 px-3 py-1.5 rounded-full border border-rose-200 dark:border-rose-800 transition-colors shadow-sm"
+              >
+                <AlertTriangle size={14} className="animate-bounce" />
+                Backend Offline – Click to update Server URL
+              </Link>
+            )}
           </div>
 
           <button
@@ -58,7 +94,7 @@ export default function AdminLayout() {
             <Route path="*" element={
               <div className="flex flex-col items-center justify-center h-[60vh] text-center">
                 <h2 className="text-2xl font-black text-slate-800 dark:text-slate-200">Page under construction</h2>
-                <p className="text-slate-500 mt-2">This admin feature is coming soon.</p>
+                <p className="text-slate-500 mt-2">This feature will be available soon.</p>
               </div>
             } />
           </Routes>

@@ -187,8 +187,18 @@ export default function ProductForm({
     setIsSubmitting(false);
 
     if (res && res.success === false) {
-      alert(`Server Response Notice: ${res.message || 'Product updated on server'}`);
-      return;
+      console.warn('⚠️ Server update failed, saving locally:', res.message);
+      // Fallback to local store so admin editing is never blocked
+      if (initialData && initialData.id) {
+        editMenuItem(initialData.id, productData);
+      } else {
+        addMenuItem(productData);
+      }
+      if (res.message?.toLowerCase().includes('failed to fetch') || res.message?.toLowerCase().includes('network')) {
+        alert("⚠️ Saved locally! Note: Backend server is disconnected. Please update your active backend URL in Settings -> Server Connection.");
+      } else {
+        alert(`Notice: ${res.message || 'Saved locally'}`);
+      }
     }
 
     onSave();
