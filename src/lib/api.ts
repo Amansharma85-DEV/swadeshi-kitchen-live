@@ -1,4 +1,22 @@
-export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://protect-cooperative-blocking-what.trycloudflare.com/api';
+export function getApiBaseUrl(): string {
+  if (typeof window !== 'undefined') {
+    const saved = localStorage.getItem('swadeshi_api_url');
+    if (saved && saved.trim()) {
+      return saved.trim().replace(/\/+$/, '');
+    }
+  }
+  return (import.meta.env.VITE_API_BASE_URL || 'https://protect-cooperative-blocking-what.trycloudflare.com/api').replace(/\/+$/, '');
+}
+
+export function setApiBaseUrl(url: string) {
+  if (typeof window !== 'undefined') {
+    const cleanUrl = url.trim().replace(/\/+$/, '');
+    localStorage.setItem('swadeshi_api_url', cleanUrl);
+    notifyDataChange();
+  }
+}
+
+export const API_BASE_URL = getApiBaseUrl();
 
 export type ApiMenuItem = {
   id: number;
@@ -64,7 +82,7 @@ export function subscribeToLiveSync(onUpdate: () => void) {
 
 // Fetch all menu items from AWS EC2 API
 export async function fetchApiMenu(): Promise<ApiMenuItem[] | null> {
-  const url = `${API_BASE_URL}/menu?_t=${Date.now()}`;
+  const url = `${getApiBaseUrl()}/menu?_t=${Date.now()}`;
   console.log('[API REQ] GET Menu:', url);
   try {
     const res = await fetch(url);
@@ -85,7 +103,7 @@ export async function fetchApiMenu(): Promise<ApiMenuItem[] | null> {
 
 // Fetch all categories from AWS EC2 API
 export async function fetchApiCategories(): Promise<ApiCategory[] | null> {
-  const url = `${API_BASE_URL}/categories?_t=${Date.now()}`;
+  const url = `${getApiBaseUrl()}/categories?_t=${Date.now()}`;
   console.log('[API REQ] GET Categories:', url);
   try {
     const res = await fetch(url);
@@ -106,7 +124,7 @@ export async function fetchApiCategories(): Promise<ApiCategory[] | null> {
 
 // Direct Multipart/Form-Data File Upload to AWS Backend
 export async function uploadImageFileApi(file: File): Promise<{ success: boolean; url?: string; message?: string }> {
-  const url = `${API_BASE_URL}/menu/upload`;
+  const url = `${getApiBaseUrl()}/menu/upload`;
   console.log('[API REQ] POST Upload File:', url, file.name, file.size);
   try {
     const formData = new FormData();
@@ -144,7 +162,7 @@ export async function createMenuItemApi(item: {
   tag?: string;
   is_available?: boolean;
 }) {
-  const url = `${API_BASE_URL}/menu`;
+  const url = `${getApiBaseUrl()}/menu`;
   console.log('[API REQ] POST Menu Item:', url, '[PAYLOAD]:', item);
   try {
     const token = localStorage.getItem('swadeshi_token');
@@ -204,7 +222,7 @@ export async function updateMenuItemApi(id: number, item: {
   tag?: string;
   is_available?: boolean;
 }) {
-  const url = `${API_BASE_URL}/menu/${id}`;
+  const url = `${getApiBaseUrl()}/menu/${id}`;
   console.log('[API REQ] PUT Menu Item ID:', id, url, '[PAYLOAD]:', item);
   try {
     const token = localStorage.getItem('swadeshi_token');
@@ -255,7 +273,7 @@ export async function updateMenuItemApi(id: number, item: {
 
 // Delete Menu Item from AWS EC2 API
 export async function deleteMenuItemApi(id: number) {
-  const url = `${API_BASE_URL}/menu/${id}`;
+  const url = `${getApiBaseUrl()}/menu/${id}`;
   console.log('[API REQ] DELETE Menu Item ID:', id, url);
   try {
     const token = localStorage.getItem('swadeshi_token');
@@ -277,7 +295,7 @@ export async function deleteMenuItemApi(id: number) {
 
 // Create Category in AWS EC2 API
 export async function createCategoryApi(category: { name: string; description?: string }) {
-  const url = `${API_BASE_URL}/categories`;
+  const url = `${getApiBaseUrl()}/categories`;
   console.log('[API REQ] POST Category:', url, '[PAYLOAD]:', category);
   try {
     const token = localStorage.getItem('swadeshi_token');
@@ -301,7 +319,7 @@ export async function createCategoryApi(category: { name: string; description?: 
 
 // Update Category in AWS EC2 API
 export async function updateCategoryApi(id: number, category: { name?: string; description?: string }) {
-  const url = `${API_BASE_URL}/categories/${id}`;
+  const url = `${getApiBaseUrl()}/categories/${id}`;
   console.log('[API REQ] PUT Category ID:', id, url, '[PAYLOAD]:', category);
   try {
     const token = localStorage.getItem('swadeshi_token');
@@ -325,7 +343,7 @@ export async function updateCategoryApi(id: number, category: { name?: string; d
 
 // Delete Category from AWS EC2 API
 export async function deleteCategoryApi(id: number) {
-  const url = `${API_BASE_URL}/categories/${id}`;
+  const url = `${getApiBaseUrl()}/categories/${id}`;
   console.log('[API REQ] DELETE Category ID:', id, url);
   try {
     const token = localStorage.getItem('swadeshi_token');
@@ -347,7 +365,7 @@ export async function deleteCategoryApi(id: number) {
 
 // Fetch Orders from AWS EC2 API
 export async function fetchApiOrders() {
-  const url = `${API_BASE_URL}/orders?_t=${Date.now()}`;
+  const url = `${getApiBaseUrl()}/orders?_t=${Date.now()}`;
   console.log('[API REQ] GET Orders:', url);
   try {
     const token = localStorage.getItem('swadeshi_token');
@@ -382,7 +400,7 @@ export async function submitApiOrder(orderData: {
   total_amount: number;
   items: { product_id: number; quantity: number; unit_price: number }[];
 }) {
-  const url = `${API_BASE_URL}/orders`;
+  const url = `${getApiBaseUrl()}/orders`;
   console.log('[API REQ] POST Order:', url, '[PAYLOAD]:', orderData);
   try {
     const payload = {
@@ -409,7 +427,7 @@ export async function submitApiOrder(orderData: {
 
 // Update Order Status in AWS EC2 API
 export async function updateOrderStatusApi(id: number, status: string) {
-  const url = `${API_BASE_URL}/orders/${id}/status`;
+  const url = `${getApiBaseUrl()}/orders/${id}/status`;
   console.log('[API REQ] PUT Order Status ID:', id, status, url);
   try {
     const token = localStorage.getItem('swadeshi_token');
@@ -433,7 +451,7 @@ export async function updateOrderStatusApi(id: number, status: string) {
 
 // Admin Login API
 export async function adminLoginApi(credentials: { email: string; password: string }) {
-  const url = `${API_BASE_URL}/auth/login`;
+  const url = `${getApiBaseUrl()}/auth/login`;
   console.log('[API REQ] POST Admin Login:', url);
   try {
     const res = await fetch(url, {
@@ -454,7 +472,7 @@ export async function adminLoginApi(credentials: { email: string; password: stri
 
 // Fetch Setting by Key from AWS EC2 API
 export async function fetchApiSetting<T>(key: string): Promise<T | null> {
-  const url = `${API_BASE_URL}/settings/${key}?_t=${Date.now()}`;
+  const url = `${getApiBaseUrl()}/settings/${key}?_t=${Date.now()}`;
   console.log('[API REQ] GET Setting Key:', key, url);
   try {
     const res = await fetch(url);
