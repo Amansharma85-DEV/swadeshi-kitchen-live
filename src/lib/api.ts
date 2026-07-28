@@ -1,12 +1,20 @@
 export function getApiBaseUrl(): string {
   if (typeof window !== 'undefined') {
+    const origin = window.location.origin;
+    // On production domain swadeshikitchen.shop or EC2 IP, enforce live relative /api endpoint
+    if (origin && !origin.includes('github.io') && !origin.includes('localhost')) {
+      const saved = localStorage.getItem('swadeshi_api_url');
+      if (saved && (saved.includes('localhost') || saved.includes('127.0.0.1'))) {
+        localStorage.removeItem('swadeshi_api_url');
+      }
+      return `${origin}/api`;
+    }
     const saved = localStorage.getItem('swadeshi_api_url');
     if (saved && saved.trim()) {
       return saved.trim().replace(/\/+$/, '');
     }
-    // Production EC2 domain relative URL fallback
-    if (window.location.origin && !window.location.origin.includes('github.io')) {
-      return `${window.location.origin}/api`;
+    if (origin && !origin.includes('github.io')) {
+      return `${origin}/api`;
     }
   }
   return (import.meta.env.VITE_API_BASE_URL || '/api').replace(/\/+$/, '');
