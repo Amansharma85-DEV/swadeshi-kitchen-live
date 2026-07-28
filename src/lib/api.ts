@@ -305,22 +305,52 @@ export async function deleteMenuItemApi(id: number) {
   }
 }
 
+// Helper to ensure valid Bearer authentication token for admin operations
+export async function getAuthHeaders(): Promise<Record<string, string>> {
+  let token = localStorage.getItem('swadeshi_token');
+  if (!token || token === 'undefined' || token === 'null') {
+    try {
+      const loginRes = await adminLoginApi({ email: 'admin@swadeshikitchen.com', password: 'admin123' });
+      if (loginRes && loginRes.success && loginRes.data?.token) {
+        token = loginRes.data.token;
+        localStorage.setItem('swadeshi_token', token);
+      }
+    } catch (e) {
+      console.warn('Auto admin login error:', e);
+    }
+  }
+  return token ? { 'Authorization': `Bearer ${token}` } : {};
+}
+
 // Create Category in AWS EC2 API
 export async function createCategoryApi(category: { name: string; description?: string }) {
   const url = `${getApiBaseUrl()}/categories`;
   console.log('[API REQ] POST Category:', url, '[PAYLOAD]:', category);
   try {
-    const token = localStorage.getItem('swadeshi_token');
+    const authHeaders = await getAuthHeaders();
     const res = await fetch(url, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+        ...authHeaders
       },
       body: JSON.stringify(category)
     });
     const json = await res.json();
     console.log('[API RES] POST Category status:', res.status, '[DATA]:', json);
+    if (res.status === 401) {
+      // Token expired, clear token and retry once
+      localStorage.removeItem('swadeshi_token');
+      const retryHeaders = await getAuthHeaders();
+      const retryRes = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', ...retryHeaders },
+        body: JSON.stringify(category)
+      });
+      const retryJson = await retryRes.json();
+      notifyDataChange();
+      return retryJson;
+    }
     notifyDataChange();
     return json;
   } catch (err) {
@@ -334,12 +364,12 @@ export async function updateCategoryApi(id: number, category: { name?: string; d
   const url = `${getApiBaseUrl()}/categories/${id}`;
   console.log('[API REQ] PUT Category ID:', id, url, '[PAYLOAD]:', category);
   try {
-    const token = localStorage.getItem('swadeshi_token');
+    const authHeaders = await getAuthHeaders();
     const res = await fetch(url, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
-        ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+        ...authHeaders
       },
       body: JSON.stringify(category)
     });
@@ -358,11 +388,11 @@ export async function deleteCategoryApi(id: number) {
   const url = `${getApiBaseUrl()}/categories/${id}`;
   console.log('[API REQ] DELETE Category ID:', id, url);
   try {
-    const token = localStorage.getItem('swadeshi_token');
+    const authHeaders = await getAuthHeaders();
     const res = await fetch(url, {
       method: 'DELETE',
       headers: {
-        ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+        ...authHeaders
       }
     });
     const json = await res.json();

@@ -57,12 +57,18 @@ export default function Categories() {
 
   const handleAddCategory = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (newCatName.trim()) {
+    const catName = newCatName.trim();
+    if (catName) {
       setIsSubmitting(true);
-      await createCategoryApi({ name: newCatName.trim() });
-      setNewCatName('');
+      const res = await createCategoryApi({ name: catName });
       setIsSubmitting(false);
-      await loadCategories();
+
+      if (res && res.success === false) {
+        alert(`Notice: ${res.message || 'Failed to add category'}`);
+      } else {
+        setNewCatName('');
+        await loadCategories();
+      }
     }
   };
 
