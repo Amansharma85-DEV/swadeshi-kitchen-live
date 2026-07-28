@@ -4,8 +4,12 @@ export function getApiBaseUrl(): string {
     if (saved && saved.trim()) {
       return saved.trim().replace(/\/+$/, '');
     }
+    // Production EC2 domain relative URL fallback
+    if (window.location.origin && !window.location.origin.includes('github.io')) {
+      return `${window.location.origin}/api`;
+    }
   }
-  return (import.meta.env.VITE_API_BASE_URL || 'https://protect-cooperative-blocking-what.trycloudflare.com/api').replace(/\/+$/, '');
+  return (import.meta.env.VITE_API_BASE_URL || '/api').replace(/\/+$/, '');
 }
 
 export function setApiBaseUrl(url: string) {
