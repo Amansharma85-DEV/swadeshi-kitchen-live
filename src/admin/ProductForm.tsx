@@ -121,19 +121,37 @@ export default function ProductForm({
     setUploadError(null);
   };
 
+  function getSecureImageUrl(url: string): string {
+    if (!url) return '';
+    if (url.startsWith('http://swadeshikitchen.shop')) {
+      return url.replace('http://', 'https://');
+    }
+    if (url.startsWith('http://43.204.145.203')) {
+      return url.replace('http://', 'https://');
+    }
+    return url;
+  }
+
   function cleanImageUrl(rawUrl: string): string {
     if (!rawUrl) return '';
-    if (rawUrl.startsWith('data:image')) {
+    let url = rawUrl;
+    if (url.startsWith('http://swadeshikitchen.shop')) {
+      url = url.replace('http://', 'https://');
+    }
+    if (url.startsWith('http://43.204.145.203')) {
+      url = url.replace('http://', 'https://');
+    }
+    if (url.startsWith('data:image')) {
       // Base64 fallback string exceeds MariaDB VARCHAR(255) column limit. Map to clean high-res preset URL.
       return 'https://images.unsplash.com/photo-1546833999-b9f581a1996d?auto=format&fit=crop&w=600&q=80';
     }
     try {
-      const parsed = new URL(rawUrl);
+      const parsed = new URL(url);
       if (parsed.hostname.includes('unsplash.com')) {
         return `${parsed.origin}${parsed.pathname}?auto=format&fit=crop&w=600&q=80`;
       }
     } catch (e) {}
-    return rawUrl;
+    return url;
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -296,7 +314,17 @@ export default function ProductForm({
                     <div className="w-20 h-20 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 flex items-center justify-center overflow-hidden shrink-0 shadow-sm relative group">
                       {formData.image ? (
                         <>
-                          <img src={formData.image} alt="Preview" className="w-full h-full object-cover" />
+                          <img 
+                            src={getSecureImageUrl(formData.image)} 
+                            alt="Preview" 
+                            className="w-full h-full object-cover" 
+                            onError={(e) => {
+                              const target = e.currentTarget;
+                              if (target.src.startsWith('http://')) {
+                                target.src = target.src.replace('http://', 'https://');
+                              }
+                            }}
+                          />
                           <button type="button" onClick={handleClearImage} className="absolute inset-0 bg-slate-900/70 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                             <Trash2 size={18} />
                           </button>
