@@ -410,12 +410,21 @@ export async function fetchApiOrders() {
   const url = `${getApiBaseUrl()}/orders?_t=${Date.now()}`;
   console.log('[API REQ] GET Orders:', url);
   try {
-    const token = localStorage.getItem('swadeshi_token');
+    const authHeaders = await getAuthHeaders();
     const res = await fetch(url, {
       headers: {
-        ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+        ...authHeaders
       }
     });
+    if (res.status === 401) {
+      localStorage.removeItem('swadeshi_token');
+      const retryHeaders = await getAuthHeaders();
+      const retryRes = await fetch(url, { headers: { ...retryHeaders } });
+      const retryJson = await retryRes.json();
+      if (retryJson.success && Array.isArray(retryJson.data?.orders)) {
+        return retryJson.data.orders;
+      }
+    }
     if (!res.ok) return null;
     const json = await res.json();
     if (json.success && Array.isArray(json.data?.orders)) {
@@ -472,12 +481,12 @@ export async function updateOrderStatusApi(id: number, status: string) {
   const url = `${getApiBaseUrl()}/orders/${id}/status`;
   console.log('[API REQ] PUT Order Status ID:', id, status, url);
   try {
-    const token = localStorage.getItem('swadeshi_token');
+    const authHeaders = await getAuthHeaders();
     const res = await fetch(url, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
-        ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+        ...authHeaders
       },
       body: JSON.stringify({ status })
     });
