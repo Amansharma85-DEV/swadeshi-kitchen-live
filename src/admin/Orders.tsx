@@ -71,16 +71,23 @@ export default function Orders() {
     const printWindow = window.open('', '_blank', 'width=800,height=900');
     if (!printWindow) return;
 
-    const itemsHtml = order.items.map((item: any) => `
-      <tr>
-        <td style="padding: 10px; border-bottom: 1px solid #eee;">${item.name}</td>
-        <td style="padding: 10px; border-bottom: 1px solid #eee; text-align: center;">${item.quantity}</td>
-        <td style="padding: 10px; border-bottom: 1px solid #eee; text-align: right;">₹${item.price}</td>
-        <td style="padding: 10px; border-bottom: 1px solid #eee; text-align: right; font-weight: bold;">₹${item.price * item.quantity}</td>
-      </tr>
-    `).join('');
+    const itemsList = Array.isArray(order.items) ? order.items : [];
+    const itemsHtml = itemsList.map((item: any) => {
+      const itemName = item.name || item.item_name || 'Delicious Dish';
+      const itemQty = Number(item.quantity || 1);
+      const itemPrice = Number(item.price !== undefined ? item.price : (item.unit_price !== undefined ? item.unit_price : 0));
+      const itemTotal = Number(item.subtotal !== undefined ? item.subtotal : (itemPrice * itemQty));
+      return `
+        <tr>
+          <td style="padding: 10px; border-bottom: 1px solid #eee;">${itemName}</td>
+          <td style="padding: 10px; border-bottom: 1px solid #eee; text-align: center;">${itemQty}</td>
+          <td style="padding: 10px; border-bottom: 1px solid #eee; text-align: right;">₹${itemPrice}</td>
+          <td style="padding: 10px; border-bottom: 1px solid #eee; text-align: right; font-weight: bold;">₹${itemTotal}</td>
+        </tr>
+      `;
+    }).join('');
 
-    const subtotal = order.totals.subtotal || order.items.reduce((s: number, i: any) => s + (i.price * i.quantity), 0);
+    const subtotal = order.totals?.subtotal || itemsList.reduce((s: number, i: any) => s + ((i.price || i.unit_price || 0) * (i.quantity || 1)), 0);
     const gst = Math.round(subtotal * 0.05);
 
     printWindow.document.write(`
@@ -248,10 +255,10 @@ export default function Orders() {
                       {/* 4. Items */}
                       <td className="px-5 py-4">
                         <span className="font-bold text-slate-900 dark:text-white">
-                          {order.items.length} {order.items.length === 1 ? 'Item' : 'Items'}
+                          {(order.items || []).length} {(order.items || []).length === 1 ? 'Item' : 'Items'}
                         </span>
                         <div className="text-xs text-slate-500 dark:text-slate-400 mt-1 max-w-[180px] truncate">
-                          {order.items.map((i: any) => `${i.quantity}x ${i.name}`).join(', ')}
+                          {(order.items || []).map((i: any) => `${i.quantity || 1}x ${i.name || i.item_name || 'Dish'}`).join(', ')}
                         </div>
                       </td>
 
