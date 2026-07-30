@@ -16,6 +16,12 @@ function App() {
             <AdminLayout />
           </ProtectedRoute>
         } />
+        <Route path="/settings" element={<Navigate to="/admin/settings" replace />} />
+        <Route path="/products" element={<Navigate to="/admin/products" replace />} />
+        <Route path="/orders" element={<Navigate to="/admin/orders" replace />} />
+        <Route path="/categories" element={<Navigate to="/admin/categories" replace />} />
+        <Route path="/admin" element={<Navigate to="/admin/dashboard" replace />} />
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </HashRouter>
   );
