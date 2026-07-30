@@ -192,13 +192,54 @@ export default function Offers() {
               </div>
 
               <div>
+                <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-1.5">
+                  Quick Discount Presets (Click to Auto-Fill)
+                </label>
+                <div className="flex flex-wrap gap-2 mb-3">
+                  <button
+                    type="button"
+                    onClick={() => setFormDescription('10% off food bill on all orders')}
+                    className="px-3 py-1.5 rounded-lg text-xs font-bold bg-orange-100 dark:bg-orange-950/60 text-orange-700 dark:text-orange-300 hover:bg-orange-200 border border-orange-300 dark:border-orange-800 transition-colors"
+                  >
+                    🎉 10% OFF
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setFormDescription('20% off food bill on all orders')}
+                    className="px-3 py-1.5 rounded-lg text-xs font-bold bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-200 border border-emerald-300 dark:border-emerald-800 transition-colors"
+                  >
+                    🔥 20% OFF
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setFormDescription('15% off food bill on all orders')}
+                    className="px-3 py-1.5 rounded-lg text-xs font-bold bg-purple-100 dark:bg-purple-950/60 text-purple-700 dark:text-purple-300 hover:bg-purple-200 border border-purple-300 dark:border-purple-800 transition-colors"
+                  >
+                    ⭐ 15% OFF
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setFormDescription('50% off food bill on all orders')}
+                    className="px-3 py-1.5 rounded-lg text-xs font-bold bg-rose-100 dark:bg-rose-950/60 text-rose-700 dark:text-rose-300 hover:bg-rose-200 border border-rose-300 dark:border-rose-800 transition-colors"
+                  >
+                    💥 50% OFF
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setFormDescription('Free delivery on orders over Rs 499')}
+                    className="px-3 py-1.5 rounded-lg text-xs font-bold bg-blue-100 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300 hover:bg-blue-200 border border-blue-300 dark:border-blue-800 transition-colors"
+                  >
+                    🚚 Free Delivery
+                  </button>
+                </div>
+
                 <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-1">
                   Description / Discount Rules
                 </label>
                 <textarea 
                   rows={3}
                   required
-                  placeholder="e.g. 10% off food bill on all orders OR Free delivery on orders over Rs 499" 
+                  placeholder="e.g. 20% off food bill on all orders OR Free delivery on orders over Rs 499" 
                   value={formDescription}
                   onChange={e => setFormDescription(e.target.value)}
                   className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg px-4 py-2.5 text-slate-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
