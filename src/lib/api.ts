@@ -437,28 +437,30 @@ export async function fetchApiOrders() {
   return null;
 }
 
-// Submit Customer Order to AWS EC2 API
-export async function submitApiOrder(orderData: {
-  customer_name: string;
-  customer_phone: string;
-  delivery_address: string;
-  order_notes?: string;
-  payment_method?: string;
-  delivery_method?: string;
-  subtotal: number;
-  delivery_fee: number;
-  discount: number;
-  total_amount: number;
-  items: { product_id: number; quantity: number; unit_price: number }[];
-}) {
+// Submit Customer Order to AWS EC2 API (Bulletproof payload normalizer)
+export async function submitApiOrder(orderData: any) {
   const url = `${getApiBaseUrl()}/orders`;
   console.log('[API REQ] POST Order:', url, '[PAYLOAD]:', orderData);
   try {
     const payload = {
-      ...orderData,
-      customer_address: orderData.delivery_address,
-      grand_total: orderData.total_amount
+      customer_name: orderData.customer_name || orderData.name || 'Customer',
+      customer_phone: orderData.customer_phone || orderData.phone || '',
+      customer_address: orderData.customer_address || orderData.delivery_address || orderData.address || 'Address Not Provided',
+      order_notes: orderData.order_notes || orderData.customer_note || orderData.note || '',
+      payment_method: orderData.payment_method || orderData.paymentMethod || 'Cash on Delivery',
+      delivery_method: orderData.delivery_method || orderData.deliveryMethod || 'Standard',
+      subtotal: Number(orderData.subtotal || 0),
+      delivery_fee: Number(orderData.delivery_fee !== undefined ? orderData.delivery_fee : (orderData.delivery !== undefined ? orderData.delivery : 0)),
+      discount: Number(orderData.discount || 0),
+      grand_total: Number(orderData.grand_total !== undefined ? orderData.grand_total : (orderData.total_amount !== undefined ? orderData.total_amount : 0)),
+      items: Array.isArray(orderData.items) ? orderData.items.map((item: any) => ({
+        menu_item_id: item.menu_item_id || item.product_id || item.id || 1,
+        item_name: item.item_name || item.name || 'Dish Item',
+        quantity: Number(item.quantity || 1),
+        unit_price: Number(item.unit_price || item.price || 0)
+      })) : []
     };
+
     const res = await fetch(url, {
       method: 'POST',
       headers: {

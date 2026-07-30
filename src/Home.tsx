@@ -374,7 +374,7 @@ function App() {
         customer_note: customer.note,
         subtotal: totals.subtotal,
         discount: totals.discount,
-        delivery_fee: totals.deliveryFee,
+        delivery_fee: totals.delivery,
         grand_total: totals.grandTotal,
         payment_method: selectedPayment,
         delivery_method: selectedDelivery,
