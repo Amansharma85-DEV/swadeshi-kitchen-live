@@ -20,13 +20,18 @@ export default function AdminLayout() {
 
   const checkConnection = async () => {
     try {
-      const url = `${getApiBaseUrl()}/health?_t=${Date.now()}`;
-      const res = await fetch(url);
+      const baseUrl = getApiBaseUrl();
+      const res = await fetch(`${baseUrl}/health?_t=${Date.now()}`);
       if (res.ok) {
         setIsConnected(true);
-      } else {
-        setIsConnected(false);
+        return;
       }
+      const fallbackRes = await fetch(`/health?_t=${Date.now()}`);
+      if (fallbackRes.ok) {
+        setIsConnected(true);
+        return;
+      }
+      setIsConnected(false);
     } catch (e) {
       setIsConnected(false);
     }
