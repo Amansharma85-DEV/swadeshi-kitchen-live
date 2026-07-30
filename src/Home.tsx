@@ -222,7 +222,7 @@ function App() {
   }, [activeOrder]);
   const [customer, setCustomer] = useState<Customer>({
     name: '',
-    phone: phoneNumber,
+    phone: '',
     address: '',
     note: ''
   });
