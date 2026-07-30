@@ -652,7 +652,7 @@ function App() {
                       <p className="text-sm font-black uppercase tracking-wide text-orange-700">Day menu</p>
                       <h3 className="text-2xl font-black">Veg thali options</h3>
                     </div>
-                    <span className="rounded-full bg-[#193d1d] px-4 py-2 text-xl font-black text-white">Rs 149</span>
+                    <span className="rounded-full bg-[#193d1d] px-4 py-2 text-xl font-black text-white">Rs 199</span>
                   </div>
                   <div className="mt-4 divide-y divide-amber-200">
                     {(pricing[0]?.items || []).map((item, i) => (
