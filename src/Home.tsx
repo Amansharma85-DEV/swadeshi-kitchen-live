@@ -252,21 +252,14 @@ function App() {
 
   const totals = useMemo(() => {
     const subtotal = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
-    const baseDelivery = subtotal > 499 || subtotal === 0 ? 0 : 39;
-    
     const foundOffer = offers.find(o => o.title.toUpperCase() === appliedCoupon.toUpperCase() && o.active);
     let discount = 0;
-    let delivery = baseDelivery;
     
     if (foundOffer) {
       const desc = foundOffer.description.toLowerCase();
-      if (desc.includes('free delivery')) {
-        delivery = 0;
-      } else {
-        const match = desc.match(/\b\d+\b/);
-        const value = match ? parseInt(match[0], 10) : 0;
-        discount = Math.round((subtotal * value) / 100);
-      }
+      const match = desc.match(/\b\d+\b/);
+      const value = match ? parseInt(match[0], 10) : 0;
+      discount = Math.round((subtotal * value) / 100);
     }
     
     const taxes = Math.round((subtotal - discount) * 0.05);
@@ -274,9 +267,9 @@ function App() {
       count: cart.reduce((sum, item) => sum + item.quantity, 0),
       subtotal,
       discount,
-      delivery,
+      delivery: 0,
       taxes,
-      grandTotal: Math.max(0, subtotal - discount + delivery + taxes)
+      grandTotal: Math.max(0, subtotal - discount + taxes)
     };
   }, [cart, appliedCoupon, offers]);
 
@@ -335,6 +328,8 @@ function App() {
       ...lines,
       '',
       '------------------------------------',
+      `*Subtotal:* ${formatCurrency(order.totals.subtotal)}`,
+      `*Delivery Charge:* To be calculated after order confirmation`,
       `*Total:* ${formatCurrency(order.totals.grandTotal)}`,
       `*Payment:* ${order.paymentMethod}`,
       `*Notes:* ${order.customer.note || 'None'}`,
@@ -1076,7 +1071,10 @@ function App() {
                     <div className="rounded-lg border border-orange-100 p-4 text-sm font-semibold dark:border-slate-800">
                       <div className="flex justify-between"><span>Subtotal</span><span>{formatCurrency(totals.subtotal)}</span></div>
                       <div className="mt-2 flex justify-between"><span>Discount</span><span>- {formatCurrency(totals.discount)}</span></div>
-                      <div className="mt-2 flex justify-between"><span>Delivery</span><span>{totals.delivery === 0 ? 'Free' : formatCurrency(totals.delivery)}</span></div>
+                      <div className="mt-2 flex justify-between gap-2 items-center">
+                        <span className="shrink-0">Delivery</span>
+                        <span className="text-xs font-bold text-orange-700 dark:text-orange-400 text-right">To be calculated after order confirmation</span>
+                      </div>
                       <div className="mt-2 flex justify-between"><span>Taxes</span><span>{formatCurrency(totals.taxes)}</span></div>
                       <div className="mt-3 flex justify-between border-t border-orange-100 pt-3 text-lg font-black dark:border-slate-800"><span>Total</span><span>{formatCurrency(totals.grandTotal)}</span></div>
                     </div>
