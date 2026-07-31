@@ -576,7 +576,7 @@ function App() {
               </div>
               <div className="mt-8 grid max-w-xl grid-cols-3 gap-4 text-center">
                 {[
-                  ['Rs 149', 'Veg Thali'],
+                  ['Rs 199', 'Veg Thali'],
                   [settings?.contact?.openingHours?.match(/\b\d+(?::\d+)?\s*(?:AM|PM)\b/i)?.[0] || '8 AM', 'Opening'],
                   ['20%', 'Self pickup']
                 ].map(([value, label]) => (
@@ -616,7 +616,7 @@ function App() {
                   <div className="mt-6 grid gap-3 sm:grid-cols-3">
                     <div className="rounded-lg bg-white/10 p-4">
                       <p className="text-sm font-bold text-amber-100">Veg Thali</p>
-                      <p className="mt-1 text-3xl font-black">Rs 149</p>
+                      <p className="mt-1 text-3xl font-black">Rs 199</p>
                     </div>
                     <div className="rounded-lg bg-white/10 p-4">
                       <p className="text-sm font-bold text-amber-100">Timings</p>
